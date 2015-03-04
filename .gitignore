@@ -1,0 +1,32 @@
+### OSX ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+### NetBeans ###
+nbproject/
+build/
+nbbuild/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+
+### Composer ###
+composer.phar
+vendor/
+composer.lock
+#bower
+web/vendor/*
+
+/bin/
+/vendor/
+
+.project
+.buildpath
+.settings
+
+*.php~
