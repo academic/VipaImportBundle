@@ -1,0 +1,22 @@
+{
+    "name": "okulbilisim/ojs-tools-bundle",
+    "license": "MIT",
+    "type": "project",
+    "description": "Ojs symfony tools bundle ",
+    "version": "0.0.1",
+    "keywords": [
+        "ojs tools",
+        "symfony"
+    ],
+    "support": {
+        "email": "info@okulbilisim.com"
+    },
+    "autoload": {
+        "psr-0": {
+            "Okulbilisim\\OjsToolsBundle": "src/"
+        }
+    },
+    "require": {
+        "php": ">=5.4"
+    }
+}
