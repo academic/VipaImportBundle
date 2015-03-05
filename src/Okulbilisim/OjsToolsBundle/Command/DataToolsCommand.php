@@ -23,18 +23,14 @@ class DataToolsCommand extends ContainerAwareCommand {
         $application = new \Symfony\Bundle\FrameworkBundle\Console\Application($kernel);
         $application->setAutoExit(false);
         $output->writeln('<info>Adding  data</info>');
-
-
-        $files = [];
-        while (false !== ($entry = readdir(__DIR__ . '/../DataFixtures/Alice/' . $input->getArgument('instutionCode') . '/'))) {
-            $files[] = "$entry\n";
+        $path = __DIR__ . '/../DataFixtures/' . $input->getArgument('instutionCode') . '/*.yml';
+        $output->writeln("reading ymls from " . $path);
+        $files = glob($path);
+        if (!empty($files) ){
+            $filesStr = implode(' ', $files);
+            $application->run(new StringInput('h4cc_alice_fixtures:load:files --manager=default --type=yaml --seed=100 --no-persist ' . $filesStr));
+            $output->writeln("\nDONE\n");
         }
-        /*
-          $manager = $this->get('h4cc_alice_fixtures.manager');
-          $objects = $manager->loadFiles($files, 'yaml');
-          $manager->persist($objects, true);
-         */
-        $output->writeln("\nDONE\n");
     }
 
 }
