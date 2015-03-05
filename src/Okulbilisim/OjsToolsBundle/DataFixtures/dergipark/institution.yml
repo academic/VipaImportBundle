@@ -1,0 +1,11 @@
+\Ojs\JournalBundle\Entity\Institution:
+  institution1: 
+      email: info@anatoliamedica.com
+      slug: anatoliamedica
+      name: "Acta Medica Anatolia"    
+      url: "demo"
+      name: "demo uni"
+      about:  null
+      phone: null
+      address: "Bolu, Turkey"
+      institution_type: @i_type
