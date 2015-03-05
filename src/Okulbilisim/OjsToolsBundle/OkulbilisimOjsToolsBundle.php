@@ -7,8 +7,6 @@ use Okulbilisim\OjsToolsBundle\Command\DataToolsCommand;
 
 class OkulbilisimOjsToolsBundle extends Bundle {
 
-    public function registerCommands(Application $application) {
-        $application->add(new DataToolsCommand());
-    }
+ 
 
 }
