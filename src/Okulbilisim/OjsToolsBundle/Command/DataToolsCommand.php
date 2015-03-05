@@ -1,6 +1,6 @@
 <?php
 
-namespace Ojs\CliBundle\Command;
+namespace Okulbilisim\OjsToolsBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
