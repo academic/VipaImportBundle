@@ -17,6 +17,7 @@
         }
     },
     "require": {
-        "php": ">=5.4"
+        "php": ">=5.4",
+        "h4cc/alice-fixtures-bundle": "~0.5"
     }
 }
