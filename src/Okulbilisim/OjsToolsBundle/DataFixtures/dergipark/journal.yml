@@ -12,5 +12,6 @@
     titleTransliterated: null
     url: "http://www.anatoliamedica.com"
     slug: acta-medica
-    institution: @institution1 
+    institution: @institution1
+    submitRole: @role3,@role11
     status: '3' 
