@@ -13,5 +13,5 @@
     url: "http://www.anatoliamedica.com"
     slug: acta-medica
     institution: @institution1
-    submitRole: @role3,@role11
+    submitRole: @role11
     status: '3' 
