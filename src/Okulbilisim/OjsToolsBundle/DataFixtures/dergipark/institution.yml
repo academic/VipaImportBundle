@@ -1,5 +1,5 @@
 \Ojs\JournalBundle\Entity\Institution:
-  institution1: 
+  institution_acta: 
       email: info@anatoliamedica.com
       slug: anatoliamedica
       name: "Acta Medica Anatolia"    
@@ -7,4 +7,5 @@
       name: "demo uni"
       about:  null
       phone: null
+      verified: 1
       address: "Bolu, Turkey"
