@@ -30,3 +30,4 @@ web/vendor/*
 .settings
 
 *.php~
+.idea
