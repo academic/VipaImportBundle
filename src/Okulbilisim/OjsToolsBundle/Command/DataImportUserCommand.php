@@ -39,6 +39,9 @@ class DataImportUserCommand extends ContainerAwareCommand {
 
             $users = $connection->fetchAll('SELECT * FROM dergipark.users where disabled=0 limit 1;');
 
+            $users_count = $connection->fetchArray('SELECT count(*) FROM dergipark.users where disabled=0;');
+
+            $i = 1;
             foreach($users as $user){
                 print_r($user);
 
@@ -51,6 +54,8 @@ class DataImportUserCommand extends ContainerAwareCommand {
                 $entity->setEmail($user['email']);
                 $em->persist($entity);
                 $em->flush();
+                $output->writeln('<info>User: '.$i.'/'.$users_count[0].'</info>');
+                $i++;
 
             }
 
