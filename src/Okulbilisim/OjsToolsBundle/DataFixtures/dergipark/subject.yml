@@ -247,22 +247,18 @@
     totalJournalCount: 1
     parent: @subject2_4
   subject52:
-    subject: '' 
-    totalJournalCount: 1
-    parent: @subject2_4
-  subject53:
     subject: 'Kütüphanecilik, Bilgi ve Belge Yönetimi' 
     totalJournalCount: 1
     parent: @subject2_4
-  subject54:
+  subject53:
     subject: 'Sosyal Bilimler (Genel)' 
     totalJournalCount: 1
     parent: @subject2_4
-  subject55:
+  subject54:
     subject: 'Şehir Bölge Planlama' 
     totalJournalCount: 1
     parent: @subject2_4
-  subject56:
+  subject55:
     subject: 'Turizm' 
     totalJournalCount: 1
     parent: @subject2_4

@@ -1,4 +1,869 @@
 \Ojs\JournalBundle\Entity\Institution:
-  institution{ABANT IZZET BAYSAL UNIV, ABDULLAH GUL UNIV, ACIBADEM UNIV, ADALET BAKANLIGI, ADANA BILIM VE TEKNOLOJI UNIV, ADANA NUMUNE EAH, ADIYAMAN UNIV, ADNAN MENDERES UNIV, AFYON KOCATEPE UNIV, AGRI IBRAHIM CECEN UNIV, AHI EVRAN UNIV, AILE VE SOSYAL POLITIKALAR BAKANLIGI, AKDENIZ UNIV, AKSARAY UNIV, ALTIN KOZA UNIV, AMASYA UNIV, ANADOLU UNIV, ANKARA ATATURK EAH, ANKARA ATATURK GOGUS HASTALIKLARI VE GOGUS CERRAHI EAH, ANKARA COCUK SAGLIGI VE HASTALIKLARI HEMATOLOJI EAH, ANKARA DISKAPI YILDIRIM BEYAZIT EAH, ANKARA DR A YURTARSLAN ONKOLOJI EAH, ANKARA DR SAMI ULUS COCUK SAGLIGI VE HASTALIK EAH, ANKARA DR ZEKAI TAHIR BURAK KADIN SAGLIGI EAH, ANKARA EAH, ANKARA ETLIK IHTISAS EAH, ANKARA ETLIK ZUBEYDE HANIM DOGUMEVI VE KADIN EAH, ANKARA FIZIK TEDAVI VE REHABILITASYON EAH, ANKARA KECIOREN EAH, ANKARA NUMUNE EAH, ANKARA TURKIYE YUKSEK IHTISAS EAH, ANKARA ULUCANLAR GOZ EAH, ANKARA UNIV, ANTALYA EAH, ARDAHAN UNIV, ARTVIN CORUH UNIV, ASKERI HASTANELER, ATATURK UNIV, ATILIM UNIV, AVRASYA UNIV, AVRUPA BIRLIGI BAKANLIGI, AVRUPA MESLEK YUKSEKOKULU, BAHCESEHIR UNIV, BALIKESIR UNIV, BARTIN UNIV, BASBAKANLIK, BASKENT UNIV, BATMAN UNIV, BAYBURT UNIV, BELEDIYELER, BEYKENT UNIV, BEYKOZ LOJISTIK MESLEK YUKSEKOKULU, BEZMIALEM UNIV, BILECIK SEYH EDEBALI UNIV, BILIM SANAYI VE TEKNOLOJI BAKANLIGI, BINGOL UNIV, BIRUNI UNIV, BITLIS EREN UNIV, BOGAZICI UNIV, BOZOK UNIV, BULENT ECEVIT UNIV, BURSA ORHANGAZI UNIV, BURSA SEVKET YILMAZ EAH, BURSA TEKNIK UNIV, BURSA YUKSEK IHTISAS EAH, CAG UNIV, CALISMA VE SOSYAL GUVENLIK BAKANLIGI, CANAKKALE ONSEKIZ MART UNIV, CANIK BASARI UNIV, CANKAYA UNIV, CANKIRI KARATEKIN UNIV, CELAL BAYAR UNIV, CEVRE VE SEHIRCILIK BAKANLIGI, CUKUROVA UNIV, CUMHURIYET UNIV, DENIZ HARP OKULU KOMUTANLIGI, DENIZ KUVVETLERI KOMUTANLIGI, DERNEK VE VAKIFLAR, DEVLET HASTANELERI, DICLE UNIV, DIGER DEVLET KURULUSLARI, DIYARBAKIR GAZI YASARGIL EAH, DOGU AKDENIZ UNIV, DOGUS UNIV, DOKUZ EYLUL UNIV, DUMLUPINAR UNIV, DUZCE UNIV, EGE UNIV, ELAZIG EAH, ENERJI VE TABII KAYNAKLAR BAKANLIGI, ERCIYES UNIV, ERZINCAN MENGUCEK GAZI EAH, ERZINCAN UNIV, ERZURUM BOLGE EAH, ERZURUM TEKNIK UNIV, ESKISEHIR OSMANGAZI UNIV, FATIH SULTAN MEHMET UNIV, FATIH UNIV, FEZA GURSEY ENSTITUSU, FIRAT UNIV, GALATASARAY UNIV, GATA, GAZI UNIV, GAZIANTEP UNIV, GAZIOSMANPASA UNIV, GEBZE TEKNIK UNIV, GEDIK UNIV, GEDIZ UNIV, GENEL KURMAY BASKANLIGI, GIDA TARIM VE HAYVANCILIK BAKANLIGI, GIRESUN UNIV, GIRNE AMERIKAN UNIV, GUMRUK VE TICARET BAKANLIGI, GUMUSHANE UNIV, HACETTEPE UNIV, HAKKARI UNIV, HALIC UNIV, HARP AKADEMILERI KOMUTANLIGI, HARRAN UNIV, HASAN KALYONCU UNIV, HAVA HARP OKULU KOMUTANLIGI, HAVA KUVVETLERI KOMUTANLIGI, HITIT UNIV, ICISLERI BAKANLIGI, IGDIR UNIV, IHSAN DOGRAMACI BILKENT UNIV, INONU UNIV, IPEK UNIV, ISIK UNIV, ISTANBUL 29 MAYIS UNIV, ISTANBUL AREL UNIV, ISTANBUL AYDIN UNIV, ISTANBUL BAGCILAR EAH, ISTANBUL BAKIRKOY DR SADI KONUK EAH, ISTANBUL BAKIRKOY KADIN DOGUM VE COCUK EAH, ISTANBUL BAKIRKOY RUH SAGLIGI VE HASTALIKLARI EAH, ISTANBUL BALTALIMANI KEMIK HASTALIKLARI EAH, ISTANBUL BEZMIALEM VALIDE SULTAN VAKIF GUREBA EAH, ISTANBUL BILGI UNIV, ISTANBUL BILIM UNIV, ISTANBUL DR SIYAMI ERSEK GOGUS KALP VE DAMAR EAH, ISTANBUL EAH, ISTANBUL ERENKOY RUH VE SINIR HASTALIKLARI EAH, ISTANBUL ESENYURT UNIV, ISTANBUL FATIH SULTAN MEHMET EAH, ISTANBUL FIZIK TEDAVI VE REHABILITASYON EAH, ISTANBUL GELISIM UNIV, ISTANBUL GOB TAKSIM EAH, ISTANBUL GOZTEPE EAH, ISTANBUL HASEKI EAH, ISTANBUL HAYDARPASA NUMUNE EAH, ISTANBUL KANUNI SULTAN SULEYMAN EAH, ISTANBUL KARTAL DR LUTFI KIRDAR EAH, ISTANBUL KARTAL KOSUYOLU YUKSEK IHTISAS EAH, ISTANBUL KEMERBURGAZ UNIV, ISTANBUL KULTUR UNIV, ISTANBUL MEDENIYET UNIV, ISTANBUL MEDIPOL UNIV, ISTANBUL MEHMET AKIF ERSOY KALP VE DAMAR EAH, ISTANBUL MS BALTALIMANI KEMIK HASTALIKLARI EAH, ISTANBUL OKMEYDANI EAH, ISTANBUL PROF DR N RESAT BELGER BEYOGLU GOZ EAH, ISTANBUL SABAHATTIN ZAIM UNIV, ISTANBUL SEHIR UNIV, ISTANBUL SISLI ETFAL EAH, ISTANBUL SULEYMANIYE KADIN VE COCUK EAH, ISTANBUL SUREYYAPASA GOGUS VE KALP DAMAR EAH, ISTANBUL TEKNIK UNIV, ISTANBUL TICARET UNIV, ISTANBUL UMRANIYE EAH, ISTANBUL UNIV, ISTANBUL YEDIKULE GOGUS HASTALIKLARI VE CERRAH EAH, ISTANBUL ZEYNEP KAMIL KADIN VE COCUK EAH, IZMIR ATATURK EAH, IZMIR BOZYAKA EAH, IZMIR DR BEHCET UZ COCUK EAH, IZMIR DR SUAT SEREN GOGUS EAH, IZMIR EAH, IZMIR EGE DOGUMEVI VE KADIN HASTALIKLARI EAH, IZMIR EKONOMI UNIV, IZMIR KATIP CELEBI UNIV, IZMIR TEPECIK EAH, IZMIR UNIV, IZMIR YUKSEK TEKNOLOJI ENSTITUSU, KADIR HAS UNIV, KAFKAS UNIV, KAHRAMANMARAS SUTCU IMAM UNIV, KALKINMA BAKANLIGI, KARA HARP OKULU KOMUTANLIGI, KARA KUVVETLERI KOMUTANLIGI, KARABUK UNIV, KARADENIZ TEKNIK UNIV, KARAMANOGLU MEHMETBEY UNIV, KASTAMONU UNIV, KAVRAM MESLEK YUKSEKOKULU, KAYSERI EAH, KILIS 7 ARALIK UNIV, KIRIKKALE UNIV, KIRIKKALE YUKSEK IHTISAS EAH, KIRKLARELI UNIV, KIZILAY, KOC UNIV, KOCAELI DERINCE EAH, KOCAELI UNIV, KONYA EAH, KONYA NECMETTIN ERBAKAN UNIV, KTO KARATAY UNIV, KULTUR VE TURIZM BAKANLIGI, KUTAHYA EVLIYA CELEBI EAH, LEFKE AVRUPA UNIV, MALIYE BAKANLIGI, MALTEPE UNIV, MARDIN ARTUKLU UNIV, MARMARA UNIV, MEF UNIV, MEHMET AKIF ERSOY UNIV, MELIK SAH UNIV, MERKEZ BANKASI, MERSIN UNIV, MEVLANA UNIV, MILLI EGITIM BAKANLIGI, MILLI SAVUNMA BAKANLIGI, MIMAR SINAN GUZEL SANATLAR UNIV, MUGLA SITKI KOCMAN UNIV, MUS ALPARSLAN UNIV, MUSTAFA KEMAL UNIV, NAMIK KEMAL UNIV, NEVSEHIR HACI BEKTAS VELI UNIV, NIGDE UNIV, NISANTASI UNIV, NUH NACI YAZGAN UNIV, OKAN UNIV, ONDOKUZ MAYIS UNIV, ORDU UNIV, ORMAN VE SU ISLERI BAKANLIGI, ORTA DOGU TEKNIK UNIV, OSMANGAZI UNIV, OSMANIYE KORKUT ATA UNIV, OZEL SAGLIK KURUMLARI, OZEL SEKTOR, OZYEGIN UNIV, PAMUKKALE UNIV, PIRI REIS UNIV, PLATO MESLEK YUKSEKOKULU, POLIS AKADEMISI, RECEP TAYYIP ERDOGAN UNIV, REFIK SAYDAM HIFZISSIHHA MERKEZI BASKANLIGI, RIZE EAH, SABANCI UNIV, SAGLIK BAKANLIGI, SAKARYA EAH, SAKARYA UNIV, SAMSUN MEHMET AYDIN EAH, SANKO UNIV, SANLIURFA MEHMET AKIF INAN EAH, SELCUK UNIV, SIFA UNIV, SIIRT UNIV, SINOP UNIV, SIRNAK UNIV, SULEYMAN DEMIREL UNIV, SULEYMAN SAH UNIV, TED UNIV, TOBB EKONOMI VE TEKNOLOJI UNIV, TODAIE, TOROS UNIV, TRABZON AHI EVREN EAH, TRABZON KANUNI EAH, TRAKYA UNIV, TUBA, TUBITAK, TUNCELI UNIV, TURGUT OZAL UNIV, TURK HAVA KURUMU UNIV, TURK-ALMAN UNIV, UFUK UNIV, ULASTIRMA DENIZCILIK VE HABERLESME BAKANLIGI, ULUDAG UNIV, ULUSLARARASI ANTALYA UNIV, ULUSLARARASI KIBRIS UNIV, USAK UNIV, USKUDAR UNIV, VAN BOLGE EAH, VAN YUKSEK IHTISAS EAH, YILDIZ TEKN UNIV, YAKIN DOGU UNIV, YALOVA UNIV, YASAR UNIV, YEDITEPE UNIV, YENI YUZYIL UNIV, YILDIRIM BEYAZIT UNIV, YILDIZ TEKNIK UNIV, YUKSEK IHTISAS UNIV, YUZUNCU YIL UNIV, ZIRVE UNIV}: 
-      name: <current()>
-      verified: 1 
+ institution1:
+  verified: 1
+  name: ABANT IZZET BAYSAL UNIV
+ institution2:
+  verified: 1
+  name: ABDULLAH GUL UNIV
+ institution3:
+  verified: 1
+  name: ACIBADEM UNIV
+ institution4:
+  verified: 1
+  name: ADALET BAKANLIGI
+ institution5:
+  verified: 1
+  name: ADANA BILIM VE TEKNOLOJI UNIV
+ institution6:
+  verified: 1
+  name: ADANA NUMUNE EAH
+ institution7:
+  verified: 1
+  name: ADIYAMAN UNIV
+ institution8:
+  verified: 1
+  name: ADNAN MENDERES UNIV
+ institution9:
+  verified: 1
+  name: AFYON KOCATEPE UNIV
+ institution10:
+  verified: 1
+  name: AGRI IBRAHIM CECEN UNIV
+ institution11:
+  verified: 1
+  name: AHI EVRAN UNIV
+ institution12:
+  verified: 1
+  name: AILE VE SOSYAL POLITIKALAR BAKANLIGI
+ institution13:
+  verified: 1
+  name: AKDENIZ UNIV
+ institution14:
+  verified: 1
+  name: AKSARAY UNIV
+ institution15:
+  verified: 1
+  name: AMASYA UNIV
+ institution16:
+  verified: 1
+  name: ANADOLU UNIV
+ institution17:
+  verified: 1
+  name: ANKARA ATATURK EAH
+ institution18:
+  verified: 1
+  name: ANKARA ATATURK GOGUS HASTALIKLARI VE GOGUS CER EAH
+ institution19:
+  verified: 1
+  name: ANKARA COCUK SAGLIGI VE HASTALIKLARI HEMATO EAH
+ institution20:
+  verified: 1
+  name: ANKARA DISKAPI YILDIRIM BEYAZIT EAH
+ institution21:
+  verified: 1
+  name: ANKARA DR A YURTARSLAN ONKOLOJI EAH
+ institution22:
+  verified: 1
+  name: ANKARA DR SAMI ULUS COCUK SAGLIGI VE HASTALIK EAH
+ institution23:
+  verified: 1
+  name: ANKARA DR ZEKAI TAHIR BURAK KADIN SAGLIGI EAH
+ institution24:
+  verified: 1
+  name: ANKARA EAH
+ institution25:
+  verified: 1
+  name: ANKARA ETLIK IHTISAS EAH
+ institution26:
+  verified: 1
+  name: ANKARA ETLIK ZUBEYDE HANIM DOGUMEVI VE KADIN EAH
+ institution27:
+  verified: 1
+  name: ANKARA FIZIK TEDAVI VE REHABILITASYON EAH
+ institution28:
+  verified: 1
+  name: ANKARA KECIOREN EAH
+ institution29:
+  verified: 1
+  name: ANKARA NUMUNE EAH
+ institution30:
+  verified: 1
+  name: ANKARA REFIK SAYDAM HIFZISSIHHA MERKEZI BASKANLIGI
+ institution31:
+  verified: 1
+  name: ANKARA TURKIYE YUKSEK IHTISAS EAH
+ institution32:
+  verified: 1
+  name: ANKARA ULUCANLAR GOZ EAH
+ institution33:
+  verified: 1
+  name: ANKARA UNIV
+ institution34:
+  verified: 1
+  name: ANTALYA EAH
+ institution35:
+  verified: 1
+  name: ARDAHAN UNIV
+ institution36:
+  verified: 1
+  name: ARTVIN CORUH UNIV
+ institution37:
+  verified: 1
+  name: ASKERI HASTANELER
+ institution38:
+  verified: 1
+  name: ATATURK UNIV
+ institution39:
+  verified: 1
+  name: ATILIM UNIV
+ institution40:
+  verified: 1
+  name: AVRASYA UNIV
+ institution41:
+  verified: 1
+  name: AVRUPA BIRLIGI BAKANLIGI
+ institution42:
+  verified: 1
+  name: AVRUPA MESLEK YUKSEKOKULU
+ institution43:
+  verified: 1
+  name: BAHCESEHIR UNIV
+ institution44:
+  verified: 1
+  name: BALIKESIR UNIV
+ institution45:
+  verified: 1
+  name: BARTIN UNIV
+ institution46:
+  verified: 1
+  name: BASBAKANLIK
+ institution47:
+  verified: 1
+  name: BASKENT UNIV
+ institution48:
+  verified: 1
+  name: BATMAN UNIV
+ institution49:
+  verified: 1
+  name: BAYBURT UNIV
+ institution50:
+  verified: 1
+  name: BELEDIYELER
+ institution51:
+  verified: 1
+  name: BEYKENT UNIV
+ institution52:
+  verified: 1
+  name: BEYKOZ LOJISTIK MESLEK YUKSEKOKULU
+ institution53:
+  verified: 1
+  name: BEZMIALEM UNIV
+ institution54:
+  verified: 1
+  name: BILECIK SEYH EDEBALI UNIV
+ institution55:
+  verified: 1
+  name: BILIM SANAYI VE TEKNOLOJI BAKANLIGI
+ institution56:
+  verified: 1
+  name: BINGOL UNIV
+ institution57:
+  verified: 1
+  name: BITLIS EREN UNIV
+ institution58:
+  verified: 1
+  name: BOGAZICI UNIV
+ institution59:
+  verified: 1
+  name: BOZOK UNIV
+ institution60:
+  verified: 1
+  name: BULENT ECEVIT UNIV
+ institution61:
+  verified: 1
+  name: BURSA ORHANGAZI UNIV
+ institution62:
+  verified: 1
+  name: BURSA SEVKET YILMAZ EAH
+ institution63:
+  verified: 1
+  name: BURSA TEKNIK UNIV
+ institution64:
+  verified: 1
+  name: BURSA YUKSEK IHTISAS EAH
+ institution65:
+  verified: 1
+  name: CAG UNIV
+ institution66:
+  verified: 1
+  name: CALISMA VE SOSYAL GUVENLIK BAKANLIGI
+ institution67:
+  verified: 1
+  name: CANAKKALE ONSEKIZ MART UNIV
+ institution68:
+  verified: 1
+  name: CANIK BASARI UNIV
+ institution69:
+  verified: 1
+  name: CANKAYA UNIV
+ institution70:
+  verified: 1
+  name: CANKIRI KARATEKIN UNIV
+ institution71:
+  verified: 1
+  name: CELAL BAYAR UNIV
+ institution72:
+  verified: 1
+  name: CEVRE VE SEHIRCILIK BAKANLIGI
+ institution73:
+  verified: 1
+  name: CUKUROVA UNIV
+ institution74:
+  verified: 1
+  name: CUMHURIYET UNIV
+ institution75:
+  verified: 1
+  name: DENIZ HARP OKULU KOMUTANLIGI
+ institution76:
+  verified: 1
+  name: DENIZ KUVVETLERI KOMUTANLIGI
+ institution77:
+  verified: 1
+  name: DERNEK VE VAKIFLAR
+ institution78:
+  verified: 1
+  name: DEVLET HASTANELERI
+ institution79:
+  verified: 1
+  name: DICLE UNIV
+ institution80:
+  verified: 1
+  name: DIGER DEVLET KURULUSLARI
+ institution81:
+  verified: 1
+  name: DISISLERI BAKANLIGI
+ institution82:
+  verified: 1
+  name: DIYARBAKIR EAH
+ institution83:
+  verified: 1
+  name: DOGU AKDENIZ UNIV
+ institution84:
+  verified: 1
+  name: DOGUS UNIV
+ institution85:
+  verified: 1
+  name: DOKUZ EYLUL UNIV
+ institution86:
+  verified: 1
+  name: DUMLUPINAR UNIV
+ institution87:
+  verified: 1
+  name: DUZCE UNIV
+ institution88:
+  verified: 1
+  name: EGE UNIV
+ institution89:
+  verified: 1
+  name: ELAZIG EAH
+ institution90:
+  verified: 1
+  name: ENERJI VE TABII KAYNAKLAR BAKANLIGI
+ institution91:
+  verified: 1
+  name: ERCIYES UNIV
+ institution92:
+  verified: 1
+  name: ERZINCAN MENGUCEK GAZI EAH
+ institution93:
+  verified: 1
+  name: ERZINCAN UNIV
+ institution94:
+  verified: 1
+  name: ERZURUM BOLGE EAH
+ institution95:
+  verified: 1
+  name: ERZURUM TEKNIK UNIV
+ institution96:
+  verified: 1
+  name: ESKISEHIR OSMANGAZI UNIV
+ institution97:
+  verified: 1
+  name: FATIH SULTAN MEHMET UNIV
+ institution98:
+  verified: 1
+  name: FATIH UNIV
+ institution99:
+  verified: 1
+  name: FEZA GURSEY ENSTITUSU
+ institution100:
+  verified: 1
+  name: FIRAT UNIV
+ institution101:
+  verified: 1
+  name: GALATASARAY UNIV
+ institution102:
+  verified: 1
+  name: GATA
+ institution103:
+  verified: 1
+  name: GAZI UNIV
+ institution104:
+  verified: 1
+  name: GAZIANTEP UNIV
+ institution105:
+  verified: 1
+  name: GAZIOSMANPASA UNIV
+ institution106:
+  verified: 1
+  name: GEBZE YUKSEK TEKNOLOJI ENSTITUSU
+ institution107:
+  verified: 1
+  name: GEDIK UNIV
+ institution108:
+  verified: 1
+  name: GEDIZ UNIV
+ institution109:
+  verified: 1
+  name: GENEL KURMAY BASKANLIGI
+ institution110:
+  verified: 1
+  name: GIDA TARIM VE HAYVANCILIK BAKANLIGI
+ institution111:
+  verified: 1
+  name: GIRESUN UNIV
+ institution112:
+  verified: 1
+  name: GIRNE AMERIKAN UNIV
+ institution113:
+  verified: 1
+  name: GUMRUK VE TICARET BAKANLIGI
+ institution114:
+  verified: 1
+  name: GUMUSHANE UNIV
+ institution115:
+  verified: 1
+  name: HACETTEPE UNIV
+ institution116:
+  verified: 1
+  name: HAKKARI UNIV
+ institution117:
+  verified: 1
+  name: HALIC UNIV
+ institution118:
+  verified: 1
+  name: HARP AKADEMILERI KOMUTANLIGI
+ institution119:
+  verified: 1
+  name: HARRAN UNIV
+ institution120:
+  verified: 1
+  name: HASAN KALYONCU UNIV
+ institution121:
+  verified: 1
+  name: HAVA HARP OKULU KOMUTANLIGI
+ institution122:
+  verified: 1
+  name: HAVA KUVVETLERI KOMUTANLIGI
+ institution123:
+  verified: 1
+  name: HITIT UNIV
+ institution124:
+  verified: 1
+  name: ICISLERI BAKANLIGI
+ institution125:
+  verified: 1
+  name: IGDIR UNIV
+ institution126:
+  verified: 1
+  name: IHSAN DOGRAMACI BILKENT UNIV
+ institution127:
+  verified: 1
+  name: INONU UNIV
+ institution128:
+  verified: 1
+  name: IPEK UNIV
+ institution129:
+  verified: 1
+  name: ISIK UNIV
+ institution130:
+  verified: 1
+  name: ISTANBUL AREL UNIV
+ institution131:
+  verified: 1
+  name: ISTANBUL AYDIN UNIV
+ institution132:
+  verified: 1
+  name: ISTANBUL BAGCILAR EAH
+ institution133:
+  verified: 1
+  name: ISTANBUL BAKIRKOY DR SADI KONUK EAH
+ institution134:
+  verified: 1
+  name: ISTANBUL BAKIRKOY KADIN DOGUM VE COCUK EAH
+ institution135:
+  verified: 1
+  name: ISTANBUL BAKIRKOY RUH SAGLIGI VE HASTALIKLARI EAH
+ institution136:
+  verified: 1
+  name: ISTANBUL BALTALIMANI KEMIK HASTALIKLARI EAH
+ institution137:
+  verified: 1
+  name: ISTANBUL BILGI UNIV
+ institution138:
+  verified: 1
+  name: ISTANBUL BILIM UNIV
+ institution139:
+  verified: 1
+  name: ISTANBUL DR SIYAMI ERSEK GOGUS KALP VE DAMAR EAH
+ institution140:
+  verified: 1
+  name: ISTANBUL EAH
+ institution141:
+  verified: 1
+  name: ISTANBUL ERENKOY RUH VE SINIR HASTALIKLARI EAH
+ institution142:
+  verified: 1
+  name: ISTANBUL FATIH SULTAN MEHMET EAH
+ institution143:
+  verified: 1
+  name: ISTANBUL FIZIK TEDAVI VE REHABILITASYON EAH
+ institution144:
+  verified: 1
+  name: ISTANBUL GELISIM UNIV
+ institution145:
+  verified: 1
+  name: ISTANBUL GOZTEPE EAH
+ institution146:
+  verified: 1
+  name: ISTANBUL HASEKI EAH
+ institution147:
+  verified: 1
+  name: ISTANBUL HAYDARPASA NUMUNE EAH
+ institution148:
+  verified: 1
+  name: ISTANBUL KANUNI SULTAN SULEYMAN EAH
+ institution149:
+  verified: 1
+  name: ISTANBUL KARTAL DR LUTFI KIRDAR EAH
+ institution150:
+  verified: 1
+  name: ISTANBUL KARTAL KOSUYOLU YUKSEK IHTISAS EAH
+ institution151:
+  verified: 1
+  name: ISTANBUL KEMERBURGAZ UNIV
+ institution152:
+  verified: 1
+  name: ISTANBUL KULTUR UNIV
+ institution153:
+  verified: 1
+  name: ISTANBUL MEDENIYET UNIV
+ institution154:
+  verified: 1
+  name: ISTANBUL MEDIPOL UNIV
+ institution155:
+  verified: 1
+  name: ISTANBUL MEHMET AKIF ERSOY KALP VE DAMAR EAH
+ institution156:
+  verified: 1
+  name: ISTANBUL METIN SABANCI BALTALIMANI KEMIK HASTALIKLARI EAH
+ institution157:
+  verified: 1
+  name: ISTANBUL OKMEYDANI EAH
+ institution158:
+  verified: 1
+  name: ISTANBUL PROF DR N RESAT BELGER BEYOGLU GOZ EAH
+ institution159:
+  verified: 1
+  name: ISTANBUL SABAHATTIN ZAIM UNIV
+ institution160:
+  verified: 1
+  name: ISTANBUL SEHIR UNIV
+ institution161:
+  verified: 1
+  name: ISTANBUL SISLI ETFAL EAH
+ institution162:
+  verified: 1
+  name: ISTANBUL SULEYMANIYE KADIN VE COCUK EAH
+ institution163:
+  verified: 1
+  name: ISTANBUL SUREYYAPASA GOGUS VE KALP DAMAR EAH
+ institution164:
+  verified: 1
+  name: ISTANBUL TAKSIM EAH
+ institution165:
+  verified: 1
+  name: ISTANBUL TEKNIK UNIV
+ institution166:
+  verified: 1
+  name: ISTANBUL TICARET UNIV
+ institution167:
+  verified: 1
+  name: ISTANBUL UMRANIYE EAH
+ institution168:
+  verified: 1
+  name: ISTANBUL UNIV
+ institution169:
+  verified: 1
+  name: ISTANBUL YEDIKULE GOGUS HASTALIKLARI VE CERRAH EAH
+ institution170:
+  verified: 1
+  name: ISTANBUL ZEYNEP KAMIL KADIN VE COCUK EAH
+ institution171:
+  verified: 1
+  name: IZMIR BOZYAKA EAH
+ institution172:
+  verified: 1
+  name: IZMIR DR BEHCET UZ COCUK EAH
+ institution173:
+  verified: 1
+  name: IZMIR DR SUAT SEREN GOGUS EAH
+ institution174:
+  verified: 1
+  name: IZMIR EAH
+ institution175:
+  verified: 1
+  name: IZMIR EGE DOGUMEVI VE KADIN HASTALIKLARI EAH
+ institution176:
+  verified: 1
+  name: IZMIR EKONOMI UNIV
+ institution177:
+  verified: 1
+  name: IZMIR KATIP CELEBI UNIV
+ institution178:
+  verified: 1
+  name: IZMIR TEPECIK EAH
+ institution179:
+  verified: 1
+  name: IZMIR UNIV
+ institution180:
+  verified: 1
+  name: IZMIR YUKSEK TEKNOLOJI ENSTITUSU
+ institution181:
+  verified: 1
+  name: KADIR HAS UNIV
+ institution182:
+  verified: 1
+  name: KAFKAS UNIV
+ institution183:
+  verified: 1
+  name: KAHRAMANMARAS SUTCU IMAM UNIV
+ institution184:
+  verified: 1
+  name: KALKINMA BAKANLIGI
+ institution185:
+  verified: 1
+  name: KARA HARP OKULU KOMUTANLIGI
+ institution186:
+  verified: 1
+  name: KARA KUVVETLERI KOMUTANLIGI
+ institution187:
+  verified: 1
+  name: KARABUK UNIV
+ institution188:
+  verified: 1
+  name: KARADENIZ TEKNIK UNIV
+ institution189:
+  verified: 1
+  name: KARAMANOGLU MEHMETBEY UNIV
+ institution190:
+  verified: 1
+  name: KASTAMONU UNIV
+ institution191:
+  verified: 1
+  name: KAYSERI EAH
+ institution192:
+  verified: 1
+  name: KECIOREN EAH
+ institution193:
+  verified: 1
+  name: KILIS 7 ARALIK UNIV
+ institution194:
+  verified: 1
+  name: KIRIKKALE UNIV
+ institution195:
+  verified: 1
+  name: KIRIKKALE YUKSEK IHTISAS EAH
+ institution196:
+  verified: 1
+  name: KIRKLARELI UNIV
+ institution197:
+  verified: 1
+  name: KIZILAY
+ institution198:
+  verified: 1
+  name: KOC UNIV
+ institution199:
+  verified: 1
+  name: KOCAELI DERINCE EAH
+ institution200:
+  verified: 1
+  name: KOCAELI UNIV
+ institution201:
+  verified: 1
+  name: KONYA EAH
+ institution202:
+  verified: 1
+  name: KONYA NECMETTIN ERBAKAN UNIV
+ institution203:
+  verified: 1
+  name: KTO KARATAY UNIV
+ institution204:
+  verified: 1
+  name: KULTUR VE TURIZM BAKANLIGI
+ institution205:
+  verified: 1
+  name: KUTAHYA EVLIYA CELEBI EAH
+ institution206:
+  verified: 1
+  name: LEFKE AVRUPA UNIV
+ institution207:
+  verified: 1
+  name: LOSEV
+ institution208:
+  verified: 1
+  name: MALIYE BAKANLIGI
+ institution209:
+  verified: 1
+  name: MALTEPE UNIV
+ institution210:
+  verified: 1
+  name: MARDIN ARTUKLU UNIV
+ institution211:
+  verified: 1
+  name: MARMARA UNIV
+ institution212:
+  verified: 1
+  name: MEHMET AKIF ERSOY UNIV
+ institution213:
+  verified: 1
+  name: MELIK SAH UNIV
+ institution214:
+  verified: 1
+  name: MERKEZ BANKASI
+ institution215:
+  verified: 1
+  name: MERSIN UNIV
+ institution216:
+  verified: 1
+  name: MEVLANA UNIV
+ institution217:
+  verified: 1
+  name: MILLI EGITIM BAKANLIGI
+ institution218:
+  verified: 1
+  name: MILLI SAVUNMA BAKANLIGI
+ institution219:
+  verified: 1
+  name: MIMAR SINAN GUZEL SANATLAR UNIV
+ institution220:
+  verified: 1
+  name: MUGLA SITKI KOCMAN UNIV
+ institution221:
+  verified: 1
+  name: MUS ALPARSLAN UNIV
+ institution222:
+  verified: 1
+  name: MUSTAFA KEMAL UNIV
+ institution223:
+  verified: 1
+  name: NAMIK KEMAL UNIV
+ institution224:
+  verified: 1
+  name: NEVSEHIR HACI BEKTAS VELI UNIV
+ institution225:
+  verified: 1
+  name: NIGDE UNIV
+ institution226:
+  verified: 1
+  name: NISANTASI UNIV
+ institution227:
+  verified: 1
+  name: NUH NACI YAZGAN UNIV
+ institution228:
+  verified: 1
+  name: OKAN UNIV
+ institution229:
+  verified: 1
+  name: ONDOKUZ MAYIS UNIV
+ institution230:
+  verified: 1
+  name: ORDU UNIV
+ institution231:
+  verified: 1
+  name: ORMAN VE SU ISLERI BAKANLIGI
+ institution232:
+  verified: 1
+  name: ORTA DOGU TEKNIK UNIV
+ institution233:
+  verified: 1
+  name: OSMANIYE KORKUT ATA UNIV
+ institution234:
+  verified: 1
+  name: OZEL SAGLIK KURUMLARI
+ institution235:
+  verified: 1
+  name: OZEL SEKTOR
+ institution236:
+  verified: 1
+  name: OZYEGIN UNIV
+ institution237:
+  verified: 1
+  name: PAMUKKALE UNIV
+ institution238:
+  verified: 1
+  name: PIRI REIS UNIV
+ institution239:
+  verified: 1
+  name: PLATO MESLEK YUKSEKOKULU
+ institution240:
+  verified: 1
+  name: POLIS AKADEMISI
+ institution241:
+  verified: 1
+  name: RECEP TAYYIP ERDOGAN UNIV
+ institution242:
+  verified: 1
+  name: RIZE EAH
+ institution243:
+  verified: 1
+  name: SABANCI UNIV
+ institution244:
+  verified: 1
+  name: SAGLIK BAKANLIGI
+ institution245:
+  verified: 1
+  name: SAKARYA EAH
+ institution246:
+  verified: 1
+  name: SAKARYA UNIV
+ institution247:
+  verified: 1
+  name: SAMSUN MEHMET AYDIN EAH
+ institution248:
+  verified: 1
+  name: SANLIURFA EAH
+ institution249:
+  verified: 1
+  name: SELCUK UNIV
+ institution250:
+  verified: 1
+  name: SIFA UNIV
+ institution251:
+  verified: 1
+  name: SIIRT UNIV
+ institution252:
+  verified: 1
+  name: SINOP UNIV
+ institution253:
+  verified: 1
+  name: SIRNAK UNIV
+ institution254:
+  verified: 1
+  name: SULEYMAN DEMIREL UNIV
+ institution255:
+  verified: 1
+  name: SULEYMAN SAH UNIV
+ institution256:
+  verified: 1
+  name: TANIMSIZ
+ institution257:
+  verified: 1
+  name: TED UNIV
+ institution258:
+  verified: 1
+  name: TOBB EKONOMI ve TEKNOLOJI UNIV
+ institution259:
+  verified: 1
+  name: TODAIE
+ institution260:
+  verified: 1
+  name: TOROS UNIV
+ institution261:
+  verified: 1
+  name: TRABZON AHI EVREN EAH
+ institution262:
+  verified: 1
+  name: TRABZON KANUNI EAH
+ institution263:
+  verified: 1
+  name: TRAKYA UNIV
+ institution264:
+  verified: 1
+  name: TSE
+ institution265:
+  verified: 1
+  name: TUBA
+ institution266:
+  verified: 1
+  name: TUBITAK
+ institution267:
+  verified: 1
+  name: TUNCELI UNIV
+ institution268:
+  verified: 1
+  name: TURGUT OZAL UNIV
+ institution269:
+  verified: 1
+  name: TURK HAVA KURUMU UNIV
+ institution270:
+  verified: 1
+  name: TURK-ALMAN UNIV
+ institution271:
+  verified: 1
+  name: UFUK UNIV
+ institution272:
+  verified: 1
+  name: ULASTIRMA DENIZCILIK VE HABERLESME BAKANLIGI
+ institution273:
+  verified: 1
+  name: ULUDAG UNIV
+ institution274:
+  verified: 1
+  name: ULUSLARARASI ANTALYA UNIV
+ institution275:
+  verified: 1
+  name: ULUSLARARASI KIBRIS UNIV
+ institution276:
+  verified: 1
+  name: USAK UNIV
+ institution277:
+  verified: 1
+  name: USKUDAR UNIV
+ institution278:
+  verified: 1
+  name: VAN BOLGE EAH
+ institution279:
+  verified: 1
+  name: VAN EAH
+ institution280:
+  verified: 1
+  name: VAN YUKSEK IHTISAS EAH
+ institution281:
+  verified: 1
+  name: YAKIN DOGU UNIV
+ institution282:
+  verified: 1
+  name: YALOVA UNIV
+ institution283:
+  verified: 1
+  name: YASAR UNIV
+ institution284:
+  verified: 1
+  name: YEDITEPE UNIV
+ institution285:
+  verified: 1
+  name: YENI YUZYIL UNIV
+ institution286:
+  verified: 1
+  name: YILDIRIM BEYAZIT UNIV
+ institution287:
+  verified: 1
+  name: YILDIZ TEKNIK UNIV
+ institution288:
+  verified: 1
+  name: YUZUNCU YIL UNIV
+ institution289:
+  verified: 1
+  name: ZIRVE UNIV
+

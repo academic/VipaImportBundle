@@ -28,7 +28,7 @@ class DataToolsCommand extends ContainerAwareCommand {
         $files = glob($path);
         if (!empty($files) ){
             $filesStr = implode(' ', $files);
-            $application->run(new StringInput('h4cc_alice_fixtures:load:files --manager=default --type=yaml --seed=100 --no-persist ' . $filesStr));
+            $application->run(new StringInput('h4cc_alice_fixtures:load:files --manager=default --type=yaml --seed=100 ' . $filesStr));
             $output->writeln("\nDONE\n");
         }
     }
