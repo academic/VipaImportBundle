@@ -2,6 +2,7 @@
 
 namespace Okulbilisim\OjsToolsBundle\Command;
 
+use Okulbilisim\LocationBundle\Entity\Country;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,6 +17,34 @@ use Ojs\UserBundle\Entity\UserJournalRole;
 
 class DataImportJournalCommand extends ContainerAwareCommand
 {
+    protected $roles = [
+        'ROLE_ID_SITE_ADMIN' => "0x00000001",
+        'ROLE_ID_SUBMITTER' => "0x00000002",
+        'ROLE_ID_JOURNAL_MANAGER' => "0x00000010",
+        'ROLE_ID_EDITOR' => "0x00000100",
+        'ROLE_ID_SECTION_EDITOR' => '0x00000200',
+        'ROLE_ID_LAYOUT_EDITOR' => '0x00000300',
+        'ROLE_ID_REVIEWER' => "0x00001000",
+        'ROLE_ID_COPYEDITOR' => '0x00002000',
+        'ROLE_ID_PROOFREADER' => "0x00003000",
+        'ROLE_ID_AUTHOR' => "0x00010000",
+        'ROLE_ID_READER' => '0x00100000',
+        'ROLE_ID_SUBSCRIPTION_MANAGER' => "0x00200000",
+    ];
+    protected $rolesMap = [
+        'ROLE_ID_SITE_ADMIN' => "ROLE_SUPER_ADMIN",
+        'ROLE_ID_SUBMITTER' => "ROLE_USER",
+        'ROLE_ID_JOURNAL_MANAGER' => "ROLE_JOURNAL_MANAGER",
+        'ROLE_ID_EDITOR' => "ROLE_EDITOR",
+        'ROLE_ID_SECTION_EDITOR' => 'ROLE_SECTION_EDITOR',
+        'ROLE_ID_LAYOUT_EDITOR' => 'ROLE_LAYOUT_EDITOR',
+        'ROLE_ID_REVIEWER' => "ROLE_REVIEWER",
+        'ROLE_ID_COPYEDITOR' => 'ROLE_COPYEDITOR',
+        'ROLE_ID_PROOFREADER' => "ROLE_PROOFREADER",
+        'ROLE_ID_AUTHOR' => "ROLE_AUTHOR",
+        'ROLE_ID_READER' => 'ROLE_READER',
+        'ROLE_ID_SUBSCRIPTION_MANAGER' => "ROLE_SUBSCRIPTION_MANAGER",
+    ];
 
     protected function configure()
     {
@@ -24,6 +53,12 @@ class DataImportJournalCommand extends ContainerAwareCommand
             ->setDescription('Import journals')
             ->addArgument(
                 'JournalId', InputArgument::REQUIRED, 'Journal ID at ');
+        $roles = [];
+        foreach ($this->roles as $k => $r) {
+            $roles[hexdec($r)] = $k;
+        }
+        $this->roles = $roles;
+
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -42,7 +77,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $connection = $connectionFactory->createConnection(array(
                 'driver' => 'pdo_mysql',
                 'user' => 'root',
-                'password' => 'root',
+                'password' => '',
                 'host' => 'localhost',
                 'dbname' => 'dergipark',
             ));
@@ -57,245 +92,32 @@ class DataImportJournalCommand extends ContainerAwareCommand
             /*
              * Journal details
              */
-            $journal_details = $connection->fetchAll('select * from journal_settings where journal_id =' . $id);
-
-            foreach($journal_details as $journal_detail){
-                echo $journal_detail['setting_name'].":\n\n".$journal_detail['setting_value'];
-                echo "\n=====================\n";
+            $journal_details = $connection->fetchAll('select locale,setting_name,setting_value from journal_settings where journal_id =' . $id);
+            $journal_detail = [];
+            foreach ($journal_details as $_journal_detail) {
+                if ($_journal_detail['locale'] == 'tr_TR' || empty($_journal_detail['locale']))
+                    $journal_detail[$_journal_detail['setting_name']] = $_journal_detail['setting_value'];
             }
 
-            /*
-
-            $journal_detail[allowRegAuthor']
-            $journal_detail['allowRegReader']
-            $journal_detail['allowRegReviewer']
-            $journal_detail['authorSelectsEditor']
-            $journal_detail['boardEnabled']
-            $journal_detail['categories']
-            $journal_detail['contactEmail']
-            $journal_detail['contactFax']
-            $journal_detail['contactName']
-            $journal_detail['contactPhone']
-            $journal_detail['contributors']
-            $journal_detail['copyrightNoticeAgree']
-            $journal_detail['copySubmissionAckAddress']
-            $journal_detail['copySubmissionAckPrimaryContact']
-            $journal_detail['copySubmissionAckSpecified']
-            $journal_detail['crossrefPassword']
-            $journal_detail['crossrefUsername']
-            $journal_detail['disableUserReg']
-            $journal_detail['displayCurrentIssue']
-            $journal_detail['emailSignature']
-            $journal_detail['enableAnnouncements']
-            $journal_detail['enableAnnouncementsHomepage']
-            $journal_detail['enableComments']
-            $journal_detail['enableLockss']
-            $journal_detail['enablePageNumber']
-            $journal_detail['enablePublicArticleId']
-            $journal_detail['enablePublicGalleyId']
-            $journal_detail['enablePublicIssueId']
-            $journal_detail['enablePublicSuppFileId']
-            $journal_detail['envelopeSender']
-            $journal_detail['fastTrackFee']
-            $journal_detail['historyDetails']
-            $journal_detail['includeCreativeCommons']
-            $journal_detail['initialNumber']
-            $journal_detail['initialVolume']
-            $journal_detail['initialYear']
-            $journal_detail['isActiveOnOjs']
-            $journal_detail['issuePerVolume']
-            $journal_detail['itemsPerPage']
-            $journal_detail['journalStyleSheet']
-            $journal_detail['journalTheme']
-            $journal_detail['mailingAddress']
-            $journal_detail['mailSubmissionsToReviewers']
-            $journal_detail['membershipFee']
-            $journal_detail['metaCitationOutputFilterId']
-            $journal_detail['metaCitations']
-            $journal_detail['metaCoverage']
-            $journal_detail['metaDiscipline']
-            $journal_detail['metaSubject']
-            $journal_detail['metaSubjectClass']
-            $journal_detail['metaType']
-            $journal_detail['notifyAllAuthorsOnDecision']
-            $journal_detail['numAnnouncementsHomepage']
-            $journal_detail['numDaysBeforeInviteReminder']
-            $journal_detail['numDaysBeforeSubmitReminder']
-            $journal_detail['numPageLinks']
-            $journal_detail['numWeeksPerReview']
-            $journal_detail['onlineIssn']
-            $journal_detail['printIssn']
-            $journal_detail['provideRefLinkInstructions']
-            $journal_detail['publicationFee']
-            $journal_detail['publicationFormatNumber']
-            $journal_detail['publicationFormatTitle']
-            $journal_detail['publicationFormatVolume']
-            $journal_detail['publicationFormatYear']
-            $journal_detail['publisherInstitution']
-            $journal_detail['publisherType']
-            $journal_detail['publisherUrl']
-            $journal_detail['publishingMode']
-            $journal_detail['purchaseArticleFee']
-            $journal_detail['rateReviewerOnQuality']
-            $journal_detail['remindForInvite']
-            $journal_detail['remindForSubmit']
-            $journal_detail['requireAuthorCompetingInterests']
-            $journal_detail['requireReviewerCompetingInterests']
-            $journal_detail['restrictArticleAccess']
-            $journal_detail['restrictReviewerFileAccess']
-            $journal_detail['restrictSiteAccess']
-            $journal_detail['reviewerAccessKeysEnabled']
-            $journal_detail['reviewerDatabaseLinks']
-            $journal_detail['rtAbstract']
-            $journal_detail['rtAddComment']
-            $journal_detail['rtCaptureCite']
-            $journal_detail['rtDefineTerms']
-            $journal_detail['rtEmailAuthor']
-            $journal_detail['rtEmailOthers']
-            $journal_detail['rtEnabled']
-            $journal_detail['rtFindingReferences']
-            $journal_detail['rtPrinterFriendly']
-            $journal_detail['rtSharingBrand']
-            $journal_detail['rtSharingButtonStyle']
-            $journal_detail['rtSharingDropDown']
-            $journal_detail['rtSharingDropDownMenu']
-            $journal_detail['rtSharingEnabled']
-            $journal_detail['rtSharingLanguage']
-            $journal_detail['rtSharingLogo']
-            $journal_detail['rtSharingLogoBackground']
-            $journal_detail['rtSharingLogoColor']
-            $journal_detail['rtSharingUserName']
-            $journal_detail['rtSupplementaryFiles']
-            $journal_detail['rtVersionId']
-            $journal_detail['rtViewMetadata']
-            $journal_detail['rtViewReviewPolicy']
-            $journal_detail['showEnsuringLink']
-            $journal_detail['showGalleyLinks']
-            $journal_detail['sponsors']
-            $journal_detail['statCountAccept']
-            $journal_detail['statCountDecline']
-            $journal_detail['statCountRevise']
-            $journal_detail['statDaysPerReview']
-            $journal_detail['statDaysToPublication']
-            $journal_detail['statItemsPublished']
-            $journal_detail['statNumPublishedIssues']
-            $journal_detail['statNumSubmissions']
-            $journal_detail['statPeerReviewed']
-            $journal_detail['statRegisteredReaders']
-            $journal_detail['statRegisteredUsers']
-            $journal_detail['statSubscriptions']
-            $journal_detail['statViews']
-            $journal_detail['submissionFee']
-            $journal_detail['supportedFormLocales']
-            $journal_detail['supportedLocales']
-            $journal_detail['supportedSubmissionLocales']
-            $journal_detail['supportEmail']
-            $journal_detail['supportName']
-            $journal_detail['supportPhone']
-            $journal_detail['templates']
-            $journal_detail['total_downloads']
-            $journal_detail['total_views']
-            $journal_detail['useCopyeditors']
-            $journal_detail['useEditorialBoard']
-            $journal_detail['useLayoutEditors']
-            $journal_detail['useProofreaders']
-            $journal_detail['volumePerYear']
-            $journal_detail['abbreviation']
-            $journal_detail['authorGuidelines']
-            $journal_detail['competingInterestGuidelines']
-            $journal_detail['copyrightNotice']
-            $journal_detail['customAboutItems']
-            $journal_detail['description']
-            $journal_detail['focusScopeDesc']
-            $journal_detail['history']
-            $journal_detail['homeHeaderTitle']
-            $journal_detail['homeHeaderTitleImage']
-            $journal_detail['homeHeaderTitleType']
-            $journal_detail['initials']
-            $journal_detail['journalPageFooter']
-            $journal_detail['journalThumbnail']
-            $journal_detail['metaDisciplineExamples']
-            $journal_detail['metaSubjectExamples']
-            $journal_detail['navItems']
-            $journal_detail['pageHeaderTitle']
-            $journal_detail['pageHeaderTitleImage']
-            $journal_detail['pageHeaderTitleType']
-            $journal_detail['searchDescription']
-            $journal_detail['searchKeywords']
-            $journal_detail['submissionChecklist']
-            $journal_detail['title']
-            $journal_detail['abbreviation']
-            $journal_detail['announcementsIntroduction']
-            $journal_detail['authorGuidelines']
-            $journal_detail['authorInformation']
-            $journal_detail['authorSelfArchivePolicy']
-            $journal_detail['competingInterestGuidelines']
-            $journal_detail['copyeditInstructions']
-            $journal_detail['copyrightNotice']
-            $journal_detail['customAboutItems']
-            $journal_detail['description']
-            $journal_detail['donationFeeDescription']
-            $journal_detail['donationFeeName']
-            $journal_detail['fastTrackFeeDescription']
-            $journal_detail['fastTrackFeeName']
-            $journal_detail['focusScopeDesc']
-            $journal_detail['history']
-            $journal_detail['homeHeaderTitle']
-            $journal_detail['homeHeaderTitleImage']
-            $journal_detail['homeHeaderTitleImageAltText']
-            $journal_detail['homeHeaderTitleType']
-            $journal_detail['initials']
-            $journal_detail['journalPageHeader']
-            $journal_detail['journalThumbnail']
-            $journal_detail['librarianInformation']
-            $journal_detail['lockssLicense']
-            $journal_detail['membershipFeeDescription']
-            $journal_detail['membershipFeeName']
-            $journal_detail['metaCitations']
-            $journal_detail['metaDisciplineExamples']
-            $journal_detail['metaSubjectExamples']
-            $journal_detail['navItems']
-            $journal_detail['openAccessPolicy']
-            $journal_detail['pageHeaderTitle']
-            $journal_detail['pageHeaderTitleImage']
-            $journal_detail['pageHeaderTitleImageAltText']
-            $journal_detail['pageHeaderTitleType']
-            $journal_detail['proofInstructions']
-            $journal_detail['publicationFeeDescription']
-            $journal_detail['publicationFeeName']
-            $journal_detail['purchaseArticleFeeDescription']
-            $journal_detail['purchaseArticleFeeName']
-            $journal_detail['readerInformation']
-            $journal_detail['refLinkInstructions']
-            $journal_detail['searchDescription']
-            $journal_detail['searchKeywords']
-            $journal_detail['submissionChecklist']
-            $journal_detail['submissionFeeDescription']
-            $journal_detail['submissionFeeName']
-            $journal_detail['title']
-            $journal_detail['waiverPolicy']
-
-             */
             /*
              * Journal Create
              */
 
 
             $journal = new Journal();
-            $journal->setTitle($journal_detail['title']);
-            $journal->setTitleAbbr($journal_detail['abbreviation']);
-            $journal->setDescription($journal_detail['description']);
-            $journal->setSubtitle($journal_detail['homeHeaderTitle']);
-            $journal->setIssn($journal_detail['printIssn']);
-            $journal->setEissn($journal_detail['onlineIssn']);
-            $journal->setPath($journal_raw['path']);
+            isset($journal_detail['title']) && $journal->setTitle($journal_detail['title']);
+            isset($journal_detail['abbreviation']) && $journal->setTitleAbbr($journal_detail['abbreviation']);
+            isset($journal_detail['description']) && $journal->setDescription($journal_detail['description']);
+            isset($journal_detail['homeHeaderTitle']) && $journal->setSubtitle($journal_detail['homeHeaderTitle']);
+            isset($journal_detail['printIssn']) && $journal->setIssn($journal_detail['printIssn']);
+            isset($journal_detail['onlineIssn']) && $journal->setEissn($journal_detail['onlineIssn']);
+            isset($journal_raw['path']) && $journal->setPath($journal_raw['path']);
             // TODO setPeriod
             // $journal->setPeriod();
-            $journal->setSlug($journal_raw['path']);
+            isset($journal_raw['path']) && $journal->setSlug($journal_raw['path']);
             $journal->setStatus(1);
-            // TODO setUrl
-            // $journal->setUrl();
-            $journal->setTags($journal_detail['searchKeywords']);
+            isset($journal_detail['publisherUrl']) && $journal->setUrl($journal_detail['publisherUrl']);
+            isset($journal_detail['searchKeywords']) && $journal->setTags($journal_detail['searchKeywords']);
             //$journal->setCountryId();
 
             $em->persist($journal);
@@ -303,40 +125,45 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $journal_id = $journal->getId();
 
 
-
             /*
              * Journal users
              */
-            $journal_users = $connection->fetchAll('select distinct user_id from roles where journal_id=' . $id . ' group by user_id order by user_id asc');
+            $journal_users = $connection->fetchAll('select distinct user_id,role_id from roles where journal_id=' . $id . ' group by user_id order by user_id asc');
             $users_count = $connection->fetchArray('select count(*) from (select distinct user_id from roles where journal_id=' . $id . ' group by user_id order by user_id asc) b;');
 
             $i = 1;
             foreach ($journal_users as $journal_user) {
-                $user = $connection->fetchAll('select * from users where user_id=' . $journal_user['user_id'] . ' limit 1;');
+                $user = $connection->fetchAll('select * from users where user_id=' . $journal_user['user_id'] . ' limit 1;')[0];
 
-                /*
-                 * User main info
-                 */
-
-
-                $user_entity = new User();
-                $user_entity->setFirstName($user['first_name'] . ' ' . $user['middle_name']);
-                $user_entity->setUsername($user['username']);
-                $user_entity->setLastName($user['last_name']);
-                $user_entity->setEmail($user['email']);
+                $usercheck = $em->getRepository('OjsUserBundle:User')->findOneBy(['username' => $user['username']]);
+                $user_entity = $usercheck ? $usercheck : new User();
+                isset($user['first_name']) && $user_entity->setFirstName($user['first_name']);
+                isset($user['middle_name']) && $user_entity->setFirstName($user_entity->getFirstName() . ' ' . $user['middle_name']);
+                isset($user['username']) && $user_entity->setUsername($user['username']);
+                isset($user['last_name']) && $user_entity->setLastName($user['last_name']);
+                isset($user['email']) && $user_entity->setEmail($user['email']);
+                $user_entity->generateApiKey();
+                isset($user['salutation']) && $user_entity->setTitle($user['salutation']);
+                if ($user['disabled'] == 1) {
+                    $user_entity->setIsActive(false);
+                    $user_entity->setStatus(0);
+                }
+                $country = $em->getRepository('OkulbilisimLocationBundle:Country')->findOneBy(['iso_code' => $user['country']]);
+                if($country instanceof Country)
+                    $user_entity->setCountry($country);
                 $em->persist($user_entity);
                 $em->flush();
-
                 /*
                  * User roles with journal
                  */
 
-
                 $user_role = new UserJournalRole();
-                $user_role->setUserId($user_entity->getId());
+                $user_role->setUser($user_entity);
 
-                $user_role->setJournalId($journal_id);
-                //$user_role->setRoleId();
+                $user_role->setJournal($journal);
+                $role = $em->getRepository('OjsUserBundle:Role')->findOneBy([
+                    'role' => $this->rolesMap[$this->roles[$journal_user['role_id']]]]);
+                $user_role->setRole($role);
                 $em->persist($user_role);
                 $em->flush();
 
@@ -352,8 +179,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $author->setEmail($user['email']);
                 $author->setInitials($user['initials']);
                 $author->setTitle($user['salutation']);
-                $author->setCountry(1);
-                $author->setUserId($user_entity->getId());
+                if($country instanceof Country)
+                    $author->setCountry($country->getId());
+                $author->setUser($user_entity);
+                $author->setAddress($user['mailing_address']);
                 $em->persist($author);
                 $em->flush();
 
@@ -383,8 +212,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $output->writeln('<info>Horayy</info>');
 
 
-        } catch (Exception $e) {
-            print_r($e);
+        } catch (\Exception $e) {
+            echo $e->getMessage();
         }
 
 
