@@ -142,14 +142,24 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 isset($user['username']) && $user_entity->setUsername($user['username']);
                 isset($user['last_name']) && $user_entity->setLastName($user['last_name']);
                 isset($user['email']) && $user_entity->setEmail($user['email']);
+                isset($user['gender']) && $user_entity->setGender($user['gender']);
+                isset($user['initials']) && $user_entity->setInitials($user['initials']);
+                isset($user['url']) && $user_entity->setUrl($user['url']);
+                isset($user['phone']) && $user_entity->setPhone($user['phone']);
+                isset($user['fax']) && $user_entity->setFax($user['fax']);
+                isset($user['mailing_address']) && $user_entity->setAddress($user['mailing_address']);
+                isset($user['billing_address']) && $user_entity->setBillingAddress($user['billing_address']);
+                isset($user['billing_address']) && $user_entity->setBillingAddress($user['billing_address']);
+                isset($user['locales']) && $user_entity->setLocales(serialize(explode(':', $user['billing_address'])));
                 $user_entity->generateApiKey();
                 isset($user['salutation']) && $user_entity->setTitle($user['salutation']);
                 if ($user['disabled'] == 1) {
                     $user_entity->setIsActive(false);
+                    $user_entity->setDisableReason($user['disable_reason']);
                     $user_entity->setStatus(0);
                 }
                 $country = $em->getRepository('OkulbilisimLocationBundle:Country')->findOneBy(['iso_code' => $user['country']]);
-                if($country instanceof Country)
+                if ($country instanceof Country)
                     $user_entity->setCountry($country);
                 $em->persist($user_entity);
                 $em->flush();
@@ -173,16 +183,21 @@ class DataImportJournalCommand extends ContainerAwareCommand
                  */
 
                 $author = new Author();
-                $author->setFirstName($user['first_name']);
-                $author->setLastName($user['last_name']);
+                $author->setFirstName($user_entity->getFirstName());
+                $author->setLastName($user_entity->getLastName());
                 $author->setMiddleName($user['middle_name']);
-                $author->setEmail($user['email']);
-                $author->setInitials($user['initials']);
-                $author->setTitle($user['salutation']);
-                if($country instanceof Country)
-                    $author->setCountry($country->getId());
+                $author->setEmail($user_entity->getEmail());
+                $author->setInitials($user_entity->getInitials());
+                $author->setTitle($user_entity->getTitle());
+                $author->setAddress($user_entity->getAddress());
+                $author->setBillingAddress($user_entity->getBillingAddress());
+                $author->setLocales($user_entity->getLocales());
+                $author->setUrl($user_entity->getUrl());
+                $author->setPhone($user_entity->getPhone());
+
+                if ($country instanceof Country)
+                    $author->setCountry($country);
                 $author->setUser($user_entity);
-                $author->setAddress($user['mailing_address']);
                 $em->persist($author);
                 $em->flush();
 
