@@ -4,6 +4,7 @@ namespace Okulbilisim\OjsToolsBundle\Command;
 
 use Okulbilisim\LocationBundle\Entity\Country;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use \Symfony\Component\Console\Input\StringInput;
@@ -48,6 +49,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
     protected function configure()
     {
+        gc_collect_cycles();
         $this
             ->setName('ojs:import:journal')
             ->setDescription('Import journals')
@@ -67,7 +69,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $kernel = $this->getContainer()->get('kernel');
         $application = new \Symfony\Bundle\FrameworkBundle\Console\Application($kernel);
         $application->setAutoExit(false);
-        $output->writeln('<info>Adding  data</info>');
 
         $id = $input->getArgument('JournalId');
 
@@ -82,9 +83,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 'dbname' => 'dergipark',
             ));
 
-
+            unset($connectionFactory);
             $em = $this->getContainer()->get("doctrine.orm.entity_manager");
-
+            $em->getConnection()->getConfiguration()->getSQLLogger(null);
 
             $journal_raw = $connection->fetchAll('SELECT * FROM journals where journal_id=' . $id . '  limit 1;');
 
@@ -122,17 +123,28 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $em->persist($journal);
             $em->flush();
+            $em->clear();
+            unset($journal_detail,$_journal_detail,$journal_details,$journal_raw);
             $journal_id = $journal->getId();
-
 
             /*
              * Journal users
              */
             $journal_users = $connection->fetchAll('select distinct user_id,role_id from roles where journal_id=' . $id . ' group by user_id order by user_id asc');
-            $users_count = $connection->fetchArray('select count(*) from (select distinct user_id from roles where journal_id=' . $id . ' group by user_id order by user_id asc) b;');
+            $users_count = $connection->fetchArray('select count(*) as c from (select distinct user_id from roles where journal_id=' . $id . ' group by user_id order by user_id asc) b;');
 
             $i = 1;
+            $userProgress = new ProgressBar($output,$users_count[0]);
+            $userProgress->setMessage("Adding users");
+            $userProgress->setFormat('<info>%message%</info> <comment;options=bold>%current%/%max%</comment;options=bold> <fg=white;bg=black>[%bar%]</fg=white;bg=black> %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%');
+            $userProgress->setBarCharacter("≈");
+            $userProgress->setProgressCharacter("∂");
+            $userProgress->setEmptyBarCharacter(" ");
+            $userProgress->start();
+
             foreach ($journal_users as $journal_user) {
+                // all relations disconnecting if i use em->clear. I refind journal for fix this issue
+                $journal = $em->find('OjsJournalBundle:Journal',$journal->getId());
                 $user = $connection->fetchAll('select * from users where user_id=' . $journal_user['user_id'] . ' limit 1;')[0];
 
                 $usercheck = $em->getRepository('OjsUserBundle:User')->findOneBy(['username' => $user['username']]);
@@ -150,12 +162,12 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 isset($user['mailing_address']) && $user_entity->setAddress($user['mailing_address']);
                 isset($user['billing_address']) && $user_entity->setBillingAddress($user['billing_address']);
                 isset($user['billing_address']) && $user_entity->setBillingAddress($user['billing_address']);
-                isset($user['locales']) && $user_entity->setLocales(serialize(explode(':', $user['billing_address'])));
+                isset($user['locales']) && $user_entity->setLocales(serialize(explode(':', $user['locales'])));
                 $user_entity->generateApiKey();
                 isset($user['salutation']) && $user_entity->setTitle($user['salutation']);
                 if ($user['disabled'] == 1) {
                     $user_entity->setIsActive(false);
-                    $user_entity->setDisableReason($user['disable_reason']);
+                    $user_entity->setDisableReason(isset($user['disable_reason'])&&$user['disable_reason']);
                     $user_entity->setStatus(0);
                 }
                 $country = $em->getRepository('OkulbilisimLocationBundle:Country')->findOneBy(['iso_code' => $user['country']]);
@@ -166,7 +178,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 /*
                  * User roles with journal
                  */
-
+                unset($user);
                 $user_role = new UserJournalRole();
                 $user_role->setUser($user_entity);
 
@@ -176,7 +188,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $user_role->setRole($role);
                 $em->persist($user_role);
                 $em->flush();
-
+                unset($user_role);
 
                 /*
                  * Add author data
@@ -185,7 +197,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $author = new Author();
                 $author->setFirstName($user_entity->getFirstName());
                 $author->setLastName($user_entity->getLastName());
-                $author->setMiddleName($user['middle_name']);
+                //$author->setMiddleName($user['middle_name']);
                 $author->setEmail($user_entity->getEmail());
                 $author->setInitials($user_entity->getInitials());
                 $author->setTitle($user_entity->getTitle());
@@ -201,27 +213,32 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $em->persist($author);
                 $em->flush();
 
+                unset($author,$user_entity,$usercheck);
 
-                $output->writeln('<info>User: ' . $i . '/' . $users_count[0] . '</info>');
+                //$output->writeln('<info>User: ' . $i . '/' . $users_count[0] . '</info>');
 
                 $i++;
-
-                /*
-                 * Journal Issues
-                 */
-
-
-                /*
-                 * Issue Articles
-                 */
-
-
-                /*
-                 * Article Files
-                 */
-
+                $userProgress->advance();
+                //performance is suchs if i dont use em->clear.
+                $em->clear();
             }
 
+            /*
+                * Journal Issues
+                */
+
+
+            /*
+             * Issue Articles
+             */
+
+
+            /*
+             * Article Files
+             */
+
+            $articles = $connection->fetchAll("SELECT * FROM articles WHERE journal_id=$id");
+            var_dump($articles);exit;
             echo "\n=====================\n";
 
             $output->writeln('<info>Horayy</info>');
