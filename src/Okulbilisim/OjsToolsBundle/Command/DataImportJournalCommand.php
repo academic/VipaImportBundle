@@ -5,6 +5,8 @@ namespace Okulbilisim\OjsToolsBundle\Command;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Gedmo\Translatable\Entity\Repository\TranslationRepository;
+use Ojs\JournalBundle\Entity\ArticleFile;
+use Ojs\JournalBundle\Entity\File;
 use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\Institution;
@@ -164,7 +166,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $journal = $this->createJournal($journal_detail, $journal_raw);
             $output->writeln("<info>Journal created.</info>");
 
-            $this->connectJournalUsers($journal, $output,$id);
+            $this->connectJournalUsers($journal, $output, $id);
 
             $output->writeln("\nUsers added.");
             /*
@@ -190,74 +192,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
     }
 
-    private function saveArticleData($_article, Journal $journal)
-    {
-        $_article_settings = $this->connection->fetchAll("SELECT * FROM article_settings WHERE article_id={$_article['article_id']}");
-        $article = new Article();
-        $article_settings = [];
-        foreach ($_article_settings as $as) {
-            if ($as['locale'] == '') {
-                $article_settings['default'][$as['setting_name']] = $as['setting_value'];
-            } else {
-                $article_settings[$as['locale']][$as['setting_name']] = $as['setting_value'];
-            }
-        }
-
-
-        $article->setJournal($journal);
-        isset($article_settings['default']['pub-id::doi']) && $article->setDoi($article_settings['default']['pub-id::doi']);
-        if ($_article['pages']) {
-            $pages = explode('-', $_article['pages']);
-            isset($pages[0]) && $article->setFirstPage((int)$pages[0] == 0 && !empty($pages[0]) ? StringHelper::roman2int($pages[0]) : $pages[0]);
-            isset($pages[1]) && $article->setLastPage((int)$pages[1] == 0 && !empty($pages[1]) ? StringHelper::roman2int($pages[1]) : $pages[1]);
-
-        }
-        $username = $this->connection->fetchColumn("SELECT username FROM users WHERE user_id='{$_article['user_id']}'");
-
-        $user = $this->em->getRepository('OjsUserBundle:User')->findOneBy(['username' => $username]);
-
-        if ($user) {
-            $article->setSubmitterId($user->getId());
-        }
-        $article->setSubmissionDate(new \DateTime($_article['date_submitted']));
-        $article->setStatus($_article['status']); //@todo check
-        $article->setIsAnonymous($_article['hide_author'] ? true : false);
-
-        unset($article_settings['default']);
-
-        //find primary languages
-        if (count($article_settings) < 1) {
-            return false;
-        }
-
-        $sizeof = array_map(function ($a) {
-            return count($a);
-        }, $article_settings);
-        $defaultLocale = array_search(max($sizeof), $sizeof);
-
-        $article->setPrimaryLanguage($defaultLocale);
-
-        isset($article_settings[$defaultLocale]['title'])
-        && $article->setTitle($article_settings[$defaultLocale]['title']);
-        isset($article_settings[$defaultLocale]['abstract'])
-        && $article->setAbstract($article_settings[$defaultLocale]['abstract']);
-
-
-        unset($article_settings[$defaultLocale]);
-
-        foreach ($article_settings as $locale => $value) {
-            isset($value['title']) && $this->translationRepository
-                ->translate($article, 'title', $locale, $value['title']);
-            isset($value['abstract']) && $this->translationRepository
-                ->translate($article, 'abstract', $locale, $value['abstract']);
-            isset($value['subject']) && $this->translationRepository
-                ->translate($article, 'subjects', $locale, $value['subject']);
-        }
-
-
-        $this->em->persist($article);
-        $this->em->flush();
-    }
 
     protected function createJournal($journal_detail, $journal_raw)
     {
@@ -295,7 +229,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         return $journal;
     }
 
-    protected function connectJournalUsers(Journal $journal, $output,$old_journal_id)
+    protected function connectJournalUsers(Journal $journal, $output, $old_journal_id)
     {
         /*
              * Journal users
@@ -365,7 +299,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         return $user_entity;
     }
 
-    protected function addJournalRole( $user,$journal, $role_id)
+    protected function addJournalRole($user, $journal, $role_id)
     {
         $user_role = new UserJournalRole();
         $user_role->setUser($user);
@@ -413,10 +347,147 @@ class DataImportJournalCommand extends ContainerAwareCommand
         foreach ($articles as $_article) {
             /** @var Journal $journal */
             $journal = $this->em->find('OjsJournalBundle:Journal', $journal->getId());
-            $this->saveArticleData($_article, $journal);
+            $this->saveArticleData($_article, $journal, false);
             $this->em->clear();
             $articleProgress->advance();
         }
         $articleProgress->finish();
+
+    }
+
+    private function saveArticleData($_article, Journal $journal)
+    {
+        $_article_settings = $this->connection->fetchAll("SELECT * FROM article_settings WHERE article_id={$_article['article_id']}");
+        $article = new Article();
+        $article_settings = [];
+        /** groupped locally  */
+        foreach ($_article_settings as $as) {
+            if ($as['locale'] == '') {
+                $article_settings['default'][$as['setting_name']] = $as['setting_value'];
+            } else {
+                $article_settings[$as['locale']][$as['setting_name']] = $as['setting_value'];
+            }
+        }
+
+
+        $article->setJournal($journal);
+        isset($article_settings['default']['pub-id::doi']) && $article->setDoi($article_settings['default']['pub-id::doi']);
+
+
+        switch ($_article['status']) {
+            case 0:
+                $article->setStatus(0); //waiting
+                break;
+            case 1:
+                //@todo
+                $article->setStatus(-2); //unpublished
+                break;
+            case 3:
+                $article->setStatus(3); // published
+                break;
+            case 4:
+                //@todo
+                $article->setStatus(-3); //rejected
+                break;
+        }
+        if ($_article['pages']) {
+            $pages = explode('-', $_article['pages']);
+            isset($pages[0]) && $article->setFirstPage((int)$pages[0] == 0 && !empty($pages[0]) ? StringHelper::roman2int($pages[0]) : $pages[0]);
+            isset($pages[1]) && $article->setLastPage((int)$pages[1] == 0 && !empty($pages[1]) ? StringHelper::roman2int($pages[1]) : $pages[1]);
+
+        }
+
+        $username = $this->connection->fetchColumn("SELECT username FROM users WHERE user_id='{$_article['user_id']}'");
+        $user = $this->em->getRepository('OjsUserBundle:User')->findOneBy(['username' => $username]);
+
+        if ($user) {
+            $article->setSubmitterId($user->getId());
+        }
+
+        isset($_article['date_submitted']) && $article->setSubmissionDate(new \DateTime($_article['date_submitted']));
+        isset($_article['hide_author']) && $article->setIsAnonymous($_article['hide_author'] ? true : false);
+
+        unset($article_settings['default']);
+
+        if (count($article_settings) < 1) {
+            return false;
+        }
+
+        //find primary languages
+        $sizeof = array_map(function ($a) {
+            return count($a);
+        }, $article_settings);
+        $defaultLocale = array_search(max($sizeof), $sizeof);
+
+        $article->setPrimaryLanguage($defaultLocale);
+
+        isset($article_settings[$defaultLocale]['title'])
+        && $article->setTitle($article_settings[$defaultLocale]['title']);
+        isset($article_settings[$defaultLocale]['abstract'])
+        && $article->setAbstract($article_settings[$defaultLocale]['abstract']);
+
+
+        unset($article_settings[$defaultLocale]);
+
+        // insert other languages data
+        foreach ($article_settings as $locale => $value) {
+            isset($value['title']) && $this->translationRepository
+                ->translate($article, 'title', $locale, $value['title']);
+            isset($value['abstract']) && $this->translationRepository
+                ->translate($article, 'abstract', $locale, $value['abstract']);
+            isset($value['subject']) && $this->translationRepository
+                ->translate($article, 'subjects', $locale, $value['subject']);
+        }
+
+
+        $this->em->persist($article);
+
+        /** Article files */
+        $this->saveArticleFiles($article, $_article['article_id']);
+        $this->em->flush();
+    }
+
+
+    public function saveArticleFiles(Article $article, $old_article_id)
+    {
+        $article_galleys = $this->connection->fetchAll("SELECT ag.* FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
+
+        $articleFilesProgress = new ProgressBar($this->output,count($article_galleys));
+        $articleFilesProgress->setMessage("Adding articles galleys and files");
+        $articleFilesProgress->setFormat('<info>%message%</info> <comment;options=bold>%current%/%max%</comment;options=bold> <fg=white;bg=black>[%bar%]</fg=white;bg=black> %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%');
+        $articleFilesProgress->setBarCharacter("≈");
+        $articleFilesProgress->setProgressCharacter("∂");
+        $articleFilesProgress->setEmptyBarCharacter(" ");
+        $articleFilesProgress->start();
+        foreach ($article_galleys as $galley) {
+            if(!$article)
+                $article = $this->em->find('OjsJournalBundle:Article',$article->getId());
+            $article_file = $this->connection->fetchAll("SELECT f.* FROM article_files f WHERE f.file_id={$galley['file_id']}");
+            if($article_file){
+                $article_file=$article_file[0];
+            }
+            $file = new File();
+            $file->setName($article_file['file_name']);
+            $file->setMimeType($article_file['file_type']);
+            $file->setSize($article_file['file_size']);
+            $version = $article_file['source_revision'];
+            $this->em->persist($file);
+
+            $article_file = new ArticleFile();
+            $article_file->setTitle($galley['label']);
+            $article_file->setLangCode($galley['locale']);
+            $article_file->setFile($file);
+            $article_file->setArticle($article);
+            $article_file->setType(0);
+            $article_file->setVersion($version?$version:1);
+
+            $this->em->persist($article_file);
+            $this->em->flush();
+            $articleFilesProgress->advance();
+            $this->em->clear();
+        }
+        $articleFilesProgress->finish();
+        $this->output->writeln("\nArticles galleys and files added.");
+
     }
 }
