@@ -2,6 +2,7 @@
 
 namespace Okulbilisim\OjsToolsBundle\Command;
 
+use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\Institution;
 use Okulbilisim\LocationBundle\Entity\Country;
@@ -158,91 +159,88 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $userProgress->setProgressCharacter("∂");
             $userProgress->setEmptyBarCharacter(" ");
             $userProgress->start();
-            if (true === false) {
-                foreach ($journal_users as $journal_user) {
-                    // all relations disconnecting if i use em->clear. I refind journal for fix this issue
-                    $journal = $em->find('OjsJournalBundle:Journal', $journal->getId());
-                    $user = $connection->fetchAll('select * from users where user_id=' . $journal_user['user_id'] . ' limit 1;')[0];
+            foreach ($journal_users as $journal_user) {
+                // all relations disconnecting if i use em->clear. I refind journal for fix this issue
+                $journal = $em->find('OjsJournalBundle:Journal', $journal->getId());
+                $user = $connection->fetchAll('select * from users where user_id=' . $journal_user['user_id'] . ' limit 1;')[0];
 
-                    $usercheck = $em->getRepository('OjsUserBundle:User')->findOneBy(['username' => $user['username']]);
-                    $user_entity = $usercheck ? $usercheck : new User();
-                    isset($user['first_name']) && $user_entity->setFirstName($user['first_name']);
-                    isset($user['middle_name']) && $user_entity->setFirstName($user_entity->getFirstName() . ' ' . $user['middle_name']);
-                    isset($user['username']) && $user_entity->setUsername($user['username']);
-                    isset($user['last_name']) && $user_entity->setLastName($user['last_name']);
-                    isset($user['email']) && $user_entity->setEmail($user['email']);
-                    isset($user['gender']) && $user_entity->setGender($user['gender']);
-                    isset($user['initials']) && $user_entity->setInitials($user['initials']);
-                    isset($user['url']) && $user_entity->setUrl($user['url']);
-                    isset($user['phone']) && $user_entity->setPhone($user['phone']);
-                    isset($user['fax']) && $user_entity->setFax($user['fax']);
-                    isset($user['mailing_address']) && $user_entity->setAddress($user['mailing_address']);
-                    isset($user['billing_address']) && $user_entity->setBillingAddress($user['billing_address']);
-                    isset($user['billing_address']) && $user_entity->setBillingAddress($user['billing_address']);
-                    isset($user['locales']) && $user_entity->setLocales(serialize(explode(':', $user['locales'])));
-                    $user_entity->generateApiKey();
-                    isset($user['salutation']) && $user_entity->setTitle($user['salutation']);
-                    if ($user['disabled'] == 1) {
-                        $user_entity->setIsActive(false);
-                        $user_entity->setDisableReason(isset($user['disable_reason']) && $user['disable_reason']);
-                        $user_entity->setStatus(0);
-                    }
-                    $country = $em->getRepository('OkulbilisimLocationBundle:Country')->findOneBy(['iso_code' => $user['country']]);
-                    if ($country instanceof Country)
-                        $user_entity->setCountry($country);
-                    $em->persist($user_entity);
-                    $em->flush();
-                    /*
-                     * User roles with journal
-                     */
-                    $userProgress->finish();
-                    unset($user);
-                    $user_role = new UserJournalRole();
-                    $user_role->setUser($user_entity);
-
-                    $user_role->setJournal($journal);
-                    $role = $em->getRepository('OjsUserBundle:Role')->findOneBy([
-                        'role' => $this->rolesMap[$this->roles[$journal_user['role_id']]]]);
-                    $user_role->setRole($role);
-                    $em->persist($user_role);
-                    $em->flush();
-                    unset($user_role);
-
-                    /*
-                     * Add author data
-                     */
-
-                    $author = new Author();
-                    $author->setFirstName($user_entity->getFirstName());
-                    $author->setLastName($user_entity->getLastName());
-                    //$author->setMiddleName($user['middle_name']);
-                    $author->setEmail($user_entity->getEmail());
-                    $author->setInitials($user_entity->getInitials());
-                    $author->setTitle($user_entity->getTitle());
-                    $author->setAddress($user_entity->getAddress());
-                    $author->setBillingAddress($user_entity->getBillingAddress());
-                    $author->setLocales($user_entity->getLocales());
-                    $author->setUrl($user_entity->getUrl());
-                    $author->setPhone($user_entity->getPhone());
-
-                    if ($country instanceof Country)
-                        $author->setCountry($country);
-                    $author->setUser($user_entity);
-                    $em->persist($author);
-                    $em->flush();
-
-                    unset($author, $user_entity, $usercheck);
-
-                    //$output->writeln('<info>User: ' . $i . '/' . $users_count[0] . '</info>');
-
-                    $i++;
-                    $userProgress->advance();
-                    //performance is suchs if i dont use em->clear.
-                    $em->clear();
+                $usercheck = $em->getRepository('OjsUserBundle:User')->findOneBy(['username' => $user['username']]);
+                $user_entity = $usercheck ? $usercheck : new User();
+                isset($user['first_name']) && $user_entity->setFirstName($user['first_name']);
+                isset($user['middle_name']) && $user_entity->setFirstName($user_entity->getFirstName() . ' ' . $user['middle_name']);
+                isset($user['username']) && $user_entity->setUsername($user['username']);
+                isset($user['last_name']) && $user_entity->setLastName($user['last_name']);
+                isset($user['email']) && $user_entity->setEmail($user['email']);
+                isset($user['gender']) && $user_entity->setGender($user['gender']);
+                isset($user['initials']) && $user_entity->setInitials($user['initials']);
+                isset($user['url']) && $user_entity->setUrl($user['url']);
+                isset($user['phone']) && $user_entity->setPhone($user['phone']);
+                isset($user['fax']) && $user_entity->setFax($user['fax']);
+                isset($user['mailing_address']) && $user_entity->setAddress($user['mailing_address']);
+                isset($user['billing_address']) && $user_entity->setBillingAddress($user['billing_address']);
+                isset($user['billing_address']) && $user_entity->setBillingAddress($user['billing_address']);
+                isset($user['locales']) && $user_entity->setLocales(serialize(explode(':', $user['locales'])));
+                $user_entity->generateApiKey();
+                isset($user['salutation']) && $user_entity->setTitle($user['salutation']);
+                if ($user['disabled'] == 1) {
+                    $user_entity->setIsActive(false);
+                    $user_entity->setDisableReason(isset($user['disable_reason']) && $user['disable_reason']);
+                    $user_entity->setStatus(0);
                 }
+                $country = $em->getRepository('OkulbilisimLocationBundle:Country')->findOneBy(['iso_code' => $user['country']]);
+                if ($country instanceof Country)
+                    $user_entity->setCountry($country);
+                $em->persist($user_entity);
+                $em->flush();
+                /*
+                 * User roles with journal
+                 */
+                unset($user);
+                $user_role = new UserJournalRole();
+                $user_role->setUser($user_entity);
 
+                $user_role->setJournal($journal);
+                $role = $em->getRepository('OjsUserBundle:Role')->findOneBy([
+                    'role' => $this->rolesMap[$this->roles[$journal_user['role_id']]]]);
+                $user_role->setRole($role);
+                $em->persist($user_role);
+                $em->flush();
+                unset($user_role);
+
+                /*
+                 * Add author data
+                 */
+
+                $author = new Author();
+                $author->setFirstName($user_entity->getFirstName());
+                $author->setLastName($user_entity->getLastName());
+                //$author->setMiddleName($user['middle_name']);
+                $author->setEmail($user_entity->getEmail());
+                $author->setInitials($user_entity->getInitials());
+                $author->setTitle($user_entity->getTitle());
+                $author->setAddress($user_entity->getAddress());
+                $author->setBillingAddress($user_entity->getBillingAddress());
+                $author->setLocales($user_entity->getLocales());
+                $author->setUrl($user_entity->getUrl());
+                $author->setPhone($user_entity->getPhone());
+
+                if ($country instanceof Country)
+                    $author->setCountry($country);
+                $author->setUser($user_entity);
+                $em->persist($author);
+                $em->flush();
+
+                unset($author, $user_entity, $usercheck);
+
+                //$output->writeln('<info>User: ' . $i . '/' . $users_count[0] . '</info>');
+
+                $i++;
+                $userProgress->advance();
+                //performance is suchs if i dont use em->clear.
+                $em->clear();
             }
             $userProgress->finish();
+            $output->writeln("\nUsers added.");
             /*
                 * Journal Issues
                 */
@@ -283,24 +281,31 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
                 $article->setJournal($journal);
                 isset($article_settings['default']['pub-id::doi']) && $article->setDoi($article_settings['default']['pub-id::doi']);
-                $pages = explode('-', $_article['pages']);
-                isset($pages[0]) && $article->setFirstPage($pages[0]);
-                isset($pages[1]) && $article->setLastPage($pages[1]);
+                if ($_article['pages']) {
+                    $pages = explode('-', $_article['pages']);
+                    isset($pages[0]) && $article->setFirstPage((int)$pages[0] == 0 && !empty($pages[0]) ? StringHelper::roman2int($pages[0]) : $pages[0]);
+                    isset($pages[1]) && $article->setLastPage((int)$pages[1] == 0 && !empty($pages[1]) ? StringHelper::roman2int($pages[1]) : $pages[1]);
 
+                }
                 $username = $connection->fetchColumn("SELECT username FROM users WHERE user_id='{$_article['user_id']}'");
 
-                $user = $em->getRepository('OjsUserBundle:User')->findOneBy(['username'=>$username]);
+                $user = $em->getRepository('OjsUserBundle:User')->findOneBy(['username' => $username]);
 
-                if($user){
+                if ($user) {
                     $article->setSubmitterId($user->getId());
                 }
                 $article->setSubmissionDate(new \DateTime($_article['date_submitted']));
                 $article->setStatus($_article['status']); //@todo check
-                $article->setIsAnonymous($_article['hide_author']?true:false);
+                $article->setIsAnonymous($_article['hide_author'] ? true : false);
 
                 unset($article_settings['default']);
 
                 //find primary languages
+                if (count($article_settings) < 1) {
+                    $articleProgress->advance();
+                    continue;
+                }
+
                 $sizeof = array_map(function ($a) {
                     return count($a);
                 }, $article_settings);
@@ -313,6 +318,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 isset($article_settings[$defaultLocale]['abstract'])
                 && $article->setAbstract($article_settings[$defaultLocale]['abstract']);
 
+
                 unset($article_settings[$defaultLocale]);
 
                 foreach ($article_settings as $locale => $value) {
@@ -320,14 +326,17 @@ class DataImportJournalCommand extends ContainerAwareCommand
                         ->translate($article, 'title', $locale, $value['title']);
                     isset($value['abstract']) && $translationRepository
                         ->translate($article, 'abstract', $locale, $value['abstract']);
+                    isset($value['subject']) && $translationRepository
+                        ->translate($article, 'subjects', $locale, $value['subject']);
                 }
+
 
                 $articleProgress->advance();
                 $em->persist($article);
                 $em->flush();
                 $em->clear();
             }
-
+            $articleProgress->finish();
             echo "\n=====================\n";
 
             $output->writeln('<info>Horayy</info>');
