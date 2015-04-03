@@ -4,7 +4,9 @@ namespace Okulbilisim\OjsToolsBundle\Command;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityNotFoundException;
 use Gedmo\Translatable\Entity\Repository\TranslationRepository;
+use Ojs\Common\Params\ArticleFileParams;
 use Ojs\JournalBundle\Entity\ArticleFile;
 use Ojs\JournalBundle\Entity\File;
 use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
@@ -24,6 +26,7 @@ use Ojs\UserBundle\Entity\User;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\Author;
 use Ojs\UserBundle\Entity\UserJournalRole;
+use Symfony\Component\Finder\Exception\ShellCommandFailureException;
 
 /**
  * Class DataImportJournalCommand
@@ -150,6 +153,11 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 from
                   journal_settings where journal_id = {$id} ");
 
+            if(!$journal_details)
+            {
+                $this->output->write("<error>Entity was not found.</error>");
+                exit;
+            }
             /**
              * I remake array groupped by locale
              */
@@ -195,6 +203,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
     protected function createJournal($journal_detail, $journal_raw)
     {
+        if(!$journal_detail)
+            return null;
         $journal = new Journal();
         isset($journal_detail['title']) && $journal->setTitle($journal_detail['title']);
         isset($journal_detail['abbreviation']) && $journal->setTitleAbbr($journal_detail['abbreviation']);
@@ -451,21 +461,15 @@ class DataImportJournalCommand extends ContainerAwareCommand
     public function saveArticleFiles(Article $article, $old_article_id)
     {
         $article_galleys = $this->connection->fetchAll("SELECT ag.* FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
-
-        $articleFilesProgress = new ProgressBar($this->output,count($article_galleys));
-        $articleFilesProgress->setMessage("Adding articles galleys and files");
-        $articleFilesProgress->setFormat('<info>%message%</info> <comment;options=bold>%current%/%max%</comment;options=bold> <fg=white;bg=black>[%bar%]</fg=white;bg=black> %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%');
-        $articleFilesProgress->setBarCharacter("≈");
-        $articleFilesProgress->setProgressCharacter("∂");
-        $articleFilesProgress->setEmptyBarCharacter(" ");
-        $articleFilesProgress->start();
         foreach ($article_galleys as $galley) {
-            if(!$article)
-                $article = $this->em->find('OjsJournalBundle:Article',$article->getId());
+            if (!$article)
+                $article = $this->em->find('OjsJournalBundle:Article', $article->getId());
             $article_file = $this->connection->fetchAll("SELECT f.* FROM article_files f WHERE f.file_id={$galley['file_id']}");
-            if($article_file){
-                $article_file=$article_file[0];
+            if ($article_file) {
+                $article_file = $article_file[0];
             }
+            if(!$article_file)
+                continue;
             $file = new File();
             $file->setName($article_file['file_name']);
             $file->setMimeType($article_file['file_type']);
@@ -479,15 +483,83 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $article_file->setFile($file);
             $article_file->setArticle($article);
             $article_file->setType(0);
-            $article_file->setVersion($version?$version:1);
+            $article_file->setVersion($version ? $version : 1);
 
             $this->em->persist($article_file);
             $this->em->flush();
-            $articleFilesProgress->advance();
             $this->em->clear();
         }
-        $articleFilesProgress->finish();
-        $this->output->writeln("\nArticles galleys and files added.");
 
+        $article_supplementary_files = $this->connection->fetchAll("SELECT asp.* FROM article_supplementary_files asp WHERE asp.article_id={$old_article_id}");
+        foreach ($article_supplementary_files as $sup_file) {
+
+            $sup_file = $this->connection->fetchAll("SELECT f.* FROM article_files f WHERE f.file_id={$sup_file['file_id']}");
+            if(!isset($sup_file['supp_id'])){
+                continue;
+            }
+            $sup_settings = $this->connection->fetchAll("SELECT s.* FROM article_supp_file_settings s WHERE s.supp_id={$sup_file['supp_id']}");
+            $supp_settings = [];
+            /** groupped locally  */
+            foreach ($sup_settings as $as) {
+                if ($as['locale'] == '') {
+                    $supp_settings['default'][$as['setting_name']] = $as['setting_value'];
+                } else {
+                    $supp_settings[$as['locale']][$as['setting_name']] = $as['setting_value'];
+                }
+            }
+
+            //find primary languages
+            $sizeof = array_map(function ($a) {
+                return count($a);
+            }, $supp_settings);
+            $defaultLocale = array_search(max($sizeof), $sizeof);
+
+            $file = new File();
+            $file->setName($sup_settings[$defaultLocale]['title']);
+            $file->setMimeType($sup_file['file_type']);
+            $file->setSize($sup_file['file_size']);
+            $version = $sup_file['source_revision'];
+            $this->em->persist($file);
+
+            $article_file = new ArticleFile();
+            $article_file->setTitle($sup_settings[$defaultLocale]['title']);
+            $article_file->setLangCode($defaultLocale);
+            $article_file->setFile($file);
+            $article_file->setArticle($article);
+            $article_file->setType($this->supplementary_files($sup_file['type']));
+            $article_file->setVersion($version ? $version : 1);
+            $this->em->persist($article_file);
+
+            $this->em->flush();
+        }
+
+    }
+
+    protected function supplementary_files($type)
+    {
+        $typeMap = [
+            'Ara?t?rma arac?' => ArticleFileParams::SUPPLEMENTARY_FILE,
+            'Araştırma aracı' => ArticleFileParams::SUPPLEMENTARY_FILE,
+            'Araştırma araçları' => ArticleFileParams::SUPPLEMENTARY_FILE,
+            'Araştırma Enstürmanları' => ArticleFileParams::SUPPLEMENTARY_FILE,
+            'Araştırma Materyalleri' => ArticleFileParams::RESEARCH_METARIALS,
+            'Araştırma sonuçları' => ArticleFileParams::RESEARCH_RESULTS,
+            'Data Analysis' => ArticleFileParams::DATA_ANALYSIS,
+            'Data Set' => ArticleFileParams::DATA_SET,
+            'Kaynak metin' => ArticleFileParams::SOURCE_TEXT,
+            'Kopya / Suret' => ArticleFileParams::SUPPLEMENTARY_FILE,
+            'Research Instrument' => ArticleFileParams::SUPPLEMENTARY_FILE,
+            'Research Materials' => ArticleFileParams::RESEARCH_METARIALS,
+            'Research Results' => ArticleFileParams::RESEARCH_RESULTS,
+            'Source Text' => ArticleFileParams::FULL_TEXT,
+            'Suretler'=>ArticleFileParams::SUPPLEMENTARY_FILE,
+            'Transcripts' => ArticleFileParams::TRANSCRIPTS,
+            'Veri analizi' => ArticleFileParams::SUPPLEMENTARY_FILE,
+            'Veri Seti' => ArticleFileParams::SUPPLEMENTARY_FILE,
+            'Veri takımı' => ArticleFileParams::SUPPLEMENTARY_FILE,
+        ];
+        if(!$type)
+            return false;
+        return $typeMap[$type];
     }
 }
