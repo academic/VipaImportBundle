@@ -8,6 +8,8 @@ use Doctrine\ORM\EntityNotFoundException;
 use Gedmo\Translatable\Entity\Repository\TranslationRepository;
 use Ojs\Common\Params\ArticleFileParams;
 use Ojs\JournalBundle\Entity\ArticleFile;
+use Ojs\JournalBundle\Entity\Citation;
+use Ojs\JournalBundle\Entity\CitationSetting;
 use Ojs\JournalBundle\Entity\File;
 use Ojs\JournalBundle\Entity\Issue;
 use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
@@ -491,6 +493,34 @@ class DataImportJournalCommand extends ContainerAwareCommand
         && $article->setTitle($article_settings[$defaultLocale]['title']);
         isset($article_settings[$defaultLocale]['abstract'])
         && $article->setAbstract($article_settings[$defaultLocale]['abstract']);
+        $this->em->persist($article);
+
+        $article_citations = $this->connection->fetchAll("SELECT * FROM citations WHERE assoc_type=257 AND assoc_id={$_article['article_id']}");
+        $i = 1;
+        foreach ($article_citations as $ac) {
+            if(empty($ac['raw_citation']))
+                continue;
+            $citation = new Citation();
+            $citation->setRaw($ac['raw_citation']);
+            $citation->addArticle($article);
+            //$citation->setType(); //type not found :\
+            $citation->setOrderNum($i);
+            $this->em->persist($citation);
+
+            $citationSettingOld = $this->connection->fetchAll("SELECT * FROM citation_settings WHERE citation_id={$ac['citation_id']}");
+            foreach ($citationSettingOld as $as) {
+                $citationSetting = new CitationSetting();
+                $citationSetting->setCitation($citation);
+                $citationSetting->setValue($as['setting_value']);
+                $citationSetting->setSetting(str_replace('nlm30:','',$as['setting_name']));
+                $this->em->persist($citationSetting);
+                $citation->addSetting($citationSetting);
+            }
+            $this->em->persist($citation);
+            $this->em->flush();
+            $i++;
+        }
+        unset($i);
 
 
         unset($article_settings[$defaultLocale]);
@@ -691,15 +721,15 @@ class DataImportJournalCommand extends ContainerAwareCommand
             return $checkIssue;
         }
         $issue = new Issue();
-        isset($issue_settings[$defaultLocale]['title'])&&$issue->setTitle($issue_settings[$defaultLocale]['title']);
-        isset($issue_settings[$defaultLocale]['description'])&&$issue->setDescription($issue_settings[$defaultLocale]['description']);
+        isset($issue_settings[$defaultLocale]['title']) && $issue->setTitle($issue_settings[$defaultLocale]['title']);
+        isset($issue_settings[$defaultLocale]['description']) && $issue->setDescription($issue_settings[$defaultLocale]['description']);
         $issue->setJournal($journal);
-        isset($issueData['date_published'])&&$issue->setDatePublished((new \DateTime($issueData['date_published'])));
+        isset($issueData['date_published']) && $issue->setDatePublished((new \DateTime($issueData['date_published'])));
         $issue->setVolume($issueData['volume']);
         $issue->setYear($issueData['year']);
         $issue->setSpecial(0);
         $issue->setNumber($issueData['number']);
-        isset($issue_settings[$defaultLocale]['fileName'])&&$issue->setCover($issue_settings[$defaultLocale]['fileName']);
+        isset($issue_settings[$defaultLocale]['fileName']) && $issue->setCover($issue_settings[$defaultLocale]['fileName']);
         $this->em->persist($issue);
 
         $this->saveIssueFiles($issue, $issueData['issue_id']);
