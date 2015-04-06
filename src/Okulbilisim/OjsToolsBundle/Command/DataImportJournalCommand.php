@@ -9,6 +9,7 @@ use Gedmo\Translatable\Entity\Repository\TranslationRepository;
 use Ojs\Common\Params\ArticleFileParams;
 use Ojs\JournalBundle\Entity\ArticleFile;
 use Ojs\JournalBundle\Entity\File;
+use Ojs\JournalBundle\Entity\Issue;
 use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\Institution;
@@ -92,6 +93,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
     /** @var  TranslationRepository */
     protected $translationRepository;
 
+
+    const DEFAULT_INSTITUTION = 1;
+
     /**
      * Command configuration.
      */
@@ -115,6 +119,11 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null|void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $connectionFactory = $this->getContainer()->get('doctrine.dbal.connection_factory');
@@ -134,7 +143,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
         // Journal Old ID
         $id = $input->getArgument('JournalId');
 
-
         try {
 
             /**
@@ -153,8 +161,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 from
                   journal_settings where journal_id = {$id} ");
 
-            if(!$journal_details)
-            {
+            if (!$journal_details) {
                 $this->output->write("<error>Entity was not found.</error>");
                 exit;
             }
@@ -177,6 +184,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->connectJournalUsers($journal, $output, $id);
 
             $output->writeln("\nUsers added.");
+
             /*
             * Journal Issues
             */
@@ -201,9 +209,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
     }
 
 
+    /**
+     * @param $journal_detail
+     * @param $journal_raw
+     * @return Journal
+     */
     protected function createJournal($journal_detail, $journal_raw)
     {
-        if(!$journal_detail)
+        if (!$journal_detail)
             return null;
         $journal = new Journal();
         isset($journal_detail['title']) && $journal->setTitle($journal_detail['title']);
@@ -227,11 +240,25 @@ class DataImportJournalCommand extends ContainerAwareCommand
              * Institution
              */
             /** @var Institution $institution */
-            $institution = $this->em->getRepository('OjsJournalBundle:Institution')->findOneBy(['name' => $journal_detail['publisherInstitution']]);
+            $institution = $this->em->getRepository('OjsJournalBundle:Institution')
+                ->findOneBy(['name' => $journal_detail['publisherInstitution']]);
             if ($institution) {
+                $journal->setInstitution($institution);
+            } else {
+                $institution = $this->createInstitution($journal_detail);
                 $journal->setInstitution($institution);
             }
         }
+
+
+        /**
+         * as journalsettings
+         * crossrefPassword
+         * crossrefUsername
+         * doiPrefix
+         * doiSuffix
+         * doiSuffixPattern
+         */
 
         $this->em->persist($journal);
         $this->em->flush();
@@ -239,6 +266,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
         return $journal;
     }
 
+    /**
+     * @param Journal $journal
+     * @param $output
+     * @param $old_journal_id
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\TransactionRequiredException
+     */
     protected function connectJournalUsers(Journal $journal, $output, $old_journal_id)
     {
         /*
@@ -268,12 +303,16 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->saveAuthorData($user);
             $userProgress->advance();
 
-            //performance is suchs if i dont use em->clear.
+            //performance is sucks if i dont use em->clear.
             $this->em->clear();
         }
         $userProgress->finish();
     }
 
+    /**
+     * @param $journal_user
+     * @return null|object|User
+     */
     protected function createUser($journal_user)
     {
         $user = $this->connection->fetchAll('SELECT * FROM users WHERE user_id=' . $journal_user['user_id'] . ' LIMIT 1;')[0];
@@ -309,7 +348,12 @@ class DataImportJournalCommand extends ContainerAwareCommand
         return $user_entity;
     }
 
-    protected function addJournalRole($user, $journal, $role_id)
+    /**
+     * @param $user
+     * @param $journal
+     * @param $role_id
+     */
+    protected function addJournalRole(User $user, Journal $journal, $role_id)
     {
         $user_role = new UserJournalRole();
         $user_role->setUser($user);
@@ -322,7 +366,11 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em->flush();
     }
 
-    protected function saveAuthorData($user)
+    /**
+     * @param User $user
+     * @return Author
+     */
+    protected function saveAuthorData(User $user)
     {
         $author = new Author();
         $author->setFirstName($user->getFirstName());
@@ -343,6 +391,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
         return $author;
     }
 
+    /**
+     * @param $output
+     * @param Journal $journal
+     * @param $old_journal_id
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\TransactionRequiredException
+     */
     protected function createArticles($output, Journal $journal, $old_journal_id)
     {
         $articles = $this->connection->fetchAll("SELECT * FROM articles WHERE journal_id=$old_journal_id");
@@ -365,6 +421,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
     }
 
+    /**
+     * @param array $_article
+     * @param Journal $journal
+     */
     private function saveArticleData($_article, Journal $journal)
     {
         $_article_settings = $this->connection->fetchAll("SELECT * FROM article_settings WHERE article_id={$_article['article_id']}");
@@ -423,11 +483,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             return false;
         }
 
-        //find primary languages
-        $sizeof = array_map(function ($a) {
-            return count($a);
-        }, $article_settings);
-        $defaultLocale = array_search(max($sizeof), $sizeof);
+        $defaultLocale = $this->defaultLocale($article_settings);
 
         $article->setPrimaryLanguage($defaultLocale);
 
@@ -454,10 +510,30 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         /** Article files */
         $this->saveArticleFiles($article, $_article['article_id']);
+
+        $published_article = $this->connection->fetchAssoc("SELECT * FROM published_articles WHERE article_id={$_article['article_id']}");
+        if ($published_article) {
+            //have an issue
+            $issue = $this->connection->fetchAssoc("SELECT * FROM issues WHERE issue_id={$published_article['issue_id']}");
+            if ($issue) {
+                $issue = $this->saveIssue($issue, $journal, $article);
+                $article->setIssue($issue);
+            }
+        }
+        $this->em->persist($article);
         $this->em->flush();
+        $this->em->clear();
+
     }
 
 
+    /**
+     * @param Article $article
+     * @param $old_article_id
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\TransactionRequiredException
+     */
     public function saveArticleFiles(Article $article, $old_article_id)
     {
         $article_galleys = $this->connection->fetchAll("SELECT ag.* FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
@@ -468,7 +544,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             if ($article_file) {
                 $article_file = $article_file[0];
             }
-            if(!$article_file)
+            if (!$article_file)
                 continue;
             $file = new File();
             $file->setName($article_file['file_name']);
@@ -487,14 +563,13 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $this->em->persist($article_file);
             $this->em->flush();
-            $this->em->clear();
         }
 
         $article_supplementary_files = $this->connection->fetchAll("SELECT asp.* FROM article_supplementary_files asp WHERE asp.article_id={$old_article_id}");
         foreach ($article_supplementary_files as $sup_file) {
 
             $sup_file = $this->connection->fetchAll("SELECT f.* FROM article_files f WHERE f.file_id={$sup_file['file_id']}");
-            if(!isset($sup_file['supp_id'])){
+            if (!isset($sup_file['supp_id'])) {
                 continue;
             }
             $sup_settings = $this->connection->fetchAll("SELECT s.* FROM article_supp_file_settings s WHERE s.supp_id={$sup_file['supp_id']}");
@@ -508,11 +583,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 }
             }
 
-            //find primary languages
-            $sizeof = array_map(function ($a) {
-                return count($a);
-            }, $supp_settings);
-            $defaultLocale = array_search(max($sizeof), $sizeof);
+            $defaultLocale = $this->defaultLocale($supp_settings);
 
             $file = new File();
             $file->setName($sup_settings[$defaultLocale]['title']);
@@ -528,6 +599,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $article_file->setArticle($article);
             $article_file->setType($this->supplementary_files($sup_file['type']));
             $article_file->setVersion($version ? $version : 1);
+            $article_file->setKeywords($sup_settings[$defaultLocale]['subject']);
             $this->em->persist($article_file);
 
             $this->em->flush();
@@ -535,6 +607,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
     }
 
+    /**
+     * @param $type
+     * @return bool
+     */
     protected function supplementary_files($type)
     {
         $typeMap = [
@@ -552,14 +628,103 @@ class DataImportJournalCommand extends ContainerAwareCommand
             'Research Materials' => ArticleFileParams::RESEARCH_METARIALS,
             'Research Results' => ArticleFileParams::RESEARCH_RESULTS,
             'Source Text' => ArticleFileParams::FULL_TEXT,
-            'Suretler'=>ArticleFileParams::SUPPLEMENTARY_FILE,
+            'Suretler' => ArticleFileParams::SUPPLEMENTARY_FILE,
             'Transcripts' => ArticleFileParams::TRANSCRIPTS,
             'Veri analizi' => ArticleFileParams::SUPPLEMENTARY_FILE,
             'Veri Seti' => ArticleFileParams::SUPPLEMENTARY_FILE,
             'Veri takımı' => ArticleFileParams::SUPPLEMENTARY_FILE,
         ];
-        if(!$type)
+        if (!$type)
             return false;
         return $typeMap[$type];
+    }
+
+    /**
+     * @param $data
+     * @return bool|\Doctrine\Common\Proxy\Proxy|object|Institution
+     * @throws \Doctrine\ORM\ORMException
+     */
+    protected function createInstitution($data)
+    {
+        if (!isset($data['publisherInstitution'])) {
+            return $this->em->getReference("OjsJournalBundle:Institution", 1);
+        }
+        $institution = new Institution();
+        $institution->setName($data['publisherInstitution']);
+        $institution->setUrl($data['publisherUrl']);
+        $this->em->persist($institution);
+        $this->em->flush();
+        return $institution;
+    }
+
+    /**
+     * @param array $issueData
+     * @param Journal $journal
+     * @param Article $article
+     * @return Issue
+     */
+    protected function saveIssue(array $issueData, Journal $journal, Article $article)
+    {
+
+        $issue_settings_ = $this->connection->fetchAll("SELECT * FROM issue_settings WHERE issue_id={$issueData['issue_id']}");
+        $issue_settings = [];
+        /** groupped locally  */
+        foreach ($issue_settings_ as $as) {
+            if ($as['locale'] == '') {
+                $issue_settings['default'][$as['setting_name']] = $as['setting_value'];
+            } else {
+                $issue_settings[$as['locale']][$as['setting_name']] = $as['setting_value'];
+            }
+        }
+
+        $defaultLocale = $this->defaultLocale($issue_settings);
+        $checkIssue = $this->em->getRepository("OjsJournalBundle:Issue")->findOneBy([
+            'number' => $issueData['number'],
+            'year' => $issueData['year'],
+            'volume' => $issueData['volume'],
+            'title' => $issue_settings[$defaultLocale]['title'],
+            'journal' => $journal
+        ]);
+        if ($checkIssue) {
+            $checkIssue->addArticle($article);
+            $this->em->persist($checkIssue);
+            return $checkIssue;
+        }
+        $issue = new Issue();
+        isset($issue_settings[$defaultLocale]['title'])&&$issue->setTitle($issue_settings[$defaultLocale]['title']);
+        isset($issue_settings[$defaultLocale]['description'])&&$issue->setDescription($issue_settings[$defaultLocale]['description']);
+        $issue->setJournal($journal);
+        isset($issueData['date_published'])&&$issue->setDatePublished((new \DateTime($issueData['date_published'])));
+        $issue->setVolume($issueData['volume']);
+        $issue->setYear($issueData['year']);
+        $issue->setSpecial(0);
+        $issue->setNumber($issueData['number']);
+        isset($issue_settings[$defaultLocale]['fileName'])&&$issue->setCover($issue_settings[$defaultLocale]['fileName']);
+        $this->em->persist($issue);
+
+        $this->saveIssueFiles($issue, $issueData['issue_id']);
+        $issue->addArticle($article);
+        return $issue;
+    }
+
+    protected function saveIssueFiles(Issue $issue, $old_issue_id)
+    {
+        //$galleys = $this->connection->fetchAll("SELECT * FROM issue_files WHERE issue_id={$old_issue_id}");
+        // where is issue files ?
+        return true;
+    }
+
+    /**
+     * @param $data
+     * @return mixed
+     */
+    public function defaultLocale($data)
+    {
+        //find primary languages
+        $sizeof = array_map(function ($a) {
+            return count($a);
+        }, $data);
+
+        return array_search(max($sizeof), $sizeof);
     }
 }
