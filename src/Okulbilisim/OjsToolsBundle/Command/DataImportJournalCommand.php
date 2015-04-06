@@ -149,10 +149,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             /**
              * @var array $journal_raw Journal main data.
-             * Its contain `journal_id`,`path`,`seq`,`primary_locale`,`enabled` fields
+             * Its contain path
              */
-            $journal_raw = $this->connection->fetchAll("SELECT * FROM journals where journal_id={$id} limit 1;");
-
+            $journal_raw = $this->connection->fetchAssoc("SELECT path FROM journals where journal_id={$id} limit 1;");
 
             /**
              * @var array $journal_details Journal detailed data as stored key-value.
@@ -176,30 +175,20 @@ class DataImportJournalCommand extends ContainerAwareCommand
                     $journal_detail[$_journal_detail['setting_name']] = $_journal_detail['setting_value'];
             }
 
+            unset($_journal_detail, $journal_details);
 
             /**
              * Journal Create
              */
-            $journal = $this->createJournal($journal_detail, $journal_raw);
+            $journal_id = $this->createJournal($journal_detail, $journal_raw);
             $output->writeln("<info>Journal created.</info>");
 
-            $this->connectJournalUsers($journal, $output, $id);
+            $this->connectJournalUsers($journal_id, $output, $id);
 
             $output->writeln("\nUsers added.");
 
-            /*
-            * Journal Issues
-            */
 
-            /*
-             * Issue Articles
-             */
-
-
-            /*
-             * Article Files
-             */
-            $this->createArticles($output, $journal, $id);
+            $this->createArticles($output, $journal_id, $id);
             $output->writeln("\nArticles added.");
 
 
@@ -214,7 +203,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
     /**
      * @param $journal_detail
      * @param $journal_raw
-     * @return Journal
+     * @return int
      */
     protected function createJournal($journal_detail, $journal_raw)
     {
@@ -264,20 +253,24 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         $this->em->persist($journal);
         $this->em->flush();
+        $journal_id = $journal->getId();
         $this->em->clear();
-        return $journal;
+        unset($journal, $journal_detail, $institution, $journal_raw);
+
+        return $journal_id;
     }
 
     /**
-     * @param Journal $journal
+     * @param int $journal_id
      * @param $output
      * @param $old_journal_id
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\TransactionRequiredException
      */
-    protected function connectJournalUsers(Journal $journal, $output, $old_journal_id)
+    protected function connectJournalUsers($journal_id, $output, $old_journal_id)
     {
+
         /*
              * Journal users
              */
@@ -293,22 +286,23 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $userProgress->start();
         foreach ($journal_users as $journal_user) {
             // all relations disconnecting if i use em->clear. I refind journal for fix this issue
-            $journal = $this->em->find('OjsJournalBundle:Journal', $journal->getId());
             $user = $this->createUser($journal_user);
             /*
              * User roles with journal
              */
-            $this->addJournalRole($user, $journal, $journal_user['role_id']);
+            $this->addJournalRole($user->getId(), $journal_id, $journal_user['role_id']);
             /*
              * Add author data
              */
             $this->saveAuthorData($user);
-            $userProgress->advance();
-
             //performance is sucks if i dont use em->clear.
             $this->em->clear();
+
+            $userProgress->advance();
         }
         $userProgress->finish();
+
+        unset($user, $userProgress, $journal_user, $journal_users, $old_journal_id);
     }
 
     /**
@@ -351,12 +345,15 @@ class DataImportJournalCommand extends ContainerAwareCommand
     }
 
     /**
-     * @param $user
-     * @param $journal
+     * @param $user_id
+     * @param $journal_id
      * @param $role_id
      */
-    protected function addJournalRole(User $user, Journal $journal, $role_id)
+    protected function addJournalRole($user_id, $journal_id, $role_id)
     {
+        $user = $this->em->getReference('OjsUserBundle:User', $user_id);
+        $journal = $this->em->getReference('OjsJournalBundle:Journal', $journal_id);
+
         $user_role = new UserJournalRole();
         $user_role->setUser($user);
         $user_role->setJournal($journal);
@@ -366,6 +363,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $user_role->setRole($role);
         $this->em->persist($user_role);
         $this->em->flush();
+
+        unset($user_role, $user, $journal, $role);
     }
 
     /**
@@ -395,14 +394,15 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
     /**
      * @param $output
-     * @param Journal $journal
+     * @param $journal_id
      * @param $old_journal_id
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\TransactionRequiredException
      */
-    protected function createArticles($output, Journal $journal, $old_journal_id)
+    protected function createArticles($output, $journal_id, $old_journal_id)
     {
+
         $articles = $this->connection->fetchAll("SELECT * FROM articles WHERE journal_id=$old_journal_id");
         $articleProgress = new ProgressBar($output, count($articles));
 
@@ -413,23 +413,21 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $articleProgress->setEmptyBarCharacter(" ");
         $articleProgress->start();
         foreach ($articles as $_article) {
-            /** @var Journal $journal */
-            $journal = $this->em->find('OjsJournalBundle:Journal', $journal->getId());
-            $this->saveArticleData($_article, $journal, false);
-            $this->em->clear();
+            $this->saveArticleData($_article, $journal_id, false);
             $articleProgress->advance();
         }
         $articleProgress->finish();
-
+        unset($journal, $journal_id, $old_journal_id, $output, $articleProgress, $articles, $_article);
     }
 
     /**
      * @param array $_article
      * @param Journal $journal
      */
-    private function saveArticleData($_article, Journal $journal)
+    private function saveArticleData($_article, $journal_id)
     {
-        $_article_settings = $this->connection->fetchAll("SELECT * FROM article_settings WHERE article_id={$_article['article_id']}");
+
+        $_article_settings = $this->connection->fetchAll("SELECT setting_name,setting_value,locale FROM article_settings WHERE article_id={$_article['article_id']}");
         $article = new Article();
         $article_settings = [];
         /** groupped locally  */
@@ -442,7 +440,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         }
 
 
-        $article->setJournal($journal);
+        $article->setJournalId($journal_id);
         isset($article_settings['default']['pub-id::doi']) && $article->setDoi($article_settings['default']['pub-id::doi']);
 
 
@@ -495,10 +493,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
         && $article->setAbstract($article_settings[$defaultLocale]['abstract']);
         $this->em->persist($article);
 
-        $article_citations = $this->connection->fetchAll("SELECT * FROM citations WHERE assoc_type=257 AND assoc_id={$_article['article_id']}");
+        $article_citations = $this->connection->fetchAll("SELECT raw_citation,citation_id FROM citations WHERE assoc_type=257 AND assoc_id={$_article['article_id']}");
         $i = 1;
         foreach ($article_citations as $ac) {
-            if(empty($ac['raw_citation']))
+            if (empty($ac['raw_citation']))
                 continue;
             $citation = new Citation();
             $citation->setRaw($ac['raw_citation']);
@@ -512,7 +510,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $citationSetting = new CitationSetting();
                 $citationSetting->setCitation($citation);
                 $citationSetting->setValue($as['setting_value']);
-                $citationSetting->setSetting(str_replace('nlm30:','',$as['setting_name']));
+                $citationSetting->setSetting(str_replace('nlm30:', '', $as['setting_name']));
                 $this->em->persist($citationSetting);
                 $citation->addSetting($citationSetting);
             }
@@ -538,39 +536,44 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         $this->em->persist($article);
 
+        $this->em->flush();
         /** Article files */
-        $this->saveArticleFiles($article, $_article['article_id']);
+        $this->saveArticleFiles($article->getId(), $_article['article_id']);
 
-        $published_article = $this->connection->fetchAssoc("SELECT * FROM published_articles WHERE article_id={$_article['article_id']}");
+        $published_article = $this->connection->fetchAssoc("SELECT issue_id FROM published_articles WHERE article_id={$_article['article_id']}");
         if ($published_article) {
             //have an issue
             $issue = $this->connection->fetchAssoc("SELECT * FROM issues WHERE issue_id={$published_article['issue_id']}");
             if ($issue) {
-                $issue = $this->saveIssue($issue, $journal, $article);
+                $issue = $this->saveIssue($issue, $journal_id, $article);
                 $article->setIssue($issue);
             }
         }
         $this->em->persist($article);
         $this->em->flush();
         $this->em->clear();
-
+        unset($article, $published_article, $article_settings, $article_citations,
+            $_article, $_article_settings, $citation, $citationSetting, $citationSettingOld
+            , $defaultLocale, $pages, $user, $username);
     }
 
 
     /**
-     * @param Article $article
-     * @param $old_article_id
+     * @param int $article_id
+     * @param int $old_article_id
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\TransactionRequiredException
      */
-    public function saveArticleFiles(Article $article, $old_article_id)
+    public function saveArticleFiles($article_id, $old_article_id)
     {
-        $article_galleys = $this->connection->fetchAll("SELECT ag.* FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
+        $article = $this->em->getReference('OjsJournalBundle:Article', $article_id);
+
+        $article_galleys = $this->connection->fetchAll("SELECT ag.file_id,ag.label,ag.locale FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
         foreach ($article_galleys as $galley) {
             if (!$article)
                 $article = $this->em->find('OjsJournalBundle:Article', $article->getId());
-            $article_file = $this->connection->fetchAll("SELECT f.* FROM article_files f WHERE f.file_id={$galley['file_id']}");
+            $article_file = $this->connection->fetchAll("SELECT f.file_name,f.file_type,f.file_size,f.source_revision FROM article_files f WHERE f.file_id={$galley['file_id']}");
             if ($article_file) {
                 $article_file = $article_file[0];
             }
@@ -595,14 +598,13 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->em->flush();
         }
 
-        $article_supplementary_files = $this->connection->fetchAll("SELECT asp.* FROM article_supplementary_files asp WHERE asp.article_id={$old_article_id}");
+        $article_supplementary_files = $this->connection->fetchAll("SELECT asp.file_id,asp.supp_id,asp.type FROM article_supplementary_files asp WHERE asp.article_id={$old_article_id}");
         foreach ($article_supplementary_files as $sup_file) {
-
-            $sup_file = $this->connection->fetchAll("SELECT f.* FROM article_files f WHERE f.file_id={$sup_file['file_id']}");
             if (!isset($sup_file['supp_id'])) {
                 continue;
             }
-            $sup_settings = $this->connection->fetchAll("SELECT s.* FROM article_supp_file_settings s WHERE s.supp_id={$sup_file['supp_id']}");
+            $sup_settings = $this->connection->fetchAll("SELECT s.setting_name,s.setting_value,s.locale FROM article_supp_file_settings s WHERE s.supp_id={$sup_file['supp_id']}");
+            $sup_file_detail = $this->connection->fetchAssoc("SELECT f.file_type,f.file_size,f.file_name,f.source_revision FROM article_files f WHERE f.file_id={$sup_file['file_id']}");
             $supp_settings = [];
             /** groupped locally  */
             foreach ($sup_settings as $as) {
@@ -616,25 +618,26 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $defaultLocale = $this->defaultLocale($supp_settings);
 
             $file = new File();
-            $file->setName($sup_settings[$defaultLocale]['title']);
-            $file->setMimeType($sup_file['file_type']);
-            $file->setSize($sup_file['file_size']);
-            $version = $sup_file['source_revision'];
+            $file->setName($supp_settings[$defaultLocale]['title']);
+            $file->setMimeType($sup_file_detail['file_type']);
+            $file->setSize($sup_file_detail['file_size']);
+            $version = $sup_file_detail['source_revision'];
             $this->em->persist($file);
 
             $article_file = new ArticleFile();
-            $article_file->setTitle($sup_settings[$defaultLocale]['title']);
+            $article_file->setTitle($supp_settings[$defaultLocale]['title']);
             $article_file->setLangCode($defaultLocale);
             $article_file->setFile($file);
             $article_file->setArticle($article);
             $article_file->setType($this->supplementary_files($sup_file['type']));
             $article_file->setVersion($version ? $version : 1);
-            $article_file->setKeywords($sup_settings[$defaultLocale]['subject']);
+            isset($supp_settings[$defaultLocale]['subject'])&&$article_file->setKeywords($supp_settings[$defaultLocale]['subject']);
             $this->em->persist($article_file);
 
             $this->em->flush();
         }
-
+        unset($article, $defaultLocale, $article_file, $article_galleys, $article_id, $article_supplementary_files, $defaultLocale
+            , $article_id, $as, $file, $galley, $old_article_id, $sup_file, $sup_settings, $sup_file_detail, $supp_settings, $article_supplementary_files);
     }
 
     /**
@@ -689,14 +692,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
     /**
      * @param array $issueData
-     * @param Journal $journal
-     * @param Article $article
+     * @param int $journal_id
+     * @param int $article
      * @return Issue
      */
-    protected function saveIssue(array $issueData, Journal $journal, Article $article)
+    protected function saveIssue(array $issueData,$journal_id, $article_id)
     {
-
-        $issue_settings_ = $this->connection->fetchAll("SELECT * FROM issue_settings WHERE issue_id={$issueData['issue_id']}");
+        $article = $this->em->getReference("OjsJournalBundle:Article",$article_id);
+        $issue_settings_ = $this->connection->fetchAll("SELECT locale,setting_value,setting_name FROM issue_settings WHERE issue_id={$issueData['issue_id']}");
         $issue_settings = [];
         /** groupped locally  */
         foreach ($issue_settings_ as $as) {
@@ -713,7 +716,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             'year' => $issueData['year'],
             'volume' => $issueData['volume'],
             'title' => $issue_settings[$defaultLocale]['title'],
-            'journal' => $journal
+            'journalId' => $journal_id
         ]);
         if ($checkIssue) {
             $checkIssue->addArticle($article);
@@ -723,7 +726,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $issue = new Issue();
         isset($issue_settings[$defaultLocale]['title']) && $issue->setTitle($issue_settings[$defaultLocale]['title']);
         isset($issue_settings[$defaultLocale]['description']) && $issue->setDescription($issue_settings[$defaultLocale]['description']);
-        $issue->setJournal($journal);
+        $issue->setJournalId($journal_id);
+        $issue->setJournal($this->em->getReference("OjsJournalBundle:Journal",$journal_id));
         isset($issueData['date_published']) && $issue->setDatePublished((new \DateTime($issueData['date_published'])));
         $issue->setVolume($issueData['volume']);
         $issue->setYear($issueData['year']);
@@ -731,9 +735,11 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $issue->setNumber($issueData['number']);
         isset($issue_settings[$defaultLocale]['fileName']) && $issue->setCover($issue_settings[$defaultLocale]['fileName']);
         $this->em->persist($issue);
+        $this->em->flush();
 
         $this->saveIssueFiles($issue, $issueData['issue_id']);
         $issue->addArticle($article);
+        $this->em->flush();
         return $issue;
     }
 
@@ -745,6 +751,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
     }
 
     /**
+     * Mapping array as group by language
      * @param $data
      * @return mixed
      */
