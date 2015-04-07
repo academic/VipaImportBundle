@@ -325,7 +325,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     protected function createUser($journal_user)
     {
-        $user = $this->connection->fetchAll('SELECT * FROM users WHERE user_id=' . $journal_user['user_id'] . ' LIMIT 1;')[0];
+        $user = $this->connection->fetchAll('SELECT * FROM users WHERE user_id=' . $journal_user['user_id'] . ' LIMIT 1;');
+        if(!$user)
+            return;
+        $user = $user[0];
 
         $usercheck = $this->em->getRepository('OjsUserBundle:User')->findOneBy(['username' => $user['username']]);
         $user_entity = $usercheck ? $usercheck : new User();
@@ -646,11 +649,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
                     $supp_settings[$as['locale']][$as['setting_name']] = $as['setting_value'];
                 }
             }
-
-            $defaultLocale = $this->defaultLocale($supp_settings);
+            if(count($sup_settings)>1){
+                $defaultLocale = $this->defaultLocale($supp_settings);
+            }else{
+                $defaultLocale='default';
+            }
 
             $file = new File();
-            $file->setName($supp_settings[$defaultLocale]['title']);
+            isset($supp_settings[$defaultLocale]['title'])&&$file->setName($supp_settings[$defaultLocale]['title']);
             $file->setMimeType($sup_file_detail['file_type']);
             $file->setSize($sup_file_detail['file_size']);
             $version = $sup_file_detail['source_revision'];
@@ -744,8 +750,18 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $issue_settings[$as['locale']][$as['setting_name']] = $as['setting_value'];
             }
         }
-
-        $defaultLocale = $this->defaultLocale($issue_settings);
+        if($issue_settings>0){
+            $defaultLocale = $this->defaultLocale($issue_settings);
+        }
+        else
+        {
+            $issue_settings['default']=[
+                'title'=>'',
+                'description'=>'',
+                'fileName'=>''
+            ];
+            $defaultLocale = 'default';
+        }
         $checkIssue = $this->em->getRepository("OjsJournalBundle:Issue")->findOneBy([
             'number' => $issueData['number'],
             'year' => $issueData['year'],
