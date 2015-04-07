@@ -134,7 +134,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->database['host']=$database['host'];
         $this->database['dbname']=$database['database'];
 
-        var_dump($this->database);
         $connectionFactory = $this->getContainer()->get('doctrine.dbal.connection_factory');
         $this->connection = $connectionFactory->createConnection($this->database);
         unset($connectionFactory);
@@ -201,6 +200,12 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         } catch (\Exception $e) {
             echo $e->getMessage();
+            echo "\n";
+            echo $e->getFile();
+            echo "\n";
+            echo $e->getLine();
+            echo "\n";
+            echo $e->getTraceAsString();
         }
 
 
