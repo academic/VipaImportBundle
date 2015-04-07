@@ -303,7 +303,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             /*
              * User roles with journal
              */
-            $this->addJournalRole($user->getId(), $journal_id, $journal_user['role_id']);
+            $role = $this->addJournalRole($user->getId(), $journal_id, $journal_user['role_id']);
             /*
              * Add author data
              */
@@ -371,6 +371,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
         /** @var Role $role */
         $role = $this->em->getRepository('OjsUserBundle:Role')->findOneBy([
             'role' => $this->rolesMap[$this->roles[$role_id]]]);
+        if($user->hasRole($role->getRole())){
+            return false;
+        }
         if(!$role){
             $this->output->writeln("<error>Role not exists. {$role_id}</error>");
         }
@@ -390,6 +393,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em->flush();
 
         unset($user_role, $user, $journal, $role);
+        return true;
     }
 
     /**
