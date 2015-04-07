@@ -134,6 +134,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->database['password']=$database['password'];
         $this->database['host']=$database['host'];
         $this->database['dbname']=$database['database'];
+        $this->database['charset']='utf-8';
 
         $connectionFactory = $this->getContainer()->get('doctrine.dbal.connection_factory');
         $this->connection = $connectionFactory->createConnection($this->database);
