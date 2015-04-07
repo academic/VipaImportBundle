@@ -434,6 +434,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
     {
 
         $articles = $this->connection->fetchAll("SELECT * FROM articles WHERE journal_id=$old_journal_id");
+        if(count($articles)<1)
+            return;
         $articleProgress = new ProgressBar($output, count($articles));
 
         $articleProgress->setMessage("Adding articles");
@@ -681,6 +683,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             'Araştırma aracı' => ArticleFileParams::SUPPLEMENTARY_FILE,
             'Araştırma araçları' => ArticleFileParams::SUPPLEMENTARY_FILE,
             'Araştırma Enstürmanları' => ArticleFileParams::SUPPLEMENTARY_FILE,
+            'Araştırma enstürmanları' => ArticleFileParams::SUPPLEMENTARY_FILE,
             'Araştırma Materyalleri' => ArticleFileParams::RESEARCH_METARIALS,
             'Araştırma sonuçları' => ArticleFileParams::RESEARCH_RESULTS,
             'Data Analysis' => ArticleFileParams::DATA_ANALYSIS,
@@ -698,6 +701,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
             'Veri takımı' => ArticleFileParams::SUPPLEMENTARY_FILE,
         ];
         if (!$type)
+            return false;
+        if(!isset($typeMap[$type]))
             return false;
         return $typeMap[$type];
     }
