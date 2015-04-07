@@ -78,7 +78,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
     protected $database = [
         'driver' => 'pdo_mysql',
         'user' => 'root',
-        'password' => '',
+        'password' => 's',
         'host' => 'localhost',
         'dbname' => 'dergipark',
     ];
@@ -134,6 +134,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->database['host']=$database['host'];
         $this->database['dbname']=$database['database'];
 
+        var_dump($this->database);
         $connectionFactory = $this->getContainer()->get('doctrine.dbal.connection_factory');
         $this->connection = $connectionFactory->createConnection($this->database);
         unset($connectionFactory);
@@ -357,8 +358,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     protected function addJournalRole($user_id, $journal_id, $role_id)
     {
-        $user = $this->em->getReference('OjsUserBundle:User', $user_id);
-        $journal = $this->em->getReference('OjsJournalBundle:Journal', $journal_id);
+        $user = $this->em->find('OjsUserBundle:User', $user_id);
+        $journal = $this->em->find('OjsJournalBundle:Journal', $journal_id);
 
         $user_role = new UserJournalRole();
         $user_role->setUser($user);
