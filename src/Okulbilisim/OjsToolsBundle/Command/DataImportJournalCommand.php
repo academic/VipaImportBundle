@@ -128,6 +128,12 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $database = $this->getContainer()->getParameter("old_database");
+        $this->database['user'] = $database['user'];
+        $this->database['password']=$database['password'];
+        $this->database['host']=$database['host'];
+        $this->database['dbname']=$database['database'];
+
         $connectionFactory = $this->getContainer()->get('doctrine.dbal.connection_factory');
         $this->connection = $connectionFactory->createConnection($this->database);
         unset($connectionFactory);
