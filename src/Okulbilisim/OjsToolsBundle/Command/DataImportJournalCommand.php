@@ -367,6 +367,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         $role = $this->em->getRepository('OjsUserBundle:Role')->findOneBy([
             'role' => $this->rolesMap[$this->roles[$role_id]]]);
+        if(!$role){
+            $this->output->writeln("<error>Role not exists. {$role_id}</error>");
+        }
         $user_role->setRole($role);
         $this->em->persist($user_role);
         $this->em->flush();
@@ -574,7 +577,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     public function saveArticleFiles($article_id, $old_article_id)
     {
-        $article = $this->em->getReference('OjsJournalBundle:Article', $article_id);
+        $article = $this->em->find('OjsJournalBundle:Article', $article_id);
 
         $article_galleys = $this->connection->fetchAll("SELECT ag.file_id,ag.label,ag.locale FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
         foreach ($article_galleys as $galley) {
@@ -687,7 +690,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
     protected function createInstitution($data)
     {
         if (!isset($data['publisherInstitution'])) {
-            return $this->em->getReference("OjsJournalBundle:Institution", 1);
+            return $this->em->find("OjsJournalBundle:Institution", 1);
         }
         $institution = new Institution();
         $institution->setName($data['publisherInstitution']);
@@ -705,7 +708,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     protected function saveIssue(array $issueData,$journal_id, $article_id)
     {
-        $article = $this->em->getReference("OjsJournalBundle:Article",$article_id);
+        $article = $this->em->find("OjsJournalBundle:Article",$article_id);
         $issue_settings_ = $this->connection->fetchAll("SELECT locale,setting_value,setting_name FROM issue_settings WHERE issue_id={$issueData['issue_id']}");
         $issue_settings = [];
         /** groupped locally  */
@@ -734,7 +737,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         isset($issue_settings[$defaultLocale]['title']) && $issue->setTitle($issue_settings[$defaultLocale]['title']);
         isset($issue_settings[$defaultLocale]['description']) && $issue->setDescription($issue_settings[$defaultLocale]['description']);
         $issue->setJournalId($journal_id);
-        $issue->setJournal($this->em->getReference("OjsJournalBundle:Journal",$journal_id));
+        $issue->setJournal($this->em->find("OjsJournalBundle:Journal",$journal_id));
         isset($issueData['date_published']) && $issue->setDatePublished((new \DateTime($issueData['date_published'])));
         $issue->setVolume($issueData['volume']);
         $issue->setYear($issueData['year']);
