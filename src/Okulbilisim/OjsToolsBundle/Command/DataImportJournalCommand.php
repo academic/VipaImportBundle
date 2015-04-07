@@ -12,6 +12,7 @@ use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\CitationSetting;
 use Ojs\JournalBundle\Entity\File;
 use Ojs\JournalBundle\Entity\Issue;
+use Ojs\UserBundle\Entity\Role;
 use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\Institution;
@@ -363,19 +364,28 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     protected function addJournalRole($user_id, $journal_id, $role_id)
     {
+        /** @var User $user */
         $user = $this->em->find('OjsUserBundle:User', $user_id);
         $journal = $this->em->find('OjsJournalBundle:Journal', $journal_id);
 
-        $user_role = new UserJournalRole();
-        $user_role->setUser($user);
-        $user_role->setJournal($journal);
-
+        /** @var Role $role */
         $role = $this->em->getRepository('OjsUserBundle:Role')->findOneBy([
             'role' => $this->rolesMap[$this->roles[$role_id]]]);
         if(!$role){
             $this->output->writeln("<error>Role not exists. {$role_id}</error>");
         }
+
+        $user_role = new UserJournalRole();
+        $user_role->setUser($user);
+        $user_role->setJournal($journal);
         $user_role->setRole($role);
+
+        $role->addUser($user);
+
+        $user->addRole($role);
+
+        $this->em->persist($role);
+        $this->em->persist($user);
         $this->em->persist($user_role);
         $this->em->flush();
 
