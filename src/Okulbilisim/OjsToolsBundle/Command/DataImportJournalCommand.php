@@ -301,6 +301,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
         foreach ($journal_users as $journal_user) {
             // all relations disconnecting if i use em->clear. I refind journal for fix this issue
             $user = $this->createUser($journal_user);
+            if(!$user){
+                $userProgress->advance();
+                continue;
+            }
             /*
              * User roles with journal
              */
@@ -327,7 +331,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
     {
         $user = $this->connection->fetchAll('SELECT * FROM users WHERE user_id=' . $journal_user['user_id'] . ' LIMIT 1;');
         if(!$user)
-            return;
+            return false;
         $user = $user[0];
 
         $usercheck = $this->em->getRepository('OjsUserBundle:User')->findOneBy(['username' => $user['username']]);
