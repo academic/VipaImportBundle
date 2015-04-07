@@ -656,20 +656,20 @@ class DataImportJournalCommand extends ContainerAwareCommand
             }
 
             $file = new File();
-            isset($supp_settings[$defaultLocale]['title'])&&$file->setName($supp_settings[$defaultLocale]['title']);
+            isset($supp_settings[$defaultLocale])&&isset($supp_settings[$defaultLocale]['title'])&&$file->setName($supp_settings[$defaultLocale]['title']);
             $file->setMimeType($sup_file_detail['file_type']);
             $file->setSize($sup_file_detail['file_size']);
             $version = $sup_file_detail['source_revision'];
             $this->em->persist($file);
 
             $article_file = new ArticleFile();
-            $article_file->setTitle($supp_settings[$defaultLocale]['title']);
+            isset($supp_settings[$defaultLocale])&&isset($supp_settings[$defaultLocale]['title'])&&$article_file->setTitle($supp_settings[$defaultLocale]['title']);
             $article_file->setLangCode($defaultLocale);
             $article_file->setFile($file);
             $article_file->setArticle($article);
             $article_file->setType($this->supplementary_files($sup_file['type']));
             $article_file->setVersion($version ? $version : 1);
-            isset($supp_settings[$defaultLocale]['subject'])&&$article_file->setKeywords($supp_settings[$defaultLocale]['subject']);
+            isset($supp_settings[$defaultLocale])&&isset($supp_settings[$defaultLocale]['subject'])&&$article_file->setKeywords($supp_settings[$defaultLocale]['subject']);
             $this->em->persist($article_file);
 
             $this->em->flush();
