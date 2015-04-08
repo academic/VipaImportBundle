@@ -754,7 +754,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $issue_settings[$as['locale']][$as['setting_name']] = $as['setting_value'];
             }
         }
-        if($issue_settings>0){
+        if(count($issue_settings)>0){
             $defaultLocale = $this->defaultLocale($issue_settings);
         }
         else
