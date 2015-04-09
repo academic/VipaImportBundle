@@ -761,7 +761,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     protected function createInstitution($data)
     {
-        if (!isset($data['publisherInstitution'])) {
+        if (!isset($data['publisherInstitution']) || empty($data['publisherInstitution'])) {
             return $this->em->find("OjsJournalBundle:Institution", 1);
         }
         $institution = new Institution();
