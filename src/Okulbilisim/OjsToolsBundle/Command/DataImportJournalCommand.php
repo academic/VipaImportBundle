@@ -11,6 +11,7 @@ use Ojs\JournalBundle\Entity\ArticleFile;
 use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\CitationSetting;
 use Ojs\JournalBundle\Entity\File;
+use Ojs\JournalBundle\Entity\InstitutionTypes;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\UserBundle\Entity\Role;
 use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
@@ -71,6 +72,18 @@ class DataImportJournalCommand extends ContainerAwareCommand
         'ROLE_ID_AUTHOR' => "ROLE_AUTHOR",
         'ROLE_ID_READER' => 'ROLE_READER',
         'ROLE_ID_SUBSCRIPTION_MANAGER' => "ROLE_SUBSCRIPTION_MANAGER",
+    ];
+
+    protected $institutionTypeMap = [
+        0=>'Other',
+        1=>"Tubitak",
+        2=>"University",
+        3=>"Government",
+        4=>"Association",
+        5=>"Foundation",
+        6=>"Hospital",
+        7=>"Chamber",
+        8=>"Private"
     ];
 
     /**
@@ -730,9 +743,23 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $institution = new Institution();
         $institution->setName($data['publisherInstitution']);
         $institution->setUrl($data['publisherUrl']);
+        $institutionType =$this->getInstitutionType($data['publisherType']);
+        $institution->setInstitutionType($institutionType);
         $this->em->persist($institution);
         $this->em->flush();
         return $institution;
+    }
+
+    /**
+     * @param $type_id
+     * @return null|InstitutionTypes
+     */
+    protected function getInstitutionType($type_id)
+    {
+        $type = null;
+        isset($this->institutionTypeMap[$type_id]) && $typeText = $this->institutionTypeMap[$type_id];
+        isset($typeText) && $type = $this->em->getRepository("OjsJournalBundle:InstitutionTypes")->findOneBy(['name'=>$typeText]);
+        return $type;
     }
 
     /**
