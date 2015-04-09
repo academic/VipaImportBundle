@@ -3,10 +3,12 @@
 namespace Okulbilisim\OjsToolsBundle\Command;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Gedmo\Translatable\Entity\Repository\TranslationRepository;
 use Ojs\Common\Params\ArticleFileParams;
+use \Ojs\JournalBundle\Document\TransferredRecord;
 use Ojs\JournalBundle\Entity\ArticleFile;
 use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\CitationSetting;
@@ -103,6 +105,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
     /** @var  EntityManager */
     protected $em;
 
+    /** @var  DocumentManager */
+    protected $dm;
     /** @var  OutputInterface */
     protected $output;
 
@@ -156,6 +160,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em = $this->getContainer()->get("doctrine.orm.entity_manager");
         $this->em->getConnection()->getConfiguration()->getSQLLogger(null);
 
+        $this->dm = $this->getContainer()->get('doctrine.odm.mongodb.document_manager');
         $this->translationRepository = $this->em->getRepository('Gedmo\\Translatable\\Entity\\Translation');
 
         $kernel = $this->getContainer()->get('kernel');
@@ -202,6 +207,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
              * Journal Create
              */
             $journal_id = $this->createJournal($journal_detail, $journal_raw);
+            $this->saveRecordChange($id,$journal_id,'Ojs\JournalBundle\Entity\Journal');
+
             $output->writeln("<info>Journal created.</info>");
 
             $this->connectJournalUsers($journal_id, $output, $id);
@@ -325,7 +332,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
             /*
              * Add author data
              */
-            $this->saveAuthorData($user);
+            $author= $this->saveAuthorData($user);
+            $this->saveRecordChange($journal_user['user_id'],$author->getId(),'Ojs\JournalBundle\Entity\Author');
+
             //performance is sucks if i dont use em->clear.
             $this->em->clear();
 
@@ -375,6 +384,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $user_entity->setCountry($country);
         $this->em->persist($user_entity);
         $this->em->flush();
+        $this->saveRecordChange($journal_user['user_id'],$user_entity->getId(),'Ojs\UserBundle\Entity\User');
+
         return $user_entity;
     }
 
@@ -407,6 +418,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $role->addUser($user);
 
         $user->addRole($role);
+        $this->saveRecordChange($role_id,$role->getId(),'Ojs\UserBundle\Entity\Role');
 
         $this->em->persist($role);
         $this->em->persist($user);
@@ -564,10 +576,15 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $citationSetting->setValue($as['setting_value']);
                 $citationSetting->setSetting(str_replace('nlm30:', '', $as['setting_name']));
                 $this->em->persist($citationSetting);
+                $this->em->flush();
+                $this->saveRecordChange($ac['citation_id'],$citationSetting->getId(),'Ojs\JournalBundle\Entity\CitationSetting');
+
                 $citation->addSetting($citationSetting);
             }
             $this->em->persist($citation);
             $this->em->flush();
+            $this->saveRecordChange($ac['citation_id'],$citation->getId(),'Ojs\JournalBundle\Entity\Citation');
+
             $i++;
         }
         unset($i);
@@ -597,12 +614,16 @@ class DataImportJournalCommand extends ContainerAwareCommand
             //have an issue
             $issue = $this->connection->fetchAssoc("SELECT * FROM issues WHERE issue_id={$published_article['issue_id']}");
             if ($issue) {
+
                 $issue = $this->saveIssue($issue, $journal_id, $article);
+                $this->saveRecordChange($published_article['issue_id'],$issue->getId(),'Ojs\JournalBundle\Entity\Issue');
                 $article->setIssue($issue);
             }
         }
         $this->em->persist($article);
         $this->em->flush();
+        $this->saveRecordChange($_article['article_id'],$article->getId(),'Ojs\JournalBundle\Entity\Article');
+
         $this->em->clear();
         unset($article, $published_article, $article_settings, $article_citations,
             $_article, $_article_settings, $citation, $citationSetting, $citationSettingOld
@@ -648,6 +669,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $this->em->persist($article_file);
             $this->em->flush();
+            $this->saveRecordChange($galley['file_id'],$file->getId(),'Ojs\JournalBundle\Entity\File');
+
         }
 
         $article_supplementary_files = $this->connection->fetchAll("SELECT asp.file_id,asp.supp_id,asp.type FROM article_supplementary_files asp WHERE asp.article_id={$old_article_id}");
@@ -690,6 +713,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->em->persist($article_file);
 
             $this->em->flush();
+
         }
         unset($article, $defaultLocale, $article_file, $article_galleys, $article_id, $article_supplementary_files, $defaultLocale
             , $article_id, $as, $file, $galley, $old_article_id, $sup_file, $sup_settings, $sup_file_detail, $supp_settings, $article_supplementary_files);
@@ -743,8 +767,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $institution = new Institution();
         $institution->setName($data['publisherInstitution']);
         $institution->setUrl($data['publisherUrl']);
-        $institutionType =$this->getInstitutionType($data['publisherType']);
-        $institution->setInstitutionType($institutionType);
+        $institutionType = $this->getInstitutionType($data['publisherType']);
+        if($institutionType)
+            $institution->setInstitutionType($institutionType);
+
         $this->em->persist($institution);
         $this->em->flush();
         return $institution;
@@ -845,5 +871,23 @@ class DataImportJournalCommand extends ContainerAwareCommand
         }, $data);
 
         return array_search(max($sizeof), $sizeof);
+    }
+
+    /**
+     * @param int $old_id
+     * @param int $new_id
+     * @param string $entity
+     */
+    protected function saveRecordChange($old_id,$new_id,$entity)
+    {
+        $changeRecordJournal = new TransferredRecord();
+        $changeRecordJournal
+            ->setOldId($old_id)
+            ->setNewId($new_id)
+            ->setEntity($entity)
+        ;
+        $this->dm->persist($changeRecordJournal);
+        $this->dm->flush();
+        $this->dm->clear();
     }
 }
