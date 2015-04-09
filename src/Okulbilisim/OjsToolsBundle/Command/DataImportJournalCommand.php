@@ -255,7 +255,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         // TODO setPeriod
         // $journal->setPeriod();
         isset($journal_raw['path']) && $journal->setSlug($journal_raw['path']);
-        $journal->setStatus(1);
+        $journal->setStatus(3);
         isset($journal_detail['publisherUrl']) && $journal->setUrl($journal_detail['publisherUrl']);
         isset($journal_detail['searchKeywords']) && $journal->setTags($journal_detail['searchKeywords']);
         //$journal->setCountryId();
