@@ -504,7 +504,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
         }
 
 
-        $article->setJournalId($journal_id);
+        $journal = $this->em->getRepository("OjsJournalBundle:Journal")->find($journal_id);
+        $article->setJournal($journal);
+
         isset($article_settings['default']['pub-id::doi']) && $article->setDoi($article_settings['default']['pub-id::doi']);
 
 
