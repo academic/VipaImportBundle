@@ -12,7 +12,9 @@ use \Ojs\JournalBundle\Document\TransferredRecord;
 use Ojs\JournalBundle\Entity\ArticleFile;
 use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\CitationSetting;
+use Ojs\JournalBundle\Entity\Contact;
 use Ojs\JournalBundle\Entity\File;
+use Ojs\JournalBundle\Entity\JournalContact;
 use Ojs\JournalBundle\Entity\InstitutionTypes;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\UserBundle\Entity\Role;
@@ -211,6 +213,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $output->writeln("<info>Journal created.</info>");
 
+            $this->saveContacts($journal_detail,$journal_raw,$journal_id);
+            $output->writeln("\n<info>Contacts saved.</info>");
             $this->connectJournalUsers($journal_id, $output, $id);
 
             $output->writeln("\nUsers added.");
@@ -891,5 +895,41 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->dm->persist($changeRecordJournal);
         $this->dm->flush();
         $this->dm->clear();
+    }
+
+    protected function saveContacts($journal_detail,$journal_raw,$journal_id){
+        /** @var Journal $journal */
+        $journal = $this->em->find('OjsJournalBundle:Journal',$journal_id);
+        // save default contact
+        if(isset($journal_detail['contactAffiliation']))
+        {
+            $contact = new Contact();
+            $contact->setAffiliation($journal_detail['contactAffiliation']);
+            isset($journal_detail['contactEmail'])&&$contact->setEmail($journal_detail['contactEmail']);
+            isset($journal_detail['contactFax'])&&$contact->setFax($journal_detail['contactFax']);
+            isset($journal_detail['contactMailingAddress'])&&$contact->setAddress($journal_detail['contactMailingAddress']);
+            if(isset($journal_detail['contactName'])){
+                $name = explode(' ',$journal_detail['contactName']);
+                $firstName = $name[0];
+                unset($name[0]);
+                $lastName = join(' ',$name);
+                $contact->setFirstName($firstName)
+                    ->setLastName($lastName);
+            }
+            isset($journal_detail['contactPhone']) && $contact->setPhone($journal_detail['contactPhone']);
+            isset($journal_detail['contactTitle']) && $contact->setTitle($journal_detail['contactTitle']);
+
+            $contactType = $this->em->getRepository("OjsJournalBundle:ContactTypes")->findOneBy(['name'=>'Journal Contact']);
+            if(!$contactType){
+                throw new \Exception("You must import default contact types.");
+            }
+            $JournalContact = new JournalContact();
+            $this->em->persist($contact);
+            $JournalContact->setContact($contact);
+            $JournalContact->setContactType($contactType);
+            $JournalContact->setJournal($journal);
+            $this->em->persist($JournalContact);
+            $this->em->flush();
+        };
     }
 }
