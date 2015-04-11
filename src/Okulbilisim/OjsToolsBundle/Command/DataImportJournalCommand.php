@@ -931,5 +931,25 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->em->persist($JournalContact);
             $this->em->flush();
         };
+        if(isset($journal_detail['supportName'])){
+            $contact = new Contact();
+            $contact->setAffiliation($journal_detail['supportName']);
+            $contact->setEmail($journal_detail['supportEmail']);
+            $contact->setPhone($journal_detail['supportPhone']);
+            $contact->setFirstName($journal_detail['supportName']);
+            $contactType = $this->em->getRepository("OjsJournalBundle:ContactTypes")->findOneBy(['name'=>'Submission Support']);
+            if(!$contactType){
+                throw new \Exception("You must import default contact types.");
+            }
+
+            $JournalContact = new JournalContact();
+            $this->em->persist($contact);
+            $JournalContact->setContact($contact);
+            $JournalContact->setContactType($contactType);
+            $JournalContact->setJournal($journal);
+            $this->em->persist($JournalContact);
+            $this->em->flush();
+        }
+
     }
 }
