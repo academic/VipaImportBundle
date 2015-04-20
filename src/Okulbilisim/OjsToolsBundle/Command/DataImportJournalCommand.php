@@ -16,6 +16,7 @@ use Ojs\JournalBundle\Entity\Contact;
 use Ojs\JournalBundle\Entity\File;
 use Ojs\JournalBundle\Entity\JournalContact;
 use Ojs\JournalBundle\Entity\JournalSection;
+use Ojs\JournalBundle\Entity\Subject;
 use Ojs\JournalBundle\Entity\InstitutionTypes;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\UserBundle\Entity\Role;
@@ -250,6 +251,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             return null;
         $journal = new Journal();
         isset($journal_detail['title']) && $journal->setTitle($journal_detail['title']);
+        isset($journal_detail['categories']) && $this->setSubjects($journal, $journal_detail['categories']);
         isset($journal_detail['abbreviation']) && $journal->setTitleAbbr($journal_detail['abbreviation']);
         isset($journal_detail['description']) && $journal->setDescription($journal_detail['description']);
         isset($journal_detail['homeHeaderTitle']) && $journal->setSubtitle($journal_detail['homeHeaderTitle']);
@@ -997,5 +999,46 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em->persist($newSection);
         $this->em->flush();
         return $newSection;
+    }
+
+    public function setSubjects(Journal &$journal, $categories)
+    {
+        if ($categories == "N;" || empty($categories)) {
+            return null;
+        }
+
+        $categories = unserialize($categories);
+        if (empty($categories)) {
+            return null;
+        }
+        $_categories = [];
+        foreach ($categories as $category) {
+            $data = $this->connection->fetchAll("SELECT * FROM controlled_vocab_entry_settings WHERE controlled_vocab_entry_id='{$category}'");
+            $cat = [];
+            foreach ($data as $d) {
+                $cat[$d['locale']] = $d['setting_value'];
+            }
+            $_categories[] = $cat;
+
+        }
+        $this->em->persist($journal);
+        foreach ($_categories as $category) {
+            /** @var Subject $subject */
+            $subject = $this->em->getRepository('OjsJournalBundle:Subject')->findOneBy(['subject' => $category['tr_TR']]);
+            if (!$subject) {
+                $subject = new Subject();
+                $subject->setSubject($category['tr_TR']);
+                isset($category['en_US']) && $this->translationRepository
+                    ->translate($subject, 'subject', 'en_US', $category['en_US']);
+                $this->em->persist($subject);
+            }
+
+            $journal->addSubject($subject);
+            $subject->addJournal($journal);
+            $this->em->persist($journal);
+            $this->em->persist($subject);
+
+            $this->em->flush();
+        }
     }
 }
