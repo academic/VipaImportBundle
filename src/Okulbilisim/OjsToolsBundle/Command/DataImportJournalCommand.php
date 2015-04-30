@@ -20,6 +20,7 @@ use Ojs\JournalBundle\Entity\Subject;
 use Ojs\JournalBundle\Entity\InstitutionTypes;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\UserBundle\Entity\Role;
+use Okulbilisim\CmsBundle\Entity\Post;
 use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\Institution;
@@ -213,10 +214,11 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $journal_id = $this->createJournal($journal_detail, $journal_raw);
             $this->saveRecordChange($id, $journal_id, 'Ojs\JournalBundle\Entity\Journal');
 
-            $output->writeln("<info>Journal created.</info>");
+            $output->writeln("<info>Journal created. #{$journal_id}</info>");
 
             $this->saveContacts($journal_detail, $journal_raw, $journal_id);
-            $output->writeln("\n<info>Contacts saved.</info>");
+            $output->writeln("\n<info>All contacts saved.</info>");
+
             $this->connectJournalUsers($journal_id, $output, $id);
 
             $output->writeln("\nUsers added.");
@@ -291,11 +293,15 @@ class DataImportJournalCommand extends ContainerAwareCommand
          * doiSuffix
          * doiSuffixPattern
          */
-
         $this->em->persist($journal);
         $this->em->flush();
+        if (isset($journal_detail['history'])) {
+            $this->createPage($journal, $journal_detail['history'], 'History', 'tr'); //@todo locale
+        }
+
         $journal_id = $journal->getId();
         $this->em->clear();
+
         unset($journal, $journal_detail, $institution, $journal_raw);
 
         return $journal_id;
@@ -318,24 +324,17 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $journal_users = $this->connection->fetchAll("select distinct user_id,role_id from roles where journal_id={$old_journal_id} group by user_id order by user_id asc");
         $users_count = $this->connection->fetchArray("select count(*) as c from (select distinct user_id from roles where journal_id={$old_journal_id} group by user_id order by user_id asc) b;");
 
-        $userProgress = new ProgressBar($output, $users_count[0]);
-        $userProgress->setMessage("Adding users");
-        $userProgress->setFormat('<info>%message%</info> <comment;options=bold>%current%/%max%</comment;options=bold> <fg=white;bg=black>[%bar%]</fg=white;bg=black> %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%');
-        $userProgress->setBarCharacter("≈");
-        $userProgress->setProgressCharacter("∂");
-        $userProgress->setEmptyBarCharacter(" ");
-        $userProgress->start();
         foreach ($journal_users as $journal_user) {
             // all relations disconnecting if i use em->clear. I refind journal for fix this issue
             $user = $this->createUser($journal_user);
             if (!$user) {
-                $userProgress->advance();
                 continue;
             }
             /*
              * User roles with journal
              */
             $role = $this->addJournalRole($user->getId(), $journal_id, $journal_user['role_id']);
+
             /*
              * Add author data
              */
@@ -345,9 +344,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             //performance is sucks if i dont use em->clear.
             $this->em->clear();
 
-            $userProgress->advance();
         }
-        $userProgress->finish();
 
         unset($user, $userProgress, $journal_user, $journal_users, $old_journal_id);
     }
@@ -392,7 +389,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em->persist($user_entity);
         $this->em->flush();
         $this->saveRecordChange($journal_user['user_id'], $user_entity->getId(), 'Ojs\UserBundle\Entity\User');
-
+        $this->output->writeln("<info>User {$user_entity->getUsername()} created. </info>");
         return $user_entity;
     }
 
@@ -405,6 +402,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
     {
         /** @var User $user */
         $user = $this->em->find('OjsUserBundle:User', $user_id);
+        /** @var Journal $journal */
         $journal = $this->em->find('OjsJournalBundle:Journal', $journal_id);
 
         /** @var Role $role */
@@ -431,7 +429,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em->persist($user);
         $this->em->persist($user_role);
         $this->em->flush();
-
+        $this->output->writeln("<info>User {$user->getUsername()} add as {$role->getName()} to {$journal->getTitle()}</info>");
         unset($user_role, $user, $journal, $role);
         return true;
     }
@@ -458,6 +456,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $author->setUser($user);
         $this->em->persist($author);
         $this->em->flush();
+        $this->output->writeln("<info>User {$user->getUsername()} added as author. </info>");
         return $author;
     }
 
@@ -477,17 +476,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
             return;
         $articleProgress = new ProgressBar($output, count($articles));
 
-        $articleProgress->setMessage("Adding articles");
-        $articleProgress->setFormat('<info>%message%</info> <comment;options=bold>%current%/%max%</comment;options=bold> <fg=white;bg=black>[%bar%]</fg=white;bg=black> %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s%');
-        $articleProgress->setBarCharacter("≈");
-        $articleProgress->setProgressCharacter("∂");
-        $articleProgress->setEmptyBarCharacter(" ");
-        $articleProgress->start();
         foreach ($articles as $_article) {
             $this->saveArticleData($_article, $journal_id, false);
-            $articleProgress->advance();
         }
-        $articleProgress->finish();
         unset($journal, $journal_id, $old_journal_id, $output, $articleProgress, $articles, $_article);
     }
 
@@ -635,6 +626,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         }
         $this->em->persist($article);
         $this->em->flush();
+        $this->output->writeln("<info>Article {$article->getTitle()} created.</info>");
         $this->saveRecordChange($_article['article_id'], $article->getId(), 'Ojs\JournalBundle\Entity\Article');
 
         $this->em->clear();
@@ -787,6 +779,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         $this->em->persist($institution);
         $this->em->flush();
+        $this->output->writeln("<info>Institution created #{$institution->getId()} as name {$institution->getName()}</info>");
         return $institution;
     }
 
@@ -860,6 +853,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->saveIssueFiles($issue, $issueData['issue_id']);
         $issue->addArticle($article);
         $this->em->flush();
+        $this->output->writeln("<info>Issue {$issue->getTitle()} created and added to {$article->getTitle()}");
         return $issue;
     }
 
@@ -935,6 +929,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $JournalContact->setJournal($journal);
             $this->em->persist($JournalContact);
             $this->em->flush();
+            $this->output->writeln("<info>Contact {$contact->getTitle()} created. </info>");
         };
         if (isset($journal_detail['supportName'])) {
             $contact = new Contact();
@@ -954,6 +949,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $JournalContact->setJournal($journal);
             $this->em->persist($JournalContact);
             $this->em->flush();
+            $this->output->writeln("<info>Contact {$contact->getTitle()} created. </info>");
+
         }
 
     }
@@ -998,6 +995,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         }
         $this->em->persist($newSection);
         $this->em->flush();
+        $this->output->writeln("<info>Section {$newSection->getTitle()} created.</info>");
         return $newSection;
     }
 
@@ -1040,5 +1038,23 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $this->em->flush();
         }
+    }
+
+    public function createPage(Journal $journal, $content, $title, $locale)
+    {
+        $page = new Post();
+        $twig = $this->getContainer()->get('okulbilisimcmsbundle.twig.post_extension');
+        $journalKey = $twig->encode($journal);
+        $page->setTitle($title)
+            ->setContent($content)
+            ->setObject($journalKey)
+            ->setObjectId($journal->getId())
+            ->setLocale($locale)
+            ->setPostType('default')
+            ->setStatus(1)
+            ->setUniqueKey($journalKey . $journal->getId());
+        $this->em->persist($page);
+        $this->em->flush();
+        $this->output->writeln("<info>Page created #{$page->getId()} as name {$page->getTitle()}</info>");
     }
 }
