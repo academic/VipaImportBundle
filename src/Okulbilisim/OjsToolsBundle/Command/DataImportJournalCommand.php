@@ -572,6 +572,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
             //$citation->setType(); //type not found :\
             $citation->setOrderNum($i);
             $this->em->persist($citation);
+            $article->addCitation($citation);
+            $this->em->persist($article);
 
             $citationSettingOld = $this->connection->fetchAll("SELECT * FROM citation_settings WHERE citation_id={$ac['citation_id']}");
             foreach ($citationSettingOld as $as) {
