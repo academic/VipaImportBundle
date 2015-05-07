@@ -24,7 +24,7 @@ use Okulbilisim\CmsBundle\Entity\Post;
 use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\Institution;
-use Okulbilisim\LocationBundle\Entity\Country;
+use Okulbilisim\LocationBundle\Entity\Location;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -383,8 +383,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $user_entity->setDisableReason(isset($user['disable_reason']) && $user['disable_reason']);
             $user_entity->setStatus(0);
         }
-        $country = $this->em->getRepository('OkulbilisimLocationBundle:Country')->findOneBy(['iso_code' => $user['country']]);
-        if ($country instanceof Country)
+        $country = $this->em->getRepository('OkulbilisimLocationBundle:Location')->findOneBy(['iso_code' => $user['country']]);
+        if ($country instanceof Location)
             $user_entity->setCountry($country);
         $this->em->persist($user_entity);
         $this->em->flush();
