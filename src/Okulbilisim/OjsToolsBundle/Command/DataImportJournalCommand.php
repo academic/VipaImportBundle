@@ -383,9 +383,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $user_entity->setDisableReason(isset($user['disable_reason']) && $user['disable_reason']);
             $user_entity->setStatus(0);
         }
+       /*
         $country = $this->em->getRepository('OkulbilisimLocationBundle:Location')->findOneBy(['iso_code' => $user['country']]);
         if ($country instanceof Location)
-            $user_entity->setCountry($country);
+            $user_entity->setCountry($country); */
         $this->em->persist($user_entity);
         $this->em->flush();
         $this->saveRecordChange($journal_user['user_id'], $user_entity->getId(), 'Ojs\UserBundle\Entity\User');
@@ -510,6 +511,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $article->setSection($section);
         }
         isset($article_settings['default']['pub-id::doi']) && $article->setDoi($article_settings['default']['pub-id::doi']);
+        isset($article_settings['default']['subject']) && $article->setSubjects($article_settings['default']['subject']);
 
 
         switch ($_article['status']) {
@@ -544,6 +546,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         isset($_article['date_submitted']) && $article->setSubmissionDate(new \DateTime($_article['date_submitted']));
         isset($_article['hide_author']) && $article->setIsAnonymous($_article['hide_author'] ? true : false);
+        isset($_article['fileName']) && $article->setHeader($_article['fileName'] ? true : false);
 
         unset($article_settings['default']);
 
@@ -626,6 +629,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $article->setIssue($issue);
             }
         }
+
         $this->em->persist($article);
         $this->em->flush();
         $this->output->writeln("<info>Article {$article->getTitle()} created.</info>");
