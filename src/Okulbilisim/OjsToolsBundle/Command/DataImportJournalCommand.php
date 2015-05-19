@@ -16,7 +16,10 @@ use Ojs\JournalBundle\Entity\Contact;
 use Ojs\JournalBundle\Entity\File;
 use Ojs\JournalBundle\Entity\JournalContact;
 use Ojs\JournalBundle\Entity\JournalSection;
+use Ojs\JournalBundle\Entity\JournalSetting;
+use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Subject;
+use Ojs\JournalBundle\Entity\SubmissionChecklist;
 use Ojs\JournalBundle\Entity\InstitutionTypes;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\UserBundle\Entity\Role;
@@ -202,10 +205,12 @@ class DataImportJournalCommand extends ContainerAwareCommand
              */
             $journal_detail = [];
             foreach ($journal_details as $_journal_detail) {
-                if ($_journal_detail['locale'] == 'tr_TR' || empty($_journal_detail['locale']))
-                    $journal_detail[$_journal_detail['setting_name']] = $_journal_detail['setting_value'];
+                if ($_journal_detail['locale'] == 'tr_TR' || empty($_journal_detail['locale'])){
+                    $journal_detail['tr_TR'][$_journal_detail['setting_name']] = $_journal_detail['setting_value'];
+                }else{
+                    $journal_detail[$_journal_detail['locale']][$_journal_detail['setting_name']] = $_journal_detail['setting_value'];
+                }
             }
-
             unset($_journal_detail, $journal_details);
 
             /**
@@ -243,16 +248,21 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
 
     /**
-     * @param $journal_detail
+     * @param $journal_details
      * @param $journal_raw
      * @return int
      */
-    protected function createJournal($journal_detail, $journal_raw)
+    protected function createJournal($journal_details, $journal_raw)
     {
-        if (!$journal_detail)
+        if (!$journal_details)
             return null;
+        $defaultLocale = $this->defaultLocale($journal_details);
+        $journal_detail = $journal_details[$defaultLocale];
+        unset($journal_details[$defaultLocale]);
+
         $journal = new Journal();
         isset($journal_detail['title']) && $journal->setTitle($journal_detail['title']);
+
         isset($journal_detail['categories']) && $this->setSubjects($journal, $journal_detail['categories']);
         isset($journal_detail['abbreviation']) && $journal->setTitleAbbr($journal_detail['abbreviation']);
         isset($journal_detail['description']) && $journal->setDescription($journal_detail['description']);
@@ -269,6 +279,13 @@ class DataImportJournalCommand extends ContainerAwareCommand
         isset($journal_detail['searchKeywords']) && $journal->setTags($journal_detail['searchKeywords']);
         //$journal->setCountryId();
 
+        //Localized
+        foreach ($journal_details as $key => $value) {
+                isset($value['title']) && $this->translationRepository
+                    ->translate($journal, 'title', $key, $value['title']);
+        }
+
+
         if (isset($journal_detail['publisherInstitution'])) {
             /**
              * Institution
@@ -284,20 +301,102 @@ class DataImportJournalCommand extends ContainerAwareCommand
             }
         }
 
+        //Submissio locales
+        $submissionLocales = $journal_detail['supportedSubmissionLocales'];
+        if($submissionLocales){
+            $locales =  unserialize($submissionLocales);
+            foreach ($locales as $locale) {
+                if(empty($locale))
+                    continue;
+                $locale = explode('_',$locale)[0];
+                $language = $this->em->getRepository('OjsJournalBundle:Lang')->findOneBy(['code'=>$locale]);
+                if(!$language){
+                    $language = new Lang();
+                    $language->setCode($locale);
+                    $this->em->persist($language);
+                }
+                $journal->addLanguage($language);
+            }
+        }
 
-        /**
-         * as journalsettings
-         * crossrefPassword
-         * crossrefUsername
-         * doiPrefix
-         * doiSuffix
-         * doiSuffixPattern
-         */
         $this->em->persist($journal);
         $this->em->flush();
-        if (isset($journal_detail['history'])) {
-            $this->createPage($journal, $journal_detail['history'], 'History', 'tr'); //@todo locale
+
+        //submission checklist
+        $checklist = unserialize($journal_detail['submissionChecklist']);
+
+        foreach ($checklist as $item) {
+            $locale = explode('_',$defaultLocale)[0];
+            $checkitem = new SubmissionChecklist();
+            $checkitem->setJournal($journal);
+            if(strlen($item['content'])>250){
+                $checkitem->setLabel(substr($item['content'],0,150))
+                    ->setDetail($item['content']);
+            }else{
+                $checkitem->setLabel($item['content']);
+            }
+                $checkitem->setLocale($locale);
+                $checkitem->setVisible(true);
+            $this->em->persist($checkitem);
+            $this->em->flush();
         }
+
+        foreach ($journal_details as $key=>$value) {
+
+            $checklist = unserialize($value['submissionChecklist']);
+            foreach ($checklist as $item) {
+                $locale = explode('_',$key)[0];
+                $checkitem = new SubmissionChecklist();
+                $checkitem->setJournal($journal);
+                if(strlen($item['content'])>250){
+                    $checkitem->setLabel(substr($item['content'],0,150))
+                        ->setDetail($item['content']);
+                }else{
+                    $checkitem->setLabel($item['content']);
+                }
+                $checkitem->setLocale($locale);
+                $checkitem->setVisible(true);
+                $this->em->persist($checkitem);
+                $this->em->flush();
+            }
+
+
+        }
+
+
+        if (isset($journal_detail['history'])) {
+            $this->createPage($journal, $journal_detail['history'], 'History', $defaultLocale);
+        }
+        if(isset($journal_detail['reviewGuidelines'])){
+            $this->createPage($journal, $journal_detail['reviewGuidelines'], 'Review Guide Lines', $defaultLocale);
+        }
+        if(isset($journal_detail['additionalHomeContent'])){
+            $this->createPage($journal, $journal_detail['additionalHomeContent'], 'Additional Home Content', $defaultLocale);
+        }
+
+        foreach ($journal_details as $key=>$value) {
+            $locale = explode('_',$key)[0];
+            if(isset($value['history'])){
+                $this->createPage($journal, $value['history'], 'History', $locale);
+            }
+            if(isset($value['reviewGuidelines'])){
+                $this->createPage($journal, $value['reviewGuidelines'], 'Review Guide Lines', $locale);
+            }
+            if(isset($value['additionalHomeContent'])){
+                $this->createPage($journal, $value['additionalHomeContent'], 'Additional Home Content', $locale);
+            }
+        }
+
+            //Journal settings
+        foreach ($journal_detail as $key => $value) {
+            if(empty($value))
+                continue;
+            $js = new JournalSetting($key,$value,$journal);
+            $this->em->persist($js);
+            $this->em->flush();
+            $this->output->writeln("<info>Setting: $key Value: $value</info>");
+        }
+
 
         $journal_id = $journal->getId();
         $this->em->clear();
