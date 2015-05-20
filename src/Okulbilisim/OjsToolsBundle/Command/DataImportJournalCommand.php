@@ -323,26 +323,30 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em->flush();
 
         //submission checklist
-        $checklist = unserialize($journal_detail['submissionChecklist']);
+        if(in_array('submissionChecklist',$journal_detail)){
+            $checklist = unserialize($journal_detail['submissionChecklist']);
 
-        foreach ($checklist as $item) {
-            $locale = explode('_',$defaultLocale)[0];
-            $checkitem = new SubmissionChecklist();
-            $checkitem->setJournal($journal);
-            if(strlen($item['content'])>250){
-                $checkitem->setLabel(substr($item['content'],0,150))
-                    ->setDetail($item['content']);
-            }else{
-                $checkitem->setLabel($item['content']);
-            }
+            foreach ($checklist as $item) {
+                $locale = explode('_',$defaultLocale)[0];
+                $checkitem = new SubmissionChecklist();
+                $checkitem->setJournal($journal);
+                if(strlen($item['content'])>250){
+                    $checkitem->setLabel(substr($item['content'],0,150))
+                        ->setDetail($item['content']);
+                }else{
+                    $checkitem->setLabel($item['content']);
+                }
                 $checkitem->setLocale($locale);
                 $checkitem->setVisible(true);
-            $this->em->persist($checkitem);
-            $this->em->flush();
+                $this->em->persist($checkitem);
+                $this->em->flush();
+            }
         }
 
-        foreach ($journal_details as $key=>$value) {
 
+        foreach ($journal_details as $key=>$value) {
+            if(!in_array('submissionChecklist',$value))
+                continue;
             $checklist = unserialize($value['submissionChecklist']);
             foreach ($checklist as $item) {
                 $locale = explode('_',$key)[0];
