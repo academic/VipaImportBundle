@@ -322,7 +322,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
         //update view and download count
         isset($journal_detail['total_views'])&&$journal->setViewCount($journal_detail['total_views']);
         isset($journal_detail['total_downloads'])&&$journal->setDownloadCount($journal_detail['total_downloads']);
-
         $this->em->persist($journal);
         $this->em->flush();
 
