@@ -319,6 +319,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
             }
         }
 
+        //update view and download count
+        isset($journal_detail['total_views'])&&$journal->setViewCount($journal_detail['total_views']);
+        isset($journal_detail['total_downloads'])&&$journal->setDownloadCount($journal_detail['total_downloads']);
+
         $this->em->persist($journal);
         $this->em->flush();
 
@@ -400,7 +404,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->em->flush();
             $this->output->writeln("<info>Setting: $key Value: $value</info>");
         }
-
 
         $journal_id = $journal->getId();
         $this->em->clear();
