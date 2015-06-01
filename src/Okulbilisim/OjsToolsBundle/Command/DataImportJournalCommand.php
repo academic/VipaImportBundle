@@ -273,9 +273,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
         isset($journal_detail['onlineIssn']) && $journal->setEissn($journal_detail['onlineIssn']);
         isset($journal_detail['onlineIssn']) && $journal->setEissn($journal_detail['onlineIssn']);
         isset($journal_raw['path']) && $journal->setPath($journal_raw['path']);
-        // TODO setPeriod
-        // $journal->setPeriod();
-        isset($journal_raw['path']) && $journal->setSlug($journal_raw['path']);
         $journal->setStatus(3);
         isset($journal_detail['publisherUrl']) && $journal->setUrl($journal_detail['publisherUrl']);
         isset($journal_detail['searchKeywords']) && $journal->setTags($journal_detail['searchKeywords']);
@@ -324,6 +321,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         //update view and download count
         isset($journal_detail['total_views'])&&$journal->setViewCount($journal_detail['total_views']);
         isset($journal_detail['total_downloads'])&&$journal->setDownloadCount($journal_detail['total_downloads']);
+        isset($journal_detail['journalPageFooter'])&&$journal->setFooterText($journal_detail['journalPageFooter']);
         $this->em->persist($journal);
         $this->em->flush();
 
@@ -368,8 +366,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $this->em->persist($checkitem);
                 $this->em->flush();
             }
-
-
         }
 
 
@@ -382,6 +378,30 @@ class DataImportJournalCommand extends ContainerAwareCommand
         if(isset($journal_detail['additionalHomeContent'])){
             $this->createPage($journal, $journal_detail['additionalHomeContent'], 'Additional Home Content', $defaultLocale);
         }
+        if(isset($journal_detail['reviewPolicy'])){
+            $this->createPage($journal, $journal_detail['reviewPolicy'], 'Review Policy', $defaultLocale);
+        }
+        if(isset($journal_detail['refLinkInstructions'])){
+            $this->createPage($journal, $journal_detail['refLinkInstructions'], 'Ref Link Instructions', $defaultLocale);
+        }
+        if(isset($journal_detail['readerInformation'])){
+            $this->createPage($journal, $journal_detail['readerInformation'], 'Reader Information', $defaultLocale);
+        }
+        if(isset($journal_detail['proofInstructions'])){
+            $this->createPage($journal, $journal_detail['proofInstructions'], 'Proof Instructions', $defaultLocale);
+        }
+        if(isset($journal_detail['focusScopeDesc'])){
+            $this->createPage($journal, $journal_detail['focusScopeDesc'], 'Focus Scope Desc', $defaultLocale);
+        }
+        if(isset($journal_detail['copyeditInstructions'])){
+            $this->createPage($journal, $journal_detail['copyeditInstructions'], 'Copy Edit Instructions', $defaultLocale);
+        }
+        if(isset($journal_detail['authorGuidelines'])){
+            $this->createPage($journal, $journal_detail['authorGuidelines'], 'Author Guidelines', $defaultLocale);
+        }
+        if(isset($journal_detail['authorInformation'])){
+            $this->createPage($journal, $journal_detail['authorInformation'], 'Author Information', $defaultLocale);
+        }
 
         foreach ($journal_details as $key=>$value) {
             $locale = explode('_',$key)[0];
@@ -393,6 +413,30 @@ class DataImportJournalCommand extends ContainerAwareCommand
             }
             if(isset($value['additionalHomeContent'])){
                 $this->createPage($journal, $value['additionalHomeContent'], 'Additional Home Content', $locale);
+            }
+            if(isset($value['reviewPolicy'])){
+                $this->createPage($journal, $value['reviewPolicy'], 'Review Policy', $locale);
+            }
+            if(isset($value['refLinkInstructions'])){
+                $this->createPage($journal, $value['refLinkInstructions'], 'Ref Link Instructions', $locale);
+            }
+            if(isset($value['readerInformation'])){
+                $this->createPage($journal, $value['readerInformation'], 'Reader Information', $locale);
+            }
+            if(isset($value['proofInstructions'])){
+                $this->createPage($journal, $value['proofInstructions'], 'Proof Instructions', $locale);
+            }
+            if(isset($value['focusScopeDesc'])){
+                $this->createPage($journal, $value['focusScopeDesc'], 'Focus Scope Desc', $locale);
+            }
+            if(isset($value['copyeditInstructions'])){
+                $this->createPage($journal, $value['copyeditInstructions'], 'Copy Edit Instructions', $locale);
+            }
+            if(isset($value['authorGuidelines'])){
+                $this->createPage($journal, $value['authorGuidelines'], 'Author Guidelines', $locale);
+            }
+            if(isset($value['authorInformation'])){
+                $this->createPage($journal, $value['authorInformation'], 'Author Information', $locale);
             }
         }
         $this->addPagesToBlock($journal);
@@ -1153,6 +1197,12 @@ class DataImportJournalCommand extends ContainerAwareCommand
         }
     }
 
+    /**
+     * @param Journal $journal
+     * @param $content
+     * @param $title
+     * @param $locale
+     */
     public function createPage(Journal $journal, $content, $title, $locale)
     {
         $page = new Post();
