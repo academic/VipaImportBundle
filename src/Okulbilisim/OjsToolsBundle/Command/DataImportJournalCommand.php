@@ -47,6 +47,12 @@ use Symfony\Component\Finder\Exception\ShellCommandFailureException;
 
 /**
  * Class DataImportJournalCommand
+ * ## How to run
+ *
+ * php app/console ojs:import:journal JournalId MysqlConnectionString
+ *
+ * JournalId Integer
+ * MysqlConnectionString user:password@host/db
  * @package Okulbilisim\OjsToolsBundle\Command
  */
 class DataImportJournalCommand extends ContainerAwareCommand
@@ -136,7 +142,11 @@ class DataImportJournalCommand extends ContainerAwareCommand
             ->setName('ojs:import:journal')
             ->setDescription('Import journals')
             ->addArgument(
-                'JournalId', InputArgument::REQUIRED, 'Journal ID at ');
+                'JournalId', InputArgument::REQUIRED, 'Journal ID at ')
+            ->addArgument(
+                'database', InputArgument::REQUIRED, 'PKP Database Connection string [root:123456@localhost/dbname]'
+            )
+        ;
         $roles = [];
         /**
          * we must convert hex data to decimal for database equality.
@@ -156,12 +166,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $database = $this->getContainer()->getParameter("old_database");
-        $this->database['user'] = $database['user'];
-        $this->database['password'] = $database['password'];
-        $this->database['host'] = $database['host'];
-        $this->database['dbname'] = $database['database'];
-        $this->database['charset'] = 'utf8';
+        $this->parseConnectionString($input->getArgument('database'));
 
         $connectionFactory = $this->getContainer()->get('doctrine.dbal.connection_factory');
         $this->connection = $connectionFactory->createConnection($this->database);
@@ -529,7 +534,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         isset($user['locales']) && $user_entity->setLocales(serialize(explode(':', $user['locales'])));
         $user_entity->generateApiKey();
         isset($user['salutation']) && $user_entity->setTitle($user['salutation']);
-        if ($user['disabled'] == 1) {
+        if ($user['disabled'] == 1 && !$usercheck) {
             $user_entity->setIsActive(false);
             $user_entity->setDisableReason(isset($user['disable_reason']) && $user['disable_reason']);
             $user_entity->setStatus(0);
@@ -1259,5 +1264,27 @@ class DataImportJournalCommand extends ContainerAwareCommand
         }
 
         $this->em->flush();
+    }
+    private function parseConnectionString($connectionString){
+        preg_match_all("~([^\:]+)\:([^\@]+)?\@([^\/]+)\/(.*)~",$connectionString,$matches);
+
+        if(isset($matches[1]))
+            $this->database['user'] = $matches[1][0];
+        else
+            throw new \Exception("Hatalı parametre.");
+        if(isset($matches[2]) )
+            $this->database['password'] = empty($matches[2][0])?null:$matches[2][0];
+        else
+            throw new \Exception("Hatalı parametre.");
+        if(isset($matches[3]))
+            $this->database['host'] = $matches[3][0];
+        else
+            throw new \Exception("Hatalı parametre.");
+        if(isset($matches[4]))
+            $this->database['dbname'] = $matches[4][0];
+        else
+            throw new \Exception("Hatalı parametre.");
+
+        $this->database['charset'] = 'utf8';
     }
 }
