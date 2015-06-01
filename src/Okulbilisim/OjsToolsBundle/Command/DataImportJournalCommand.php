@@ -22,6 +22,8 @@ use Ojs\JournalBundle\Entity\Subject;
 use Ojs\JournalBundle\Entity\SubmissionChecklist;
 use Ojs\JournalBundle\Entity\InstitutionTypes;
 use Ojs\JournalBundle\Entity\Issue;
+use Ojs\SiteBundle\Entity\Block;
+use Ojs\SiteBundle\Entity\BlockLink;
 use Ojs\UserBundle\Entity\Role;
 use Okulbilisim\CmsBundle\Entity\Post;
 use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
@@ -393,7 +395,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $this->createPage($journal, $value['additionalHomeContent'], 'Additional Home Content', $locale);
             }
         }
-
+        $this->addPagesToBlock($journal);
             //Journal settings
         foreach ($journal_detail as $key => $value) {
             if(empty($value))
@@ -1167,5 +1169,45 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em->persist($page);
         $this->em->flush();
         $this->output->writeln("<info>Page created #{$page->getId()} as name {$page->getTitle()}</info>");
+    }
+
+    public function addPagesToBlock(Journal $journal)
+    {
+        $twig = $this->getContainer()->get('okulbilisimcmsbundle.twig.post_extension');
+        $journalKey = $twig->encode($journal);
+        $pages = $this->em->getRepository('OkulbilisimCmsBundle:Post')->findBy([
+            'object'=>$journalKey,
+            'objectId'=>$journal->getId()
+        ]);
+        if(!$pages)
+            return null;
+
+        $block = $this->em->getRepository('OjsSiteBundle:Block')->findOneBy(['object_type'=>'journal','object_id'=>$journal->getId(),'type'=>'link']);
+        if(!$block){
+            $block = new Block();
+            $block->setObjectType('journal')
+                ->setObjectId($journal->getId())
+                ->setType('link')
+                ->setColor('primary')
+                ->setTitle("Sayfalar");
+            $this->em->persist($block);
+            $this->em->flush();
+        }
+        $router = $this->getContainer()->get('router');
+        foreach ($pages as $page) {
+            /** @var Post $page */
+            $blockLink = new BlockLink();
+            $blockLink->setBlock($block)
+                ->setPost($page)
+                ->setText($page->getTitle())
+                ->setUrl("http:".$router->generate('ojs_journal_index_page_detail',['institution'=>$journal->getInstitution()->getSlug(),'journal_slug'=>$journal->getSlug(),'slug'=>$page->getSlug()]))
+            ;
+
+            $this->em->persist($blockLink);
+            $block->addLink($blockLink);
+            $this->em->persist($block);
+        }
+
+        $this->em->flush();
     }
 }
