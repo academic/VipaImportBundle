@@ -29,7 +29,7 @@ use Okulbilisim\CmsBundle\Entity\Post;
 use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\Institution;
-use Okulbilisim\LocationBundle\Entity\Location;
+use Ojs\LocationBundle\Entity\Location;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -78,7 +78,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
      * @var array Ojs roles data map
      */
     protected $rolesMap = [
-        'ROLE_ID_SITE_ADMIN' => "ROLE_SUPER_ADMIN",
+        'ROLE_ID_SITE_ADMIN' => "ROLE_ADMIN",
         'ROLE_ID_SUBMITTER' => "ROLE_USER",
         'ROLE_ID_JOURNAL_MANAGER' => "ROLE_JOURNAL_MANAGER",
         'ROLE_ID_EDITOR' => "ROLE_EDITOR",
@@ -285,8 +285,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         //Localized
         foreach ($journal_details as $key => $value) {
-                isset($value['title']) && $this->translationRepository
-                    ->translate($journal, 'title', $key, $value['title']);
+            isset($value['title']) && $this->translationRepository
+                ->translate($journal, 'title', $key, $value['title']);
         }
 
 
@@ -445,7 +445,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             }
         }
         $this->addPagesToBlock($journal);
-            //Journal settings
+        //Journal settings
         foreach ($journal_detail as $key => $value) {
             if(empty($value))
                 continue;
@@ -539,10 +539,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $user_entity->setDisableReason(isset($user['disable_reason']) && $user['disable_reason']);
             $user_entity->setStatus(0);
         }
-       /*
-        $country = $this->em->getRepository('OkulbilisimLocationBundle:Location')->findOneBy(['iso_code' => $user['country']]);
-        if ($country instanceof Location)
-            $user_entity->setCountry($country); */
+        /*
+         $country = $this->em->getRepository('OkulbilisimLocationBundle:Location')->findOneBy(['iso_code' => $user['country']]);
+         if ($country instanceof Location)
+             $user_entity->setCountry($country); */
         $this->em->persist($user_entity);
         $this->em->flush();
         $this->saveRecordChange($journal_user['user_id'], $user_entity->getId(), 'Ojs\UserBundle\Entity\User');
@@ -554,6 +554,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
      * @param $user_id
      * @param $journal_id
      * @param $role_id
+     * @return bool
+     * @throws \Doctrine\ORM\ORMException
      */
     protected function addJournalRole($user_id, $journal_id, $role_id)
     {
@@ -562,31 +564,39 @@ class DataImportJournalCommand extends ContainerAwareCommand
         /** @var Journal $journal */
         $journal = $this->em->find('OjsJournalBundle:Journal', $journal_id);
 
-        /** @var Role $role */
-        $role = $this->em->getRepository('OjsUserBundle:Role')->findOneBy([
-            'role' => $this->rolesMap[$this->roles[$role_id]]]);
-        if ($user->hasRole($role->getRole())) {
-            return false;
+
+        $ojsRole = $this->rolesMap[$this->roles[$role_id]];
+        if($ojsRole === 'ROLE_ADMIN') {
+            $user->setAdmin(true);
+            $this->em->persist($user);
+            $transferred = array('id' => 0, 'name' => 'ROLE_ADMIN');
         }
-        if (!$role) {
-            $this->output->writeln("<error>Role not exists. {$role_id}</error>");
+        else {
+            $role = $this->em->getRepository('OjsUserBundle:Role')->findOneBy([
+                'role' => $ojsRole]);
+            if (!$role) {
+                $this->output->writeln("<error>Role not exists. {$role_id}</error>");
+                return false;
+            }
+            $userJournalRole = $this->em->getRepository('OjsUserBundle:UserJournalRole')
+                ->findOneBy(
+                    array('user' => $user, 'role' => $role, 'journal' => $journal)
+                );
+            if($userJournalRole){
+                return false;
+            }
+            $userJournalRole = new UserJournalRole();
+            $userJournalRole->setUser($user);
+            $userJournalRole->setJournal($journal);
+            $userJournalRole->setRole($role);
+            $this->em->persist($userJournalRole);
+            $transferred = array('id' => $role->getId(), 'name' => $role->getName());
         }
 
-        $user_role = new UserJournalRole();
-        $user_role->setUser($user);
-        $user_role->setJournal($journal);
-        $user_role->setRole($role);
+        $this->saveRecordChange($role_id, $transferred['id'], 'Ojs\UserBundle\Entity\Role');
 
-        $role->addUser($user);
-
-        $user->addRole($role);
-        $this->saveRecordChange($role_id, $role->getId(), 'Ojs\UserBundle\Entity\Role');
-
-        $this->em->persist($role);
-        $this->em->persist($user);
-        $this->em->persist($user_role);
         $this->em->flush();
-        $this->output->writeln("<info>User {$user->getUsername()} add as {$role->getName()} to {$journal->getTitle()}</info>");
+        $this->output->writeln('<info>User '. $user->getUsername().' add as '.$transferred['name'].' to '.$journal->getTitle().'</info>');
         unset($user_role, $user, $journal, $role);
         return true;
     }
