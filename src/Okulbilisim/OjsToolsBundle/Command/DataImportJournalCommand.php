@@ -7,6 +7,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Gedmo\Translatable\Entity\Repository\TranslationRepository;
+use Ojs\Common\Helper\FileHelper;
 use Ojs\Common\Params\ArticleFileParams;
 use \Ojs\JournalBundle\Document\TransferredRecord;
 use Ojs\JournalBundle\Document\WaitingFiles;
@@ -820,6 +821,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
     {
         /** @var Article $article */
         $article = $this->em->find('OjsJournalBundle:Article', $article_id);
+        $filehelper = new FileHelper();
 
         $article_galleys = $this->connection->fetchAll("SELECT ag.galley_id, ag.file_id,ag.label,ag.locale FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
         foreach ($article_galleys as $galley) {
@@ -854,7 +856,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->saveRecordChange($galley['file_id'], $file->getId(), 'Ojs\JournalBundle\Entity\File');
 
             $waitingfile = new WaitingFiles();
-            $waitingfile->setPath($article_file->getFile()->getName())
+            $filepath = $filehelper->generatePath($article_file->getFile()->getName(),true).$article_file->getFile()->getName();
+            $waitingfile->setPath($filepath)
                 ->setUrl($url)
                 ->setOldId($galley['file_id'])
                 ->setNewId($file->getId());
