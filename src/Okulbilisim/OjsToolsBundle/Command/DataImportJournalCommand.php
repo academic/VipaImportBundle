@@ -619,7 +619,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $author->setLocales($user->getLocales());
         $author->setUrl($user->getUrl());
         $author->setPhone($user->getPhone());
-        $author->setCountry($user->getCountry());
+        $user->getCountry()!==null&&$author->setCountry($user->getCountry());
         $author->setUser($user);
         $this->em->persist($author);
         $this->em->flush();
@@ -1238,6 +1238,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
     public function addPagesToBlock(Journal $journal)
     {
+        if(!$journal->getSlug())
+            return;
         $twig = $this->getContainer()->get('okulbilisimcmsbundle.twig.post_extension');
         $journalKey = $twig->encode($journal);
         $pages = $this->em->getRepository('OkulbilisimCmsBundle:Post')->findBy([
