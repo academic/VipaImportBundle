@@ -856,7 +856,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->saveRecordChange($galley['file_id'], $file->getId(), 'Ojs\JournalBundle\Entity\File');
 
             $waitingfile = new WaitingFiles();
-            $filepath = $filehelper->generatePath($article_file->getFile()->getName(),true).$article_file->getFile()->getName();
+            $filepath = $filehelper->generatePath($article_file->getFile()->getName()).$article_file->getFile()->getName();
             $waitingfile->setPath($filepath)
                 ->setUrl($url)
                 ->setOldId($galley['file_id'])
