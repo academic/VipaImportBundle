@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityNotFoundException;
 use Gedmo\Translatable\Entity\Repository\TranslationRepository;
 use Ojs\Common\Params\ArticleFileParams;
 use \Ojs\JournalBundle\Document\TransferredRecord;
+use Ojs\JournalBundle\Document\WaitingFiles;
 use Ojs\JournalBundle\Entity\ArticleFile;
 use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\CitationSetting;
@@ -228,10 +229,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $output->writeln("<info>Journal created. #{$journal_id}</info>");
 
-            $this->saveContacts($journal_detail, $journal_raw, $journal_id);
+            //$this->saveContacts($journal_detail, $journal_raw, $journal_id);
             $output->writeln("\n<info>All contacts saved.</info>");
 
-            $this->connectJournalUsers($journal_id, $output, $id);
+            //$this->connectJournalUsers($journal_id, $output, $id);
 
             $output->writeln("\nUsers added.");
 
@@ -817,9 +818,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     public function saveArticleFiles($article_id, $old_article_id)
     {
+        /** @var Article $article */
         $article = $this->em->find('OjsJournalBundle:Article', $article_id);
 
-        $article_galleys = $this->connection->fetchAll("SELECT ag.file_id,ag.label,ag.locale FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
+        $article_galleys = $this->connection->fetchAll("SELECT ag.galley_id, ag.file_id,ag.label,ag.locale FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
         foreach ($article_galleys as $galley) {
             if (!$article)
                 $article = $this->em->find('OjsJournalBundle:Article', $article->getId());
@@ -829,6 +831,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
             }
             if (!$article_file)
                 continue;
+            $journal_path = $article->getJournal()->getPath();
+            $galley_setting = $this->connection->fetchAssoc("SELECT setting_value FROM article_galley_settings WHERE galley_id={$galley['galley_id']} and setting_name='pub-id::publisher-id'");
+            $url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$article->getId()}/{$galley_setting['setting_value']}";
             $file = new File();
             $file->setName($article_file['file_name']);
             $file->setMimeType($article_file['file_type']);
@@ -847,6 +852,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->em->persist($article_file);
             $this->em->flush();
             $this->saveRecordChange($galley['file_id'], $file->getId(), 'Ojs\JournalBundle\Entity\File');
+
+            $waitingfile = new WaitingFiles();
+            $waitingfile->setPath($article_file->getFile()->getName())
+                ->setUrl($url)
+                ->setOldId($galley['file_id'])
+                ->setNewId($file->getId());
+            $this->dm->persist($waitingfile);
+            $this->dm->flush();
 
         }
 
