@@ -873,6 +873,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             }
             $sup_settings = $this->connection->fetchAll("SELECT s.setting_name,s.setting_value,s.locale FROM article_supp_file_settings s WHERE s.supp_id={$sup_file['supp_id']}");
             $sup_file_detail = $this->connection->fetchAssoc("SELECT f.file_type,f.file_size,f.file_name,f.source_revision FROM article_files f WHERE f.file_id={$sup_file['file_id']}");
+
             $supp_settings = [];
             /** groupped locally  */
             foreach ($sup_settings as $as) {
@@ -906,6 +907,17 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->em->persist($article_file);
 
             $this->em->flush();
+
+         /**
+          *   $waitingfile = new WaitingFiles();
+            $filepath = $filehelper->generatePath($article_file->getFile()->getName()).$article_file->getFile()->getName();
+            $waitingfile->setPath($filepath)
+                ->setUrl()
+                ->setOldId()
+                ->setNewId($file->getId());
+            $this->dm->persist($waitingfile);
+            $this->dm->flush();
+          * */
 
         }
         unset($article, $defaultLocale, $article_file, $article_galleys, $article_id, $article_supplementary_files, $defaultLocale
@@ -1047,7 +1059,29 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
     protected function saveIssueFiles(Issue $issue, $old_issue_id)
     {
-        //$galleys = $this->connection->fetchAll("SELECT * FROM issue_files WHERE issue_id={$old_issue_id}");
+        $galleys = $this->connection->fetchAll("SELECT * FROM issue_galleys WHERE issue_id={$old_issue_id}");
+        $journalPath = $issue->getJournal()->getPath();
+        $fileHelper = new FileHelper();
+        foreach ($galleys as $galley) {
+
+            $oldFile = $this->connection->fetchAssoc("SELECT * FROM issue_files WHERE file_id={$galley['file_id']}");
+            $file = new File();
+            $file->setName($oldFile['file_name'])
+                ->setMimeType($oldFile['file_type'])
+                ->setSize($oldFile['file_size']);
+
+            //@todo continue after issuefile feature
+            $fileUrl = "http://dergipark.ulakbim.gov.tr/$journalPath/issue/download/{$galley['issue_id']}/{$galley['galley_id']}";
+            $waitingfile = new WaitingFiles();
+            $filepath = $fileHelper->generatePath($issue_file->getFile()->getName()).$issue_file->getFile()->getName();
+            $waitingfile->setPath($filepath)
+                ->setUrl($fileUrl)
+                ->setOldId($galley['file_id'])
+                ->setNewId($file->getId());
+            $this->dm->persist($waitingfile);
+            $this->dm->flush();
+        }
+
         // where is issue files ?
         return true;
     }
