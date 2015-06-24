@@ -230,10 +230,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $output->writeln("<info>Journal created. #{$journal_id}</info>");
 
-            //$this->saveContacts($journal_detail, $journal_raw, $journal_id);
+            $this->saveContacts($journal_detail, $journal_raw, $journal_id);
             $output->writeln("\n<info>All contacts saved.</info>");
 
-            //$this->connectJournalUsers($journal_id, $output, $id);
+            $this->connectJournalUsers($journal_id, $output, $id);
 
             $output->writeln("\nUsers added.");
 
@@ -279,7 +279,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         isset($journal_detail['printIssn']) && $journal->setIssn($journal_detail['printIssn']);
         isset($journal_detail['onlineIssn']) && $journal->setEissn($journal_detail['onlineIssn']);
         isset($journal_detail['onlineIssn']) && $journal->setEissn($journal_detail['onlineIssn']);
-        isset($journal_raw['path']) && $journal->setPath($journal_raw['path']);
+        isset($journal_raw['path']) && $journal->setPath($journal_raw['path']) && $journal->setSlug($journal_raw['path']);
         $journal->setStatus(3);
         isset($journal_detail['publisherUrl']) && $journal->setUrl($journal_detail['publisherUrl']);
         isset($journal_detail['searchKeywords']) && $journal->setTags($journal_detail['searchKeywords']);
@@ -1265,7 +1265,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         if(!$pages)
             return null;
 
-        $block = $this->em->getRepository('OjsSiteBundle:Block')->findOneBy(['object_type'=>'journal','object_id'=>$journal->getId(),'type'=>'link']);
+        $block = $this->em->getRepository('OjsSiteBundle:Block')->findOneBy(['objectType'=>'journal','objectId'=>$journal->getId(),'type'=>'link']);
         if(!$block){
             $block = new Block();
             $block->setObjectType('journal')
