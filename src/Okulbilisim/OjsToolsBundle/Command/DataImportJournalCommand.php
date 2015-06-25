@@ -24,6 +24,7 @@ use Ojs\JournalBundle\Entity\Subject;
 use Ojs\JournalBundle\Entity\SubmissionChecklist;
 use Ojs\JournalBundle\Entity\InstitutionTypes;
 use Ojs\JournalBundle\Entity\Issue;
+use Ojs\JournalBundle\Entity\IssueFile;
 use Ojs\SiteBundle\Entity\Block;
 use Ojs\SiteBundle\Entity\BlockLink;
 use Ojs\UserBundle\Entity\Role;
@@ -856,7 +857,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->saveRecordChange($galley['file_id'], $file->getId(), 'Ojs\JournalBundle\Entity\File');
 
             $waitingfile = new WaitingFiles();
-            $filepath = $filehelper->generatePath($article_file->getFile()->getName()).$article_file->getFile()->getName();
+            $filepath = $filehelper->generatePath("uploads/articlefiles/".$article_file->getFile()->getName()).$article_file->getFile()->getName();
             $waitingfile->setPath($filepath)
                 ->setUrl($url)
                 ->setOldId($galley['file_id'])
@@ -1071,9 +1072,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 ->setSize($oldFile['file_size']);
 
             //@todo continue after issuefile feature
+            $issueFile = new IssueFile();
+            $issueFile->setFile($file)
+                ->setIssue($issue)
+                ->setTitle($oldFile['file_name']);
+
             $fileUrl = "http://dergipark.ulakbim.gov.tr/$journalPath/issue/download/{$galley['issue_id']}/{$galley['galley_id']}";
             $waitingfile = new WaitingFiles();
-            $filepath = $fileHelper->generatePath($issue_file->getFile()->getName()).$issue_file->getFile()->getName();
+            $filepath = $fileHelper->generatePath("uploads/issuefiles/".$issueFile->getFile()->getName()).$issueFile->getFile()->getName();
             $waitingfile->setPath($filepath)
                 ->setUrl($fileUrl)
                 ->setOldId($galley['file_id'])
