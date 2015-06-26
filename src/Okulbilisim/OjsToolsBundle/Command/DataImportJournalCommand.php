@@ -14,7 +14,6 @@ use Ojs\JournalBundle\Document\WaitingFiles;
 use Ojs\JournalBundle\Entity\ArticleFile;
 use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\CitationSetting;
-use Ojs\JournalBundle\Entity\Contact;
 use Ojs\JournalBundle\Entity\File;
 use Ojs\JournalBundle\Entity\JournalContact;
 use Ojs\JournalBundle\Entity\JournalSection;
@@ -1130,7 +1129,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $journal = $this->em->find('OjsJournalBundle:Journal', $journal_id);
         // save default contact
         if (isset($journal_detail['contactAffiliation'])) {
-            $contact = new Contact();
+            $contact = new JournalContact();
             $contact->setAffiliation($journal_detail['contactAffiliation']);
             isset($journal_detail['contactEmail']) && $contact->setEmail($journal_detail['contactEmail']);
             isset($journal_detail['contactFax']) && $contact->setFax($journal_detail['contactFax']);
@@ -1150,17 +1149,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
             if (!$contactType) {
                 throw new \Exception("You must import default contact types.");
             }
-            $JournalContact = new JournalContact();
+            $contact->setContactType($contactType);
+            $contact->setJournal($journal);
             $this->em->persist($contact);
-            $JournalContact->setContact($contact);
-            $JournalContact->setContactType($contactType);
-            $JournalContact->setJournal($journal);
-            $this->em->persist($JournalContact);
             $this->em->flush();
             $this->output->writeln("<info>Contact {$contact->getTitle()} created. </info>");
         };
         if (isset($journal_detail['supportName'])) {
-            $contact = new Contact();
+            $contact = new JournalContact();
             $contact->setAffiliation($journal_detail['supportName']);
             $contact->setEmail($journal_detail['supportEmail']);
             $contact->setPhone($journal_detail['supportPhone']);
@@ -1170,12 +1166,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 throw new \Exception("You must import default contact types.");
             }
 
-            $JournalContact = new JournalContact();
+            $contact->setContactType($contactType);
+            $contact->setJournal($journal);
             $this->em->persist($contact);
-            $JournalContact->setContact($contact);
-            $JournalContact->setContactType($contactType);
-            $JournalContact->setJournal($journal);
-            $this->em->persist($JournalContact);
             $this->em->flush();
             $this->output->writeln("<info>Contact {$contact->getTitle()} created. </info>");
 
