@@ -44,7 +44,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Ojs\UserBundle\Entity\User;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\Author;
-use Ojs\UserBundle\Entity\UserJournalRole;
+use Ojs\JournalBundle\Entity\JournalRole as UserJournalRole;
 use Symfony\Component\Finder\Exception\ShellCommandFailureException;
 
 /**
@@ -580,7 +580,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $this->output->writeln("<error>Role not exists. {$role_id}</error>");
                 return false;
             }
-            $userJournalRole = $this->em->getRepository('OjsUserBundle:UserJournalRole')
+            $userJournalRole = $this->em->getRepository('OjsJournalBundle:JournalRole')
                 ->findOneBy(
                     array('user' => $user, 'role' => $role, 'journal' => $journal)
                 );
