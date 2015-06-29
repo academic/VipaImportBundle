@@ -771,11 +771,12 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         // insert other languages data
         foreach ($article_settings as $locale => $value) {
-            isset($value['title']) && $this->translationRepository
+            isset($value['title']) &&  $article->getTitle()!="" && $this->translationRepository
                 ->translate($article, 'title', $locale, $value['title']);
-            isset($value['abstract']) && $this->translationRepository
+            echo "\n".$value['abstract']."\n";
+            isset($value['abstract']) && $article->getAbstract()!="" && $this->translationRepository
                 ->translate($article, 'abstract', $locale, $value['abstract']);
-            isset($value['subject']) && $this->translationRepository
+            isset($value['subject']) &&  $article->getSubjects()!="" && $this->translationRepository
                 ->translate($article, 'subjects', $locale, $value['subject']);
         }
 
@@ -823,7 +824,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $article = $this->em->find('OjsJournalBundle:Article', $article_id);
         $filehelper = new FileHelper();
 
-        $article_galleys = $this->connection->fetchAll("SELECT ag.galley_id, ag.file_id,ag.label,ag.locale FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
+        $article_galleys = $this->connection->fetchAll("SELECT ag.article_id,ag.galley_id, ag.file_id,ag.label,ag.locale FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
         foreach ($article_galleys as $galley) {
             if (!$article)
                 $article = $this->em->find('OjsJournalBundle:Article', $article->getId());
@@ -835,7 +836,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 continue;
             $journal_path = $article->getJournal()->getPath();
             $galley_setting = $this->connection->fetchAssoc("SELECT setting_value FROM article_galley_settings WHERE galley_id={$galley['galley_id']} and setting_name='pub-id::publisher-id'");
-            $url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$article->getId()}/{$galley_setting['setting_value']}";
+            $url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$galley['article_id']}/{$galley_setting['setting_value']}";
             $file = new File();
             $file->setName($article_file['file_name']);
             $file->setMimeType($article_file['file_type']);
