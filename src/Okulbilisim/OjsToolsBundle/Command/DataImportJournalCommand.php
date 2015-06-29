@@ -12,6 +12,7 @@ use Ojs\Common\Params\ArticleFileParams;
 use \Ojs\JournalBundle\Document\TransferredRecord;
 use Ojs\JournalBundle\Document\WaitingFiles;
 use Ojs\JournalBundle\Entity\ArticleFile;
+use Ojs\JournalBundle\Entity\ArticleTranslation;
 use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\CitationSetting;
 use Ojs\JournalBundle\Entity\File;
@@ -771,13 +772,37 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         // insert other languages data
         foreach ($article_settings as $locale => $value) {
-            isset($value['title']) &&  $article->getTitle()!="" && $this->translationRepository
-                ->translate($article, 'title', $locale, $value['title']);
-            echo "\n".$value['abstract']."\n";
-            isset($value['abstract']) && $article->getAbstract()!="" && $this->translationRepository
-                ->translate($article, 'abstract', $locale, $value['abstract']);
-            isset($value['subject']) &&  $article->getSubjects()!="" && $this->translationRepository
-                ->translate($article, 'subjects', $locale, $value['subject']);
+            $this->output->writeln("<warning> $locale locale saving.</warning>");
+            if(isset($value['title']) &&  $article->getTitle()!="" ){
+                $at = new ArticleTranslation();
+                $at->setContent($value['title']);
+                $at->setField('title');
+                $at->setLocale($locale);
+                $at->setObject($article);
+                $this->em->persist($at);
+                $this->em->flush();
+            }
+            if(isset($value['abstract']) && $article->getAbstract()!=""){
+                $at = new ArticleTranslation();
+                $at->setContent($value['abstract']);
+                $at->setField('abstract');
+                $at->setLocale($locale);
+                $at->setObject($article);
+                $this->em->persist($at);
+                $this->em->flush();
+            }
+            if(isset($value['subject']) &&  $article->getSubjects()!=""){
+                $at = new ArticleTranslation();
+                $at->setContent($value['subject']);
+                $at->setField('subjects');
+                $at->setLocale($locale);
+                $at->setObject($article);
+                $this->em->persist($at);
+                $this->em->flush();
+            }
+
+            $this->em->persist($article);
+            $this->em->flush();
         }
 
 
