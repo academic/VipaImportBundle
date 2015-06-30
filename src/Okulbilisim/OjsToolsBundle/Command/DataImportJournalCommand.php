@@ -18,7 +18,9 @@ use Ojs\JournalBundle\Entity\CitationSetting;
 use Ojs\JournalBundle\Entity\File;
 use Ojs\JournalBundle\Entity\JournalContact;
 use Ojs\JournalBundle\Entity\JournalSection;
+use Ojs\JournalBundle\Entity\JournalSectionTranslation;
 use Ojs\JournalBundle\Entity\JournalSetting;
+use Ojs\JournalBundle\Entity\JournalTranslation;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Subject;
 use Ojs\JournalBundle\Entity\SubmissionChecklist;
@@ -29,6 +31,7 @@ use Ojs\SiteBundle\Entity\Block;
 use Ojs\SiteBundle\Entity\BlockLink;
 use Ojs\UserBundle\Entity\Role;
 use Okulbilisim\CmsBundle\Entity\Post;
+use Okulbilisim\CmsBundle\Entity\PostTranslation;
 use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\Institution;
@@ -148,8 +151,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 'JournalId', InputArgument::REQUIRED, 'Journal ID at ')
             ->addArgument(
                 'database', InputArgument::REQUIRED, 'PKP Database Connection string [root:123456@localhost/dbname]'
-            )
-        ;
+            );
         $roles = [];
         /**
          * we must convert hex data to decimal for database equality.
@@ -215,9 +217,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
              */
             $journal_detail = [];
             foreach ($journal_details as $_journal_detail) {
-                if ($_journal_detail['locale'] == 'tr_TR' || empty($_journal_detail['locale'])){
+                if ($_journal_detail['locale'] == 'tr_TR' || empty($_journal_detail['locale'])) {
                     $journal_detail['tr_TR'][$_journal_detail['setting_name']] = $_journal_detail['setting_value'];
-                }else{
+                } else {
                     $journal_detail[$_journal_detail['locale']][$_journal_detail['setting_name']] = $_journal_detail['setting_value'];
                 }
             }
@@ -288,8 +290,15 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         //Localized
         foreach ($journal_details as $key => $value) {
-            isset($value['title']) && $this->translationRepository
-                ->translate($journal, 'title', $key, $value['title']);
+            if(isset($value['title'])){
+                $at = new JournalTranslation();
+                $at->setContent($value['title']);
+                $at->setField('title');
+                $at->setLocale($key);
+                $at->setObject($journal);
+                $this->em->persist($at);
+                $this->em->flush();
+            }
         }
 
 
@@ -310,14 +319,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         //Submissio locales
         $submissionLocales = $journal_detail['supportedSubmissionLocales'];
-        if($submissionLocales){
-            $locales =  unserialize($submissionLocales);
+        if ($submissionLocales) {
+            $locales = unserialize($submissionLocales);
             foreach ($locales as $locale) {
-                if(empty($locale))
+                if (empty($locale))
                     continue;
-                $locale = explode('_',$locale)[0];
-                $language = $this->em->getRepository('OjsJournalBundle:Lang')->findOneBy(['code'=>$locale]);
-                if(!$language){
+                $locale = explode('_', $locale)[0];
+                $language = $this->em->getRepository('OjsJournalBundle:Lang')->findOneBy(['code' => $locale]);
+                if (!$language) {
                     $language = new Lang();
                     $language->setCode($locale);
                     $this->em->persist($language);
@@ -327,24 +336,24 @@ class DataImportJournalCommand extends ContainerAwareCommand
         }
 
         //update view and download count
-        isset($journal_detail['total_views'])&&$journal->setViewCount($journal_detail['total_views']);
-        isset($journal_detail['total_downloads'])&&$journal->setDownloadCount($journal_detail['total_downloads']);
-        isset($journal_detail['journalPageFooter'])&&$journal->setFooterText($journal_detail['journalPageFooter']);
+        isset($journal_detail['total_views']) && $journal->setViewCount($journal_detail['total_views']);
+        isset($journal_detail['total_downloads']) && $journal->setDownloadCount($journal_detail['total_downloads']);
+        isset($journal_detail['journalPageFooter']) && $journal->setFooterText($journal_detail['journalPageFooter']);
         $this->em->persist($journal);
         $this->em->flush();
 
         //submission checklist
-        if(in_array('submissionChecklist',$journal_detail)){
+        if (in_array('submissionChecklist', $journal_detail)) {
             $checklist = unserialize($journal_detail['submissionChecklist']);
 
             foreach ($checklist as $item) {
-                $locale = explode('_',$defaultLocale)[0];
+                $locale = explode('_', $defaultLocale)[0];
                 $checkitem = new SubmissionChecklist();
                 $checkitem->setJournal($journal);
-                if(strlen($item['content'])>250){
-                    $checkitem->setLabel(substr($item['content'],0,150))
+                if (strlen($item['content']) > 250) {
+                    $checkitem->setLabel(substr($item['content'], 0, 150))
                         ->setDetail($item['content']);
-                }else{
+                } else {
                     $checkitem->setLabel($item['content']);
                 }
                 $checkitem->setLocale($locale);
@@ -355,18 +364,18 @@ class DataImportJournalCommand extends ContainerAwareCommand
         }
 
 
-        foreach ($journal_details as $key=>$value) {
-            if(!in_array('submissionChecklist',$value))
+        foreach ($journal_details as $key => $value) {
+            if (!in_array('submissionChecklist', $value))
                 continue;
             $checklist = unserialize($value['submissionChecklist']);
             foreach ($checklist as $item) {
-                $locale = explode('_',$key)[0];
+                $locale = explode('_', $key)[0];
                 $checkitem = new SubmissionChecklist();
                 $checkitem->setJournal($journal);
-                if(strlen($item['content'])>250){
-                    $checkitem->setLabel(substr($item['content'],0,150))
+                if (strlen($item['content']) > 250) {
+                    $checkitem->setLabel(substr($item['content'], 0, 150))
                         ->setDetail($item['content']);
-                }else{
+                } else {
                     $checkitem->setLabel($item['content']);
                 }
                 $checkitem->setLocale($locale);
@@ -376,83 +385,62 @@ class DataImportJournalCommand extends ContainerAwareCommand
             }
         }
 
+        $pages = [];
 
         if (isset($journal_detail['history'])) {
-            $this->createPage($journal, $journal_detail['history'], 'History', $defaultLocale);
+            $pages['history'] = $this->createPage($journal, $journal_detail['history'], 'History', $defaultLocale);
         }
-        if(isset($journal_detail['reviewGuidelines'])){
-            $this->createPage($journal, $journal_detail['reviewGuidelines'], 'Review Guide Lines', $defaultLocale);
+        if (isset($journal_detail['reviewGuidelines'])) {
+            $pages['reviewGuidelines'] = $this->createPage($journal, $journal_detail['reviewGuidelines'], 'Review Guide Lines', $defaultLocale);
         }
-        if(isset($journal_detail['additionalHomeContent'])){
-            $this->createPage($journal, $journal_detail['additionalHomeContent'], 'Additional Home Content', $defaultLocale);
+        if (isset($journal_detail['additionalHomeContent'])) {
+            $pages['additionalHomeContent'] = $this->createPage($journal, $journal_detail['additionalHomeContent'], 'Additional Home Content', $defaultLocale);
         }
-        if(isset($journal_detail['reviewPolicy'])){
-            $this->createPage($journal, $journal_detail['reviewPolicy'], 'Review Policy', $defaultLocale);
+        if (isset($journal_detail['reviewPolicy'])) {
+            $pages['reviewPolicy'] = $this->createPage($journal, $journal_detail['reviewPolicy'], 'Review Policy', $defaultLocale);
         }
-        if(isset($journal_detail['refLinkInstructions'])){
-            $this->createPage($journal, $journal_detail['refLinkInstructions'], 'Ref Link Instructions', $defaultLocale);
+        if (isset($journal_detail['refLinkInstructions'])) {
+            $pages['refLinkInstructions'] = $this->createPage($journal, $journal_detail['refLinkInstructions'], 'Ref Link Instructions', $defaultLocale);
         }
-        if(isset($journal_detail['readerInformation'])){
-            $this->createPage($journal, $journal_detail['readerInformation'], 'Reader Information', $defaultLocale);
+        if (isset($journal_detail['readerInformation'])) {
+            $pages['readerInformation'] = $this->createPage($journal, $journal_detail['readerInformation'], 'Reader Information', $defaultLocale);
         }
-        if(isset($journal_detail['proofInstructions'])){
-            $this->createPage($journal, $journal_detail['proofInstructions'], 'Proof Instructions', $defaultLocale);
+        if (isset($journal_detail['proofInstructions'])) {
+            $pages['proofInstructions'] = $this->createPage($journal, $journal_detail['proofInstructions'], 'Proof Instructions', $defaultLocale);
         }
-        if(isset($journal_detail['focusScopeDesc'])){
-            $this->createPage($journal, $journal_detail['focusScopeDesc'], 'Focus Scope Desc', $defaultLocale);
+        if (isset($journal_detail['focusScopeDesc'])) {
+            $pages['focusScopeDesc'] = $this->createPage($journal, $journal_detail['focusScopeDesc'], 'Focus Scope Desc', $defaultLocale);
         }
-        if(isset($journal_detail['copyeditInstructions'])){
-            $this->createPage($journal, $journal_detail['copyeditInstructions'], 'Copy Edit Instructions', $defaultLocale);
+        if (isset($journal_detail['copyeditInstructions'])) {
+            $pages['copyeditInstructions'] = $this->createPage($journal, $journal_detail['copyeditInstructions'], 'Copy Edit Instructions', $defaultLocale);
         }
-        if(isset($journal_detail['authorGuidelines'])){
-            $this->createPage($journal, $journal_detail['authorGuidelines'], 'Author Guidelines', $defaultLocale);
+        if (isset($journal_detail['authorGuidelines'])) {
+            $pages['authorGuidelines'] = $this->createPage($journal, $journal_detail['authorGuidelines'], 'Author Guidelines', $defaultLocale);
         }
-        if(isset($journal_detail['authorInformation'])){
-            $this->createPage($journal, $journal_detail['authorInformation'], 'Author Information', $defaultLocale);
+        if (isset($journal_detail['authorInformation'])) {
+            $pages['authorInformation'] = $this->createPage($journal, $journal_detail['authorInformation'], 'Author Information', $defaultLocale);
         }
 
-        foreach ($journal_details as $key=>$value) {
-            $locale = explode('_',$key)[0];
-            if(isset($value['history'])){
-                $this->createPage($journal, $value['history'], 'History', $locale);
-            }
-            if(isset($value['reviewGuidelines'])){
-                $this->createPage($journal, $value['reviewGuidelines'], 'Review Guide Lines', $locale);
-            }
-            if(isset($value['additionalHomeContent'])){
-                $this->createPage($journal, $value['additionalHomeContent'], 'Additional Home Content', $locale);
-            }
-            if(isset($value['reviewPolicy'])){
-                $this->createPage($journal, $value['reviewPolicy'], 'Review Policy', $locale);
-            }
-            if(isset($value['refLinkInstructions'])){
-                $this->createPage($journal, $value['refLinkInstructions'], 'Ref Link Instructions', $locale);
-            }
-            if(isset($value['readerInformation'])){
-                $this->createPage($journal, $value['readerInformation'], 'Reader Information', $locale);
-            }
-            if(isset($value['proofInstructions'])){
-                $this->createPage($journal, $value['proofInstructions'], 'Proof Instructions', $locale);
-            }
-            if(isset($value['focusScopeDesc'])){
-                $this->createPage($journal, $value['focusScopeDesc'], 'Focus Scope Desc', $locale);
-            }
-            if(isset($value['copyeditInstructions'])){
-                $this->createPage($journal, $value['copyeditInstructions'], 'Copy Edit Instructions', $locale);
-            }
-            if(isset($value['authorGuidelines'])){
-                $this->createPage($journal, $value['authorGuidelines'], 'Author Guidelines', $locale);
-            }
-            if(isset($value['authorInformation'])){
-                $this->createPage($journal, $value['authorInformation'], 'Author Information', $locale);
+        foreach ($journal_details as $key => $value) {
+            foreach ($pages as $k => $v) {
+                if (isset($value[$k])) {
+                    $at = new PostTranslation();
+                    $at->setContent($value[$k]);
+                    $at->setField('content');
+                    $at->setLocale($key);
+                    $at->setObject($v);
+                    $this->em->persist($at);
+                    $this->em->flush();
+                }
             }
         }
+
         $this->addPagesToBlock($journal);
         //Journal settings
         foreach ($journal_detail as $key => $value) {
-            if(empty($value))
+            if (empty($value))
                 continue;
-            $js = new JournalSetting($key,$value,$journal);
+            $js = new JournalSetting($key, $value, $journal);
             $this->em->persist($js);
             $this->em->flush();
             $this->output->writeln("<info>Setting: $key Value: $value</info>");
@@ -569,12 +557,11 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
 
         $ojsRole = $this->rolesMap[$this->roles[$role_id]];
-        if($ojsRole === 'ROLE_ADMIN') {
+        if ($ojsRole === 'ROLE_ADMIN') {
             $user->setAdmin(true);
             $this->em->persist($user);
             $transferred = array('id' => 0, 'name' => 'ROLE_ADMIN');
-        }
-        else {
+        } else {
             $role = $this->em->getRepository('OjsUserBundle:Role')->findOneBy([
                 'role' => $ojsRole]);
             if (!$role) {
@@ -585,7 +572,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 ->findOneBy(
                     array('user' => $user, 'role' => $role, 'journal' => $journal)
                 );
-            if($userJournalRole){
+            if ($userJournalRole) {
                 return false;
             }
             $userJournalRole = new UserJournalRole();
@@ -599,7 +586,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->saveRecordChange($role_id, $transferred['id'], 'Ojs\UserBundle\Entity\Role');
 
         $this->em->flush();
-        $this->output->writeln('<info>User '. $user->getUsername().' add as '.$transferred['name'].' to '.$journal->getTitle().'</info>');
+        $this->output->writeln('<info>User ' . $user->getUsername() . ' add as ' . $transferred['name'] . ' to ' . $journal->getTitle() . '</info>');
         unset($user_role, $user, $journal, $role);
         return true;
     }
@@ -622,7 +609,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $author->setLocales($user->getLocales());
         $author->setUrl($user->getUrl());
         $author->setPhone($user->getPhone());
-        $user->getCountry()!==null&&$author->setCountry($user->getCountry());
+        $user->getCountry() !== null && $author->setCountry($user->getCountry());
         $author->setUser($user);
         $this->em->persist($author);
         $this->em->flush();
@@ -772,8 +759,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         // insert other languages data
         foreach ($article_settings as $locale => $value) {
-            $this->output->writeln("<warning> $locale locale saving.</warning>");
-            if(isset($value['title']) &&  $article->getTitle()!="" ){
+            $this->output->writeln("<info> $locale locale saving.</info>");
+            if (isset($value['title']) && $article->getTitle() != "") {
                 $at = new ArticleTranslation();
                 $at->setContent($value['title']);
                 $at->setField('title');
@@ -782,7 +769,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $this->em->persist($at);
                 $this->em->flush();
             }
-            if(isset($value['abstract']) && $article->getAbstract()!=""){
+            if (isset($value['abstract']) && $article->getAbstract() != "") {
                 $at = new ArticleTranslation();
                 $at->setContent($value['abstract']);
                 $at->setField('abstract');
@@ -791,7 +778,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $this->em->persist($at);
                 $this->em->flush();
             }
-            if(isset($value['subject']) &&  $article->getSubjects()!=""){
+            if (isset($value['subject']) && $article->getSubjects() != "") {
                 $at = new ArticleTranslation();
                 $at->setContent($value['subject']);
                 $at->setField('subjects');
@@ -882,7 +869,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->saveRecordChange($galley['file_id'], $file->getId(), 'Ojs\JournalBundle\Entity\File');
 
             $waitingfile = new WaitingFiles();
-            $filepath = $filehelper->generatePath("uploads/articlefiles/".$article_file->getFile()->getName()).$article_file->getFile()->getName();
+            $filepath = $filehelper->generatePath("uploads/articlefiles/" . $article_file->getFile()->getName()) . $article_file->getFile()->getName();
             $waitingfile->setPath($filepath)
                 ->setUrl($url)
                 ->setOldId($galley['file_id'])
@@ -934,16 +921,16 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $this->em->flush();
 
-         /**
-          *   $waitingfile = new WaitingFiles();
-            $filepath = $filehelper->generatePath($article_file->getFile()->getName()).$article_file->getFile()->getName();
-            $waitingfile->setPath($filepath)
-                ->setUrl()
-                ->setOldId()
-                ->setNewId($file->getId());
-            $this->dm->persist($waitingfile);
-            $this->dm->flush();
-          * */
+            /**
+             *   $waitingfile = new WaitingFiles();
+             * $filepath = $filehelper->generatePath($article_file->getFile()->getName()).$article_file->getFile()->getName();
+             * $waitingfile->setPath($filepath)
+             * ->setUrl()
+             * ->setOldId()
+             * ->setNewId($file->getId());
+             * $this->dm->persist($waitingfile);
+             * $this->dm->flush();
+             * */
 
         }
         unset($article, $defaultLocale, $article_file, $article_galleys, $article_id, $article_supplementary_files, $defaultLocale
@@ -1104,7 +1091,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $fileUrl = "http://dergipark.ulakbim.gov.tr/$journalPath/issue/download/{$galley['issue_id']}/{$galley['galley_id']}";
             $waitingfile = new WaitingFiles();
-            $filepath = $fileHelper->generatePath("uploads/issuefiles/".$issueFile->getFile()->getName()).$issueFile->getFile()->getName();
+            $filepath = $fileHelper->generatePath("uploads/issuefiles/" . $issueFile->getFile()->getName()) . $issueFile->getFile()->getName();
             $waitingfile->setPath($filepath)
                 ->setUrl($fileUrl)
                 ->setOldId($galley['file_id'])
@@ -1237,8 +1224,16 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em->persist($newSection);
         unset($section_settings[$defaultLocale]);
         foreach ($section_settings as $key => $section) {
-            isset($section['title']) && $this->translationRepository
-                ->translate($newSection, 'title', $key, $section['title']);
+            if(isset($section['title'])){
+                $at = new JournalSectionTranslation();
+                $at->setContent($section['title']);
+                $at->setField('title');
+                $at->setLocale($key);
+                $at->setObject($newSection);
+                $this->em->persist($at);
+                $this->em->flush();
+            }
+
         }
         $this->em->persist($newSection);
         $this->em->flush();
@@ -1309,23 +1304,24 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em->persist($page);
         $this->em->flush();
         $this->output->writeln("<info>Page created #{$page->getId()} as name {$page->getTitle()}</info>");
+        return $page;
     }
 
     public function addPagesToBlock(Journal $journal)
     {
-        if(!$journal->getSlug())
+        if (!$journal->getSlug())
             return;
         $twig = $this->getContainer()->get('okulbilisimcmsbundle.twig.post_extension');
         $journalKey = $twig->encode($journal);
         $pages = $this->em->getRepository('OkulbilisimCmsBundle:Post')->findBy([
-            'object'=>$journalKey,
-            'objectId'=>$journal->getId()
+            'object' => $journalKey,
+            'objectId' => $journal->getId()
         ]);
-        if(!$pages)
+        if (!$pages)
             return null;
 
-        $block = $this->em->getRepository('OjsSiteBundle:Block')->findOneBy(['objectType'=>'journal','objectId'=>$journal->getId(),'type'=>'link']);
-        if(!$block){
+        $block = $this->em->getRepository('OjsSiteBundle:Block')->findOneBy(['objectType' => 'journal', 'objectId' => $journal->getId(), 'type' => 'link']);
+        if (!$block) {
             $block = new Block();
             $block->setObjectType('journal')
                 ->setObjectId($journal->getId())
@@ -1342,8 +1338,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $blockLink->setBlock($block)
                 ->setPost($page)
                 ->setText($page->getTitle())
-                ->setUrl("http:".$router->generate('ojs_journal_index_page_detail',['institution'=>$journal->getInstitution()->getSlug(),'journal_slug'=>$journal->getSlug(),'slug'=>$page->getSlug()]))
-            ;
+                ->setUrl("http:" . $router->generate('ojs_journal_index_page_detail', ['institution' => $journal->getInstitution()->getSlug(), 'journal_slug' => $journal->getSlug(), 'slug' => $page->getSlug()]));
 
             $this->em->persist($blockLink);
             $block->addLink($blockLink);
@@ -1352,22 +1347,24 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         $this->em->flush();
     }
-    private function parseConnectionString($connectionString){
-        preg_match_all("~([^\:]+)\:([^\@]+)?\@([^\/]+)\/(.*)~",$connectionString,$matches);
 
-        if(isset($matches[1]))
+    private function parseConnectionString($connectionString)
+    {
+        preg_match_all("~([^\:]+)\:([^\@]+)?\@([^\/]+)\/(.*)~", $connectionString, $matches);
+
+        if (isset($matches[1]))
             $this->database['user'] = $matches[1][0];
         else
             throw new \Exception("Hatalı parametre.");
-        if(isset($matches[2]) )
-            $this->database['password'] = empty($matches[2][0])?null:$matches[2][0];
+        if (isset($matches[2]))
+            $this->database['password'] = empty($matches[2][0]) ? null : $matches[2][0];
         else
             throw new \Exception("Hatalı parametre.");
-        if(isset($matches[3]))
+        if (isset($matches[3]))
             $this->database['host'] = $matches[3][0];
         else
             throw new \Exception("Hatalı parametre.");
-        if(isset($matches[4]))
+        if (isset($matches[4]))
             $this->database['dbname'] = $matches[4][0];
         else
             throw new \Exception("Hatalı parametre.");
