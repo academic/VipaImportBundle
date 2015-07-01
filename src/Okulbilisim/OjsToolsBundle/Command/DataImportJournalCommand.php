@@ -23,6 +23,7 @@ use Ojs\JournalBundle\Entity\JournalSetting;
 use Ojs\JournalBundle\Entity\JournalTranslation;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Subject;
+use Ojs\JournalBundle\Entity\SubjectTranslation;
 use Ojs\JournalBundle\Entity\SubmissionChecklist;
 use Ojs\JournalBundle\Entity\InstitutionTypes;
 use Ojs\JournalBundle\Entity\Issue;
@@ -1268,9 +1269,16 @@ class DataImportJournalCommand extends ContainerAwareCommand
             if (!$subject) {
                 $subject = new Subject();
                 $subject->setSubject($category['tr_TR']);
-                isset($category['en_US']) && $this->translationRepository
-                    ->translate($subject, 'subject', 'en_US', $category['en_US']);
                 $this->em->persist($subject);
+                if(isset($category['en_US'])){
+                    $at = new SubjectTranslation();
+                    $at->setContent($category['en_US']);
+                    $at->setField('subject');
+                    $at->setLocale('en_US');
+                    $at->setObject($subject);
+                    $this->em->persist($at);
+                    $this->em->flush();
+                }
             }
 
             $journal->addSubject($subject);
