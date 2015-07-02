@@ -96,6 +96,11 @@ class DownloadWaitingFilesCommand extends ContainerAwareCommand
         curl_setopt($ch, CURLOPT_FILE, $wrap);
         curl_exec($ch);
         curl_close($ch);
+        if(file_exists($fullPath)){
+            $file->setDownloaded(true);
+            $this->dm->persist($file);
+            $this->dm->flush();
+        }
         $this->output->writeln("<info>{$file->getPath()} indirildi.</info>");
     }
 } 
