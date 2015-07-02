@@ -45,11 +45,9 @@ Installation
 Usage
 ======
 
- It has 2 console command for import. ```ojs:import:journal journalId database_connection_string``` and ```ojs:import:article_stats database_connection_string``` .
- 
- Database connection string example: 
- 
- ```user:password@host/database```
+It has 2 console command for import. ```ojs:import:journal journalId database_connection_string``` and ```ojs:import:article_stats database_connection_string``` .
+
+Database connection string example: ```user:password@host/database``` 
  
 #### Import Journal
 
