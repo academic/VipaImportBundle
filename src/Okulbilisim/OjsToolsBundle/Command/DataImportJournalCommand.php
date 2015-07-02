@@ -849,6 +849,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 continue;
             $journal_path = $article->getJournal()->getPath();
             $galley_setting = $this->connection->fetchAssoc("SELECT setting_value FROM article_galley_settings WHERE galley_id={$galley['galley_id']} and setting_name='pub-id::publisher-id'");
+            if(!$galley_setting['setting_value'])
+                continue;
             $url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$galley['article_id']}/{$galley_setting['setting_value']}";
             $file = new File();
             $file->setName($article_file['file_name']);
