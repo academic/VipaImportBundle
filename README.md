@@ -75,4 +75,4 @@ We'd love to get contributions from you! Please read [contributing to Symfony](h
 Support
 -------
 
-Please log tickets and issues at  [ISSUES](https://github.com/aybarscengaver/hello-world/issues) section.
+Please log tickets and issues at  [ISSUES](https://github.com/okulbilisim/ojs-tools-bundle/issues) section.
