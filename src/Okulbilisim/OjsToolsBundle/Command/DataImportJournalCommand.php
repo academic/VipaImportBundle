@@ -870,7 +870,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->saveRecordChange($galley['file_id'], $file->getId(), 'Ojs\JournalBundle\Entity\File');
 
             $waitingfile = new WaitingFiles();
-            $filepath = $filehelper->generatePath("uploads/articlefiles/" . $article_file->getFile()->getName()) . $article_file->getFile()->getName();
+            $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()->getName()) . $article_file->getFile()->getName();
             $waitingfile->setPath($filepath)
                 ->setUrl($url)
                 ->setOldId($galley['file_id'])
@@ -1092,7 +1092,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $fileUrl = "http://dergipark.ulakbim.gov.tr/$journalPath/issue/download/{$galley['issue_id']}/{$galley['galley_id']}";
             $waitingfile = new WaitingFiles();
-            $filepath = $fileHelper->generatePath("uploads/issuefiles/" . $issueFile->getFile()->getName()) . $issueFile->getFile()->getName();
+            $filepath = "uploads/issuefiles/" . $fileHelper->generatePath($issueFile->getFile()->getName()) . $issueFile->getFile()->getName();
             $waitingfile->setPath($filepath)
                 ->setUrl($fileUrl)
                 ->setOldId($galley['file_id'])

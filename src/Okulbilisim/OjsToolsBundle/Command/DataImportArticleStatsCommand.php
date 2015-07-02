@@ -105,7 +105,7 @@ class DataImportArticleStatsCommand extends ContainerAwareCommand
                 $singleViews = $this->connection->fetchAll("select * from article_view_stats where article_id={$oldId->getOldId()}");
                 $singleDownloads = $this->connection->fetchAll("select * from article_download_stats where article_id={$oldId->getOldId()}");
                 $adoCheck = $this->dm->getRepository("OjsAnalyticsBundle:ObjectDownload")->findOneBy(['objectId'=>$article['id'],'entity'=>'article']);
-                if(!$adoCheck) {
+                if(!$adoCheck && $totalDownload['total']) {
                     $ados = new ObjectDownload();
                     $ados->setEntity('article')
                         ->setObjectId($article['id'])
@@ -123,7 +123,7 @@ class DataImportArticleStatsCommand extends ContainerAwareCommand
                 }
 
                 $avoCheck = $this->dm->getRepository("OjsAnalyticsBundle:ObjectView")->findOneBy(["objectId"=>$article['id'],'entity'=>'article']);
-                if(!$avoCheck){
+                if(!$avoCheck && $totalView['total']){
                     $avos = new ObjectView();
                     $avos->setTotal($totalView['total'])
                         ->setEntity('article')
