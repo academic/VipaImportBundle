@@ -1269,6 +1269,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             /** @var Subject $subject */
             $subject = $this->em->getRepository('OjsJournalBundle:Subject')->findOneBy(['subject' => $category['tr_TR']]);
             if (!$subject) {
+                continue;
                 $subject = new Subject();
                 $subject->setSubject($category['tr_TR']);
                 $this->em->persist($subject);
@@ -1288,8 +1289,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->em->persist($journal);
             $this->em->persist($subject);
 
-            $this->em->flush();
         }
+        $this->em->flush();
+
     }
 
     /**
