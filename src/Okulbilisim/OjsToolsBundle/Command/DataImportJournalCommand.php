@@ -808,8 +808,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
             //have an issue
             $issue = $this->connection->fetchAssoc("SELECT * FROM issues WHERE issue_id={$published_article['issue_id']}");
             if ($issue) {
-
                 $issue = $this->saveIssue($issue, $journal_id, $article);
+                if(!$issue->getSections()->contains($section))
+                    $issue->addSection($section);
+                $this->em->persist($issue);
                 $this->saveRecordChange($published_article['issue_id'], $issue->getId(), 'Ojs\JournalBundle\Entity\Issue');
                 $article->setIssue($issue);
             }
