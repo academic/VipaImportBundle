@@ -133,6 +133,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
     /** @var  OutputInterface */
     protected $output;
 
+    /** @var  int */
+    protected $journalOldId;
+
     /** @var  TranslationRepository */
     protected $translationRepository;
 
@@ -190,7 +193,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->output = $output;
 
         // Journal Old ID
-        $id = $input->getArgument('JournalId');
+        $id = $this->journalOldId = $input->getArgument('JournalId');
 
         try {
 
@@ -1062,7 +1065,19 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $issue->setYear($issueData['year']);
         $issue->setSpecial(0);
         $issue->setNumber($issueData['number']);
-        isset($issue_settings[$defaultLocale]['fileName']) && $issue->setCover($issue_settings[$defaultLocale]['fileName']);
+        if(isset($issue_settings[$defaultLocale]['fileName'])){
+            $issue->setCover($issue_settings[$defaultLocale]['fileName']);
+            $fileUrl = "http://dergipark.ulakbim.gov.tr/public/journals/{$this->journalOldId}/{$issue_settings[$defaultLocale]['fileName']}";
+            $waitingfile = new WaitingFiles();
+            $fileHelper = new FileHelper();
+
+            $filepath = "uploads/journalfiles/" . $fileHelper->generatePath($issue_settings[$defaultLocale]['fileName']) . $issue_settings[$defaultLocale]['fileName'];
+            $waitingfile->setPath($filepath)
+                ->setUrl($fileUrl)
+                ->setOldId($issueData['issue_id']);
+            $this->dm->persist($waitingfile);
+            $this->dm->flush();
+        }
         $this->em->persist($issue);
         $this->em->flush();
 
