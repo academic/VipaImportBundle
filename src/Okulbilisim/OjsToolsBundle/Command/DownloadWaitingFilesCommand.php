@@ -69,7 +69,7 @@ class DownloadWaitingFilesCommand extends ContainerAwareCommand
     public function getFiles()
     {
         $qb = $this->dm->createQueryBuilder("OjsJournalBundle:WaitingFiles")->eagerCursor(true);
-        $qb->where("function() { return (typeof this.downloaded ==='undefined' || this.downloaded==false) and (typeof this.download_start_at ==='undefined' ); }");
+        $qb->where("function() { return (typeof this.downloaded ==='undefined' || this.downloaded==false) && (typeof this.download_start_at ==='undefined' ); }");
 
         /** @var \Doctrine\ODM\MongoDB\EagerCursor $files */
         $files = $qb->getQuery()->execute();
