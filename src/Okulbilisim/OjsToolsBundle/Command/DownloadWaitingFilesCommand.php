@@ -86,7 +86,7 @@ class DownloadWaitingFilesCommand extends ContainerAwareCommand
         if (!is_dir(dirname($fullPath))) {
             mkdir(dirname($fullPath), 0777, true);
         }
-        if(strstr($fullPath,'.'))
+        if(!strstr($fullPath,'.'))
             return;
 
         $wrap = \fopen($fullPath, "a+");
