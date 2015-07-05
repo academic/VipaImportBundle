@@ -11,6 +11,7 @@ use Ojs\Common\Helper\FileHelper;
 use Ojs\Common\Params\ArticleFileParams;
 use \Ojs\JournalBundle\Document\TransferredRecord;
 use Ojs\JournalBundle\Document\WaitingFiles;
+use Ojs\JournalBundle\Entity\ArticleAuthor;
 use Ojs\JournalBundle\Entity\ArticleFile;
 use Ojs\JournalBundle\Entity\ArticleTranslation;
 use Ojs\JournalBundle\Entity\Citation;
@@ -910,13 +911,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $defaultLocale = 'default';
             }
 
-            //@todo i can't find supplementary files download link on dergipark.
 
-            if(isset($supp_settings['default'])){
 
-                $url = "http://dergipark.ulakbim.gov.tr/{$journal_path}/article/download/{$sup_file['article_id']}/{$sup_file['supp_id']}";
-                $this->output->writeln("<error>$url</error>");
-            }
             $file = new File();
             isset($supp_settings[$defaultLocale]) && isset($supp_settings[$defaultLocale]['title']) && $file->setName($supp_settings[$defaultLocale]['title']);
             $file->setMimeType($sup_file_detail['file_type']);
@@ -936,19 +932,48 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->em->persist($article_file);
 
             $this->em->flush();
-
-            /**
-             *   $waitingfile = new WaitingFiles();
-             * $filepath = $filehelper->generatePath($article_file->getFile()->getName()).$article_file->getFile()->getName();
-             * $waitingfile->setPath($filepath)
-             * ->setUrl()
-             * ->setOldId()
-             * ->setNewId($file->getId());
-             * $this->dm->persist($waitingfile);
-             * $this->dm->flush();
-             * */
-
+            if(isset($supp_settings['default'])) {
+                $url = "http://dergipark.ulakbim.gov.tr/{$journal_path}/article/downloadSuppFile/{$sup_file['article_id']}/{$sup_file['supp_id']}";
+                $waitingfile = new WaitingFiles();
+                $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()->getName()) . $article_file->getFile()->getName();
+                $waitingfile->setPath($filepath)
+                    ->setUrl($url)
+                    ->setOldId($sup_file['supp_id'])
+                    ->setNewId($file->getId());
+                $this->dm->persist($waitingfile);
+                $this->dm->flush();
+            }
         }
+
+        //Article authors
+        $authors = $this->connection->fetchAll("SELECT * FROM authors as a WHERE submission_id=$old_article_id");
+        $a = 2;
+        foreach ($authors as $author) {
+            $newAuthor = new Author();
+            $newAuthor->setFirstName($author['first_name'])
+                ->setMiddleName($author['middle_name'])
+                ->setLastName($author['last_name'])
+                ->setTitle($author['suffix'])
+                ->setEmail($author['email'])
+                ->setUrl($author['url']);
+            $this->em->persist($newAuthor);
+            $articleAuthor = new ArticleAuthor();
+            $articleAuthor->setArticle($article)
+                ->setAuthor($newAuthor)
+                ->setAuthorOrder($author['primary_contact']==1?1:$a++);
+            $this->em->persist($articleAuthor);
+
+            $newAuthor->addArticleAuthor($articleAuthor);
+            $this->em->persist($newAuthor);
+
+            $article->addArticleAuthor($articleAuthor);
+            $this->em->persist($article);
+            $this->output->writeln("<comment>Author {$newAuthor->getFirstName()} {$newAuthor->getLastName()} added to article.</comment>");
+        }
+
+        $this->em->flush();
+
+
         unset($article, $defaultLocale, $article_file, $article_galleys, $article_id, $article_supplementary_files, $defaultLocale
             , $article_id, $as, $file, $galley, $old_article_id, $sup_file, $sup_settings, $sup_file_detail, $supp_settings, $article_supplementary_files);
     }
