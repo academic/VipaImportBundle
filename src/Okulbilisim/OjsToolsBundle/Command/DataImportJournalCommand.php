@@ -911,8 +911,12 @@ class DataImportJournalCommand extends ContainerAwareCommand
             }
 
             //@todo i can't find supplementary files download link on dergipark.
-            //$url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$sup_file['article_id']}/{$galley_setting['setting_value']}";
 
+            if(isset($supp_settings['default'])){
+
+                $url = "http://dergipark.ulakbim.gov.tr/{$journal_path}/article/download/{$sup_file['article_id']}/{$sup_file['supp_id']}";
+                $this->output->writeln("<error>$url</error>");
+            }
             $file = new File();
             isset($supp_settings[$defaultLocale]) && isset($supp_settings[$defaultLocale]['title']) && $file->setName($supp_settings[$defaultLocale]['title']);
             $file->setMimeType($sup_file_detail['file_type']);
