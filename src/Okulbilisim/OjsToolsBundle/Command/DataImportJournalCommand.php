@@ -842,6 +842,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         /** @var Article $article */
         $article = $this->em->find('OjsJournalBundle:Article', $article_id);
         $filehelper = new FileHelper();
+        $journal_path = $article->getJournal()->getPath();
 
         $article_galleys = $this->connection->fetchAll("SELECT ag.article_id,ag.galley_id, ag.file_id,ag.label,ag.locale FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
         foreach ($article_galleys as $galley) {
@@ -853,7 +854,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
             }
             if (!$article_file)
                 continue;
-            $journal_path = $article->getJournal()->getPath();
             $galley_setting = $this->connection->fetchAssoc("SELECT setting_value FROM article_galley_settings WHERE galley_id={$galley['galley_id']} and setting_name='pub-id::publisher-id'");
             if(!$galley_setting['setting_value'])
                 continue;
@@ -914,7 +914,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
 
             $file = new File();
-            $file->setName($sup_file_detail['file_name']);
+            $file->setName(strtolower($sup_file_detail['file_name']));
             $file->setMimeType($sup_file_detail['file_type']);
             $file->setSize($sup_file_detail['file_size']);
             $version = $sup_file_detail['source_revision'];
@@ -942,6 +942,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                     ->setNewId($file->getId());
                 $this->dm->persist($waitingfile);
                 $this->dm->flush();
+                $this->output->writeln("<question>FileId: {$file->getId()} \n FileUrl: $url \n FilePath: $filepath</question>");
             }
         }
 
