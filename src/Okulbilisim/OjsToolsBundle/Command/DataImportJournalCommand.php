@@ -887,7 +887,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         }
 
-        $article_supplementary_files = $this->connection->fetchAll("SELECT asp.file_id,asp.supp_id,asp.type FROM article_supplementary_files asp WHERE asp.article_id={$old_article_id}");
+        $article_supplementary_files = $this->connection->fetchAll("SELECT asp.article_id, asp.file_id,asp.supp_id,asp.type FROM article_supplementary_files asp WHERE asp.article_id={$old_article_id}");
         foreach ($article_supplementary_files as $sup_file) {
             if (!isset($sup_file['supp_id'])) {
                 continue;
@@ -910,12 +910,16 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $defaultLocale = 'default';
             }
 
+            //@todo i can't find supplementary files download link on dergipark.
+            //$url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$sup_file['article_id']}/{$galley_setting['setting_value']}";
+
             $file = new File();
             isset($supp_settings[$defaultLocale]) && isset($supp_settings[$defaultLocale]['title']) && $file->setName($supp_settings[$defaultLocale]['title']);
             $file->setMimeType($sup_file_detail['file_type']);
             $file->setSize($sup_file_detail['file_size']);
             $version = $sup_file_detail['source_revision'];
             $this->em->persist($file);
+
 
             $article_file = new ArticleFile();
             isset($supp_settings[$defaultLocale]) && isset($supp_settings[$defaultLocale]['title']) && $article_file->setTitle($supp_settings[$defaultLocale]['title']);
