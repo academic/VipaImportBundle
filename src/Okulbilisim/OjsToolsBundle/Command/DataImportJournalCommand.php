@@ -1079,6 +1079,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 ->setOldId($issueData['issue_id']);
             $this->dm->persist($waitingfile);
             $this->dm->flush();
+            $this->output->writeln("<comment>Saved issue cover image #{$waitingfile->getPath()} to waiting files</comment>");
         }
         $this->em->persist($issue);
         $this->em->flush();
