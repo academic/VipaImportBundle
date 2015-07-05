@@ -914,7 +914,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
 
             $file = new File();
-            isset($supp_settings[$defaultLocale]) && isset($supp_settings[$defaultLocale]['title']) && $file->setName($supp_settings[$defaultLocale]['title']);
+            $file->setName($sup_file_detail['file_name']);
             $file->setMimeType($sup_file_detail['file_type']);
             $file->setSize($sup_file_detail['file_size']);
             $version = $sup_file_detail['source_revision'];
@@ -932,7 +932,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->em->persist($article_file);
 
             $this->em->flush();
-            if(isset($supp_settings['default'])) {
+            if(isset($sup_file['supp_id'])) {
                 $url = "http://dergipark.ulakbim.gov.tr/{$journal_path}/article/downloadSuppFile/{$sup_file['article_id']}/{$sup_file['supp_id']}";
                 $waitingfile = new WaitingFiles();
                 $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()->getName()) . $article_file->getFile()->getName();
