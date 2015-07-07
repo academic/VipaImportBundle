@@ -865,7 +865,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $issue = $this->connection->fetchAssoc("SELECT * FROM issues WHERE issue_id={$published_article['issue_id']}");
             if ($issue) {
                 $issue = $this->saveIssue($issue, $journal_id, $article);
-                if (!$issue->getSections()->contains($section))
+                if ($section instanceof JournalSection && !$issue->getSections()->contains($section))
                     $issue->addSection($section);
                 $this->em->persist($issue);
                 $this->saveRecordChange($published_article['issue_id'], $issue->getId(), 'Ojs\JournalBundle\Entity\Issue');
@@ -1350,7 +1350,11 @@ class DataImportJournalCommand extends ContainerAwareCommand
     {
         $section_id = $article_data['section_id'];
         $sections = $this->connection->fetchAll("SELECT * FROM section_settings WHERE section_id={$section_id}");
+        if(!$sections)
+            return false;
         $section_detail = $this->connection->fetchAssoc("SELECT * FROM sections WHERE section_id={$section_id}");
+        if(!$section_detail)
+            return false;
         $section_settings = [];
         /** groupped locally  */
         foreach ($sections as $as) {
@@ -1365,6 +1369,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
         } else {
             $defaultLocale = 'default';
         }
+        if(!isset($section_settings[$defaultLocale]))
+            return false;
         $check = $this->em->getRepository('OjsJournalBundle:JournalSection')->findOneBy(['journalId' => $journal->getId(), 'title' => $section_settings[$defaultLocale]['title']]);
         if ($check) {
             return $check;
