@@ -176,6 +176,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+
+        $time_start = microtime(true);
         $this->parseConnectionString($input->getArgument('database'));
 
         $connectionFactory = $this->getContainer()->get('doctrine.dbal.connection_factory');
@@ -248,7 +250,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->createArticles($output, $journal_id, $id);
             $output->writeln("\nArticles added.");
 
-
+            $time_end = microtime(true);
+            $time = $time_end - $time_start;
+            $output->writeln("Total $time seconds...");
         } catch (\Exception $e) {
             echo $e->getMessage();
             echo "\n";
