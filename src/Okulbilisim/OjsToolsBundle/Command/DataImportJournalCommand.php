@@ -763,8 +763,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
             if (empty($ac['raw_citation']))
                 continue;
             $citation = $this->em->getRepository("OjsJournalBundle:Citation")
-                ->findOneBy(['raw'=>$ac['raw_citation'], 'article'=>$article]);
+                ->findOneBy(['raw'=>$ac['raw_citation']]);
             $citation = $citation?$citation:new Citation();
+            $citation->setUpdatedBy('/dev/null');
             $citation->setRaw($ac['raw_citation']);
             $citation->addArticle($article);
             //$citation->setType(); //type not found :\
@@ -785,6 +786,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $citationSetting->setCitation($citation);
                 $citationSetting->setValue($as['setting_value']);
                 $citationSetting->setSetting($setting);
+                $citationSetting->setUpdatedBy('/dev/null');
                 $this->em->persist($citationSetting);
                 $this->em->flush();
                 $this->saveRecordChange($ac['citation_id'], $citationSetting->getId(), 'Ojs\JournalBundle\Entity\CitationSetting');
@@ -1219,11 +1221,12 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     public function defaultLocale($data)
     {
+        if(count($data)<1)
+            return 'default';
         //find primary languages
         $sizeof = array_map(function ($a) {
             return count($a);
         }, $data);
-
         return array_search(max($sizeof), $sizeof);
     }
 
@@ -1429,9 +1432,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
                     $this->em->flush();
                 }
             }
-
-            $journal->addSubject($subject);
-            $subject->addJournal($journal);
+            if(!$journal->getSubjects()->contains($subject))
+                $journal->addSubject($subject);
+            if($subject->getJournals()->contains($journal))
+                $subject->addJournal($journal);
             $this->em->persist($journal);
             $this->em->persist($subject);
 
