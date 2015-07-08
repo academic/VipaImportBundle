@@ -18,6 +18,7 @@ use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\CitationSetting;
 use Ojs\JournalBundle\Entity\File;
 use Ojs\JournalBundle\Entity\JournalContact;
+use Ojs\JournalBundle\Entity\JournalContactTranslation;
 use Ojs\JournalBundle\Entity\JournalSection;
 use Ojs\JournalBundle\Entity\JournalSectionTranslation;
 use Ojs\JournalBundle\Entity\JournalSetting;
@@ -1297,6 +1298,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $contact = $this->em->getRepository("OjsJournalBundle:JournalContact")->findOneBy($where);
             $contact = $contact ? $contact : new JournalContact();
             $contact->setAffiliation($journal_detail[$defaultLocale]['contactAffiliation']);
+
             isset($journal_detail[$defaultLocale]['contactEmail']) && $contact->setEmail($journal_detail[$defaultLocale]['contactEmail']);
             isset($journal_detail[$defaultLocale]['contactFax']) && $contact->setFax($journal_detail[$defaultLocale]['contactFax']);
             isset($journal_detail[$defaultLocale]['contactMailingAddress']) && $contact->setAddress($journal_detail[$defaultLocale]['contactMailingAddress']);
@@ -1317,6 +1319,24 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $contact->setContactType($contactType);
             $contact->setJournal($journal);
             $this->em->persist($contact);
+            foreach ($journal_detail as $key => $value) {
+                if ($key == $defaultLocale)
+                    continue;
+                $aft = new JournalContactTranslation();
+                $aft->setContent($value['contactAffiliation'])
+                    ->setField('affiliation')
+                    ->setLocale($key)
+                    ->setObject($contact);
+                $this->em->persist($aft);
+                $adt = new JournalContactTranslation();
+                $adt->setContent($value['contactMailingAddress'])
+                    ->setField('address')
+                    ->setObject($contact)
+                    ->setLocale($key);
+                $this->em->persist($adt);
+            }
+
+
             $this->em->flush();
             $this->output->writeln("<info>Contact {$contact->getAffiliation()} {$contact->getTitle()} created. </info>");
         };
@@ -1345,6 +1365,17 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $contact->setContactType($contactType);
             $contact->setJournal($journal);
             $this->em->persist($contact);
+
+            foreach ($journal_detail as $key => $value) {
+                if ($key == $defaultLocale || !isset($value['supportName']))
+                    continue;
+                $aft = new JournalContactTranslation();
+                $aft->setContent($value['supportName'])
+                    ->setField('affiliation')
+                    ->setLocale($key)
+                    ->setObject($contact);
+                $this->em->persist($aft);
+            }
             $this->em->flush();
             $this->output->writeln("<info>Contact {$contact->getAffiliation()} {$contact->getTitle()} created. </info>");
 
