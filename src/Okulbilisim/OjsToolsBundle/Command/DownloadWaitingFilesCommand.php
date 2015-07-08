@@ -86,26 +86,28 @@ class DownloadWaitingFilesCommand extends ContainerAwareCommand
         if (!is_dir(dirname($fullPath))) {
             mkdir(dirname($fullPath), 0777, true);
         }
-        if(is_dir($fullPath)){
-            return;
-        }
+        if (!is_dir($fullPath)) {
+            if (($dh = opendir($fullPath)) === false) {
+                if (($wrap = \fopen($fullPath, "a+")) !== false) {
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, $file->getUrl());
+                    curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-        $wrap = \fopen($fullPath, "a+");
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $file->getUrl());
-        curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_FILE, $wrap);
-        curl_exec($ch);
-        curl_close($ch);
-        if(file_exists($fullPath)){
-            $file->setDownloaded(true);
-            $this->dm->persist($file);
-            $this->dm->flush();
+                    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+                    curl_setopt($ch, CURLOPT_FILE, $wrap);
+                    curl_exec($ch);
+                    curl_close($ch);
+                    if (file_exists($fullPath)) {
+                        $file->setDownloaded(true);
+                        $this->dm->persist($file);
+                        $this->dm->flush();
+                    }
+                    $this->output->writeln("<info>{$file->getPath()} indirildi.</info>");
+                    fclose($wrap);
+                }
+            }
         }
-        $this->output->writeln("<info>{$file->getPath()} indirildi.</info>");
     }
 } 
