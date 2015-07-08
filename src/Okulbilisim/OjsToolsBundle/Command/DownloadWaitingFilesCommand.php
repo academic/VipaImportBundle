@@ -86,8 +86,9 @@ class DownloadWaitingFilesCommand extends ContainerAwareCommand
         if (!is_dir(dirname($fullPath))) {
             mkdir(dirname($fullPath), 0777, true);
         }
-        if(is_dir($fullPath))
+        if(is_dir($fullPath)){
             return;
+        }
 
         $wrap = \fopen($fullPath, "a+");
         $ch = curl_init();
