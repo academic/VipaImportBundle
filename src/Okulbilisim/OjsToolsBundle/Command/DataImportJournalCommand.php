@@ -1271,44 +1271,45 @@ class DataImportJournalCommand extends ContainerAwareCommand
         /** @var Journal $journal */
         $journal = $this->em->find('OjsJournalBundle:Journal', $journal_id);
         // save default contact
-        if (isset($journal_detail['contactAffiliation'])) {
-            $contactType = $this->em->getRepository("OjsJournalBundle:ContactTypes")->findOneBy(['name' => 'Journal Contact']);
+        $defaultLocale = $this->defaultLocale($journal_detail);
 
+        if (isset($journal_detail[$defaultLocale]['contactAffiliation'])) {
+            $contactType = $this->em->getRepository("OjsJournalBundle:ContactTypes")->findOneBy(['name' => 'Journal Contact']);
             $where = [];
-            $where['affiliation'] = $journal_detail['contactAffiliation'];
-            isset($journal_detail['contactEmail']) && $where['email'] = $journal_detail['contactEmail'];
-            isset($journal_detail['contactFax']) && $where['fax'] = $journal_detail['contactFax'];
-            isset($journal_detail['contactMailingAddress']) && $where['address'] = $journal_detail['contactMailingAddress'];
-            if (isset($journal_detail['contactName'])) {
-                $name = explode(' ', $journal_detail['contactName']);
+            $where['affiliation'] = $journal_detail[$defaultLocale]['contactAffiliation'];
+            isset($journal_detail[$defaultLocale]['contactEmail']) && $where['email'] = $journal_detail[$defaultLocale]['contactEmail'];
+            isset($journal_detail[$defaultLocale]['contactFax']) && $where['fax'] = $journal_detail[$defaultLocale]['contactFax'];
+            isset($journal_detail[$defaultLocale]['contactMailingAddress']) && $where['address'] = $journal_detail[$defaultLocale]['contactMailingAddress'];
+            if (isset($journal_detail[$defaultLocale]['contactName'])) {
+                $name = explode(' ', $journal_detail[$defaultLocale]['contactName']);
                 $firstName = $name[0];
                 unset($name[0]);
                 $lastName = join(' ', $name);
                 $where['firstName'] = $firstName;
                 $where['lastName'] = $lastName;
             }
-            isset($journal_detail['contactPhone']) && $where['phone'] = $journal_detail['contactPhone'];
-            isset($journal_detail['contactTitle']) && $where['title'] = $journal_detail['contactTitle'];
+            isset($journal_detail[$defaultLocale]['contactPhone']) && $where['phone'] = $journal_detail[$defaultLocale]['contactPhone'];
+            isset($journal_detail[$defaultLocale]['contactTitle']) && $where['title'] = $journal_detail[$defaultLocale]['contactTitle'];
             $where['contactType'] = $contactType;
             $where['journal'] = $journal;
 
 
             $contact = $this->em->getRepository("OjsJournalBundle:JournalContact")->findOneBy($where);
             $contact = $contact ? $contact : new JournalContact();
-            $contact->setAffiliation($journal_detail['contactAffiliation']);
-            isset($journal_detail['contactEmail']) && $contact->setEmail($journal_detail['contactEmail']);
-            isset($journal_detail['contactFax']) && $contact->setFax($journal_detail['contactFax']);
-            isset($journal_detail['contactMailingAddress']) && $contact->setAddress($journal_detail['contactMailingAddress']);
-            if (isset($journal_detail['contactName'])) {
-                $name = explode(' ', $journal_detail['contactName']);
+            $contact->setAffiliation($journal_detail[$defaultLocale]['contactAffiliation']);
+            isset($journal_detail[$defaultLocale]['contactEmail']) && $contact->setEmail($journal_detail[$defaultLocale]['contactEmail']);
+            isset($journal_detail[$defaultLocale]['contactFax']) && $contact->setFax($journal_detail[$defaultLocale]['contactFax']);
+            isset($journal_detail[$defaultLocale]['contactMailingAddress']) && $contact->setAddress($journal_detail[$defaultLocale]['contactMailingAddress']);
+            if (isset($journal_detail[$defaultLocale]['contactName'])) {
+                $name = explode(' ', $journal_detail[$defaultLocale]['contactName']);
                 $firstName = $name[0];
                 unset($name[0]);
                 $lastName = join(' ', $name);
                 $contact->setFirstName($firstName)
                     ->setLastName($lastName);
             }
-            isset($journal_detail['contactPhone']) && $contact->setPhone($journal_detail['contactPhone']);
-            isset($journal_detail['contactTitle']) && $contact->setTitle($journal_detail['contactTitle']);
+            isset($journal_detail[$defaultLocale]['contactPhone']) && $contact->setPhone($journal_detail[$defaultLocale]['contactPhone']);
+            isset($journal_detail[$defaultLocale]['contactTitle']) && $contact->setTitle($journal_detail[$defaultLocale]['contactTitle']);
 
             if (!$contactType) {
                 throw new \Exception("You must import default contact types.");
@@ -1317,26 +1318,26 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $contact->setJournal($journal);
             $this->em->persist($contact);
             $this->em->flush();
-            $this->output->writeln("<info>Contact {$contact->getTitle()} created. </info>");
+            $this->output->writeln("<info>Contact {$contact->getAffiliation()} {$contact->getTitle()} created. </info>");
         };
-        if (isset($journal_detail['supportName'])) {
+        if (isset($journal_detail[$defaultLocale]['supportName'])) {
             $contactType = $this->em->getRepository("OjsJournalBundle:ContactTypes")->findOneBy(['name' => 'Submission Support']);
 
             $contact = $this->em->getRepository("OjsJournalBundle:JournalContact")->findOneBy(
                 [
-                    'affiliation' => $journal_detail['supportName'],
-                    'email' => $journal_detail['supportEmail'],
-                    'phone' => $journal_detail['supportPhone'],
-                    'firstName' => $journal_detail['supportName'],
+                    'affiliation' => $journal_detail[$defaultLocale]['supportName'],
+                    'email' => $journal_detail[$defaultLocale]['supportEmail'],
+                    'phone' => $journal_detail[$defaultLocale]['supportPhone'],
+                    'firstName' => $journal_detail[$defaultLocale]['supportName'],
                     'contactType' => $contactType,
                     'journal' => $journal
                 ]
             );
             $contact = $contact ? $contact : new JournalContact();
-            $contact->setAffiliation($journal_detail['supportName']);
-            $contact->setEmail($journal_detail['supportEmail']);
-            $contact->setPhone($journal_detail['supportPhone']);
-            $contact->setFirstName($journal_detail['supportName']);
+            $contact->setAffiliation($journal_detail[$defaultLocale]['supportName']);
+            $contact->setEmail($journal_detail[$defaultLocale]['supportEmail']);
+            $contact->setPhone($journal_detail[$defaultLocale]['supportPhone']);
+            $contact->setFirstName($journal_detail[$defaultLocale]['supportName']);
             if (!$contactType) {
                 throw new \Exception("You must import default contact types.");
             }
@@ -1345,7 +1346,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $contact->setJournal($journal);
             $this->em->persist($contact);
             $this->em->flush();
-            $this->output->writeln("<info>Contact {$contact->getTitle()} created. </info>");
+            $this->output->writeln("<info>Contact {$contact->getAffiliation()} {$contact->getTitle()} created. </info>");
 
         }
 
