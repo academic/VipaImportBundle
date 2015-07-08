@@ -1164,7 +1164,10 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $issue->setSpecial(0);
         $issue->setNumber($issueData['number']);
         if (isset($issue_settings[$defaultLocale]['fileName'])) {
+            $journal = $issue->getJournal();
             $issue->setCover($issue_settings[$defaultLocale]['fileName']);
+            $journal->setImage($issue_settings[$defaultLocale]['fileName']);
+            $this->em->persist($journal);
             $fileUrl = "http://dergipark.ulakbim.gov.tr/public/journals/{$this->journalOldId}/{$issue_settings[$defaultLocale]['fileName']}";
             $waitingfile = new WaitingFiles();
             $fileHelper = new FileHelper();
