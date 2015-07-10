@@ -141,6 +141,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
     /** @var  TranslationRepository */
     protected $translationRepository;
 
+    /** @var  array */
+    protected $old_journal_details;
 
     const DEFAULT_INSTITUTION = 1;
 
@@ -231,6 +233,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
                     $journal_detail[$_journal_detail['locale']][$_journal_detail['setting_name']] = $_journal_detail['setting_value'];
                 }
             }
+
+            $this->old_journal_details = $journal_detail;
+
             unset($_journal_detail, $journal_details);
 
             /**
@@ -908,6 +913,9 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $journal_path = $article->getJournal()->getPath();
 
         $article_galleys = $this->connection->fetchAll("SELECT ag.article_id,ag.galley_id, ag.file_id,ag.label,ag.locale FROM article_galleys ag WHERE ag.article_id={$old_article_id}");
+        if (count($article_galleys) < 1) {
+            $this->output->writeln("<error>{$old_article_id} id'li article için dosya bulunamadı.</error>");
+        }
         foreach ($article_galleys as $galley) {
             if (!$article)
                 $article = $this->em->find('OjsJournalBundle:Article', $article->getId());
@@ -915,12 +923,24 @@ class DataImportJournalCommand extends ContainerAwareCommand
             if ($article_file) {
                 $article_file = $article_file[0];
             }
-            if (!$article_file)
+            if (!$article_file) {
+                $this->output->writeln("<error>{$galley['file_id']} id'li dosya bulunamadı.</error>");
                 continue;
-            $galley_setting = $this->connection->fetchAssoc("SELECT setting_value FROM article_galley_settings WHERE galley_id={$galley['galley_id']} and setting_name='pub-id::publisher-id'");
-            if (!$galley_setting['setting_value'])
-                continue;
-            $url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$galley['article_id']}/{$galley_setting['setting_value']}";
+            }
+            if (isset($this->old_journal_details['tr_TR']) && isset($this->old_journal_details['tr_TR']['enablePublicGalleyId']) &&
+                $this->old_journal_details['tr_TR']['enablePublicGalleyId'] == 1
+            ) {
+                $url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$galley['article_id']}/{$galley['galley_id']}";
+            } else {
+                $galley_setting = $this->connection->fetchAssoc("SELECT setting_value FROM article_galley_settings WHERE galley_id={$galley['galley_id']} and setting_name='pub-id::publisher-id'");
+                if (!$galley_setting['setting_value']) {
+                    $this->output->writeln("<error>{$galley['galley_id']} id'li galley için publisher-id bulunamadı.</error>");
+                    $this->output->writeln("<comment>{$galley['galley_id']} id'li galley için galley verisiyle devam ediliyor.</comment>");
+                    $url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$galley['article_id']}/{$galley['galley_id']}";
+                } else {
+                    $url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$galley['article_id']}/{$galley_setting['setting_value']}";
+                }
+            }
             $file = new File();
             $file->setName($article_file['file_name']);
             $file->setMimeType($article_file['file_type']);
@@ -948,10 +968,17 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 ->setNewId($file->getId());
             $this->dm->persist($waitingfile);
             $this->dm->flush();
+            $this->output->writeln("<question>FileId: {$file->getId()} \n FileUrl: $url \n FilePath: $filepath</question>");
+
 
         }
 
         $article_supplementary_files = $this->connection->fetchAll("SELECT asp.article_id, asp.file_id,asp.supp_id,asp.type FROM article_supplementary_files asp WHERE asp.article_id={$old_article_id}");
+
+        if (count($article_supplementary_files) < 1) {
+            $this->output->writeln("<error>{$old_article_id} id'li article için ek dosya bulunamadı.</error>");
+        }
+
         foreach ($article_supplementary_files as $sup_file) {
             if (!isset($sup_file['supp_id'])) {
                 continue;
@@ -1322,18 +1349,22 @@ class DataImportJournalCommand extends ContainerAwareCommand
             foreach ($journal_detail as $key => $value) {
                 if ($key == $defaultLocale)
                     continue;
-                $aft = new JournalContactTranslation();
-                $aft->setContent($value['contactAffiliation'])
-                    ->setField('affiliation')
-                    ->setLocale($key)
-                    ->setObject($contact);
-                $this->em->persist($aft);
-                $adt = new JournalContactTranslation();
-                $adt->setContent($value['contactMailingAddress'])
-                    ->setField('address')
-                    ->setObject($contact)
-                    ->setLocale($key);
-                $this->em->persist($adt);
+                if (isset($value['contactAffiliation'])) {
+                    $aft = new JournalContactTranslation();
+                    $aft->setContent($value['contactAffiliation'])
+                        ->setField('affiliation')
+                        ->setLocale($key)
+                        ->setObject($contact);
+                    $this->em->persist($aft);
+                }
+                if (isset($value['contactMailingAddress'])) {
+                    $adt = new JournalContactTranslation();
+                    $adt->setContent($value['contactMailingAddress'])
+                        ->setField('address')
+                        ->setObject($contact)
+                        ->setLocale($key);
+                    $this->em->persist($adt);
+                }
             }
 
 
