@@ -23,6 +23,7 @@ use Ojs\JournalBundle\Entity\JournalSection;
 use Ojs\JournalBundle\Entity\JournalSectionTranslation;
 use Ojs\JournalBundle\Entity\JournalSetting;
 use Ojs\JournalBundle\Entity\JournalTranslation;
+use Ojs\JournalBundle\Entity\JournalUser;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Subject;
 use Ojs\JournalBundle\Entity\SubjectTranslation;
@@ -601,24 +602,31 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $this->em->persist($user);
             $transferred = array('id' => 0, 'name' => 'ROLE_ADMIN');
         } else {
+            /** @var Role $role */
             $role = $this->em->getRepository('OjsUserBundle:Role')->findOneBy([
                 'role' => $ojsRole]);
             if (!$role) {
                 $this->output->writeln("<error>Role not exists. {$role_id}</error>");
                 return false;
             }
-            $userJournalRole = $this->em->getRepository('OjsJournalBundle:JournalRole')
+            /** @var JournalUser $userJournalRole */
+            $journalUser = $this->em->getRepository('OjsJournalBundle:JournalUser')
                 ->findOneBy(
-                    array('user' => $user, 'role' => $role, 'journal' => $journal)
+                    array('user' => $user, 'journal' => $journal)
                 );
-            if ($userJournalRole) {
-                return false;
+            if(!$userJournalRole){
+                $journalUser = new JournalUser();
             }
-            $userJournalRole = new UserJournalRole();
-            $userJournalRole->setUser($user);
-            $userJournalRole->setJournal($journal);
-            $userJournalRole->setRole($role);
-            $this->em->persist($userJournalRole);
+            if ($journalUser->getRoles() && $journalUser->getRoles()->contains($role)) {
+                return true;
+            }
+            $journalUser->setUser($user);
+            $journalUser->setJournal($journal);
+            $journalUser->addRole($role);
+
+            $this->em->persist($journalUser);
+
+
             $transferred = array('id' => $role->getId(), 'name' => $role->getName());
         }
 
