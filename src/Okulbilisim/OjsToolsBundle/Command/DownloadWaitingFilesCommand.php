@@ -89,7 +89,9 @@ class DownloadWaitingFilesCommand extends ContainerAwareCommand
         if(is_dir($fullPath))
             return;
 
-        $wrap = \fopen($fullPath, "a+");
+        $wrap = @fopen($fullPath, "a+");
+        if(!$wrap)
+            return;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $file->getUrl());
         curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
