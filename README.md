@@ -1,6 +1,6 @@
 Description
 ============
-That is a tool for importing database in PKPOJS to OJS which developed by OKUL BİLİŞİM.
+That is a tool for importing database in PKP/OJS to OJS which developed by [OkulBilişim](http://okulbilisim.com).
 
 Installation
 ============
