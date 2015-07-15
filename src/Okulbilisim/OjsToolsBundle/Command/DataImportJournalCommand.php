@@ -66,6 +66,8 @@ use Symfony\Component\Finder\Exception\ShellCommandFailureException;
  */
 class DataImportJournalCommand extends ContainerAwareCommand
 {
+    /** @var  string */
+    protected $base_domain;
     /**
      * @var array PKPOjs roles data.
      */
@@ -121,7 +123,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         'user' => 'root',
         'password' => 's',
         'host' => 'localhost',
-        'dbname' => 'dergipark',
+        'dbname' => 'ojs',
     ];
 
     /** @var  Connection */
@@ -159,7 +161,11 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 'JournalId', InputArgument::REQUIRED, 'Journal ID at ')
             ->addArgument(
                 'database', InputArgument::REQUIRED, 'PKP Database Connection string [root:123456@localhost/dbname]'
-            );
+            )
+            ->addArgument(
+                'base_domain', InputArgument::REQUIRED, "Old pkp/ojs base_domain for image downloads"
+            )
+        ;
         $roles = [];
         /**
          * we must convert hex data to decimal for database equality.
@@ -182,6 +188,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
         $time_start = microtime(true);
         $this->parseConnectionString($input->getArgument('database'));
+
+        $this->base_domain = $input->getArgument('base_domain');
 
         $connectionFactory = $this->getContainer()->get('doctrine.dbal.connection_factory');
         $this->connection = $connectionFactory->createConnection($this->database);
@@ -936,15 +944,15 @@ class DataImportJournalCommand extends ContainerAwareCommand
             if (isset($this->old_journal_details['tr_TR']) && isset($this->old_journal_details['tr_TR']['enablePublicGalleyId']) &&
                 $this->old_journal_details['tr_TR']['enablePublicGalleyId'] == 1
             ) {
-                $url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$galley['article_id']}/{$galley['galley_id']}";
+                $url = "{$this->base_domain}/$journal_path/article/download/{$galley['article_id']}/{$galley['galley_id']}";
             } else {
                 $galley_setting = $this->connection->fetchAssoc("SELECT setting_value FROM article_galley_settings WHERE galley_id={$galley['galley_id']} and setting_name='pub-id::publisher-id'");
                 if (!$galley_setting['setting_value']) {
                     $this->output->writeln("<error>{$galley['galley_id']} id'li galley için publisher-id bulunamadı.</error>");
                     $this->output->writeln("<comment>{$galley['galley_id']} id'li galley için galley verisiyle devam ediliyor.</comment>");
-                    $url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$galley['article_id']}/{$galley['galley_id']}";
+                    $url = "{$this->base_domain}/$journal_path/article/download/{$galley['article_id']}/{$galley['galley_id']}";
                 } else {
-                    $url = "http://dergipark.ulakbim.gov.tr/$journal_path/article/download/{$galley['article_id']}/{$galley_setting['setting_value']}";
+                    $url = "{$this->base_domain}/$journal_path/article/download/{$galley['article_id']}/{$galley_setting['setting_value']}";
                 }
             }
             $file = new File();
@@ -1028,7 +1036,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $this->em->flush();
             if (isset($sup_file['supp_id'])) {
-                $url = "http://dergipark.ulakbim.gov.tr/{$journal_path}/article/downloadSuppFile/{$sup_file['article_id']}/{$sup_file['supp_id']}";
+                $url = "{$this->base_domain}/{$journal_path}/article/downloadSuppFile/{$sup_file['article_id']}/{$sup_file['supp_id']}";
                 $waitingfile = new WaitingFiles();
                 $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()->getName()) . $article_file->getFile()->getName();
                 $waitingfile->setPath($filepath)
@@ -1202,7 +1210,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $issue->setCover($issue_settings[$defaultLocale]['fileName']);
             $journal->setImage($issue_settings[$defaultLocale]['fileName']);
             $this->em->persist($journal);
-            $fileUrl = "http://dergipark.ulakbim.gov.tr/public/journals/{$this->journalOldId}/{$issue_settings[$defaultLocale]['fileName']}";
+            $fileUrl = "{$this->base_domain}/public/journals/{$this->journalOldId}/{$issue_settings[$defaultLocale]['fileName']}";
             $waitingfile = new WaitingFiles();
             $fileHelper = new FileHelper();
 
@@ -1243,7 +1251,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 ->setIssue($issue)
                 ->setTitle($oldFile['file_name']);
 
-            $fileUrl = "http://dergipark.ulakbim.gov.tr/$journalPath/issue/download/{$galley['issue_id']}/{$galley['galley_id']}";
+            $fileUrl = "{$this->base_domain}/$journalPath/issue/download/{$galley['issue_id']}/{$galley['galley_id']}";
             $waitingfile = new WaitingFiles();
             $filepath = "uploads/issuefiles/" . $fileHelper->generatePath($issueFile->getFile()->getName()) . $issueFile->getFile()->getName();
             $waitingfile->setPath($filepath)
