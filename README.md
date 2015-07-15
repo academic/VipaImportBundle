@@ -112,7 +112,7 @@ Second one is written as pure php. It is most performed than SymfonyConsoleComma
 
 ```bash
 
-php dpstastImporter.php $id root:root@10.61.11.29/ojs root:root@127.0.0.1/statistics ojs 127.0.0.1
+php dpstastImporter.php $id root:root@127.0.0.1/ojs root:root@127.0.0.1/statistics ojs 127.0.0.1
 
 ```
 
