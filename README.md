@@ -55,27 +55,27 @@ You have 4 different command for usage.
 #### 1- Install data command
 
 This command is used for importing specific institution data to the database.For example, you can import institution data and 
-subjects, that prepared for DERGİPARK in Yaml format, to the database.This data are in DataFixtures/dergipark folder.
+subjects, that prepared for OJS in Yaml format, to the database.This data are in DataFixtures/ojs folder.
 
 
 ```bash
 
-php app/console ojs:install:data dergipark
+php app/console ojs:install:data ojs
 
 ```
 
-Above command, save Dergipark data to database.
+Above command, save Ojs data to database.
 
 
 #### 2- Import journal command
 
 This command is transfer a journal specified by id, from old database to new ojs database. Its include all journal 
-related contents like articles, issues, users and others. It is required 2 parameter. First one is old journal id, 
-second one is mysql connection string for old database.  
+related contents like articles, issues, users and others. It is required 3 parameter. First one is old journal id, 
+second one is mysql connection string for old database. Third one is pkp/ojs base_domain for download file url.
 
 ```bash
 
-php app/console ojs:import:journal 1007 root:root@localhost/pkpojs
+php app/console ojs:import:journal 1007 root:root@localhost/pkpojs http://journal.pkp-ojs.org
 
 ```
 
@@ -112,7 +112,7 @@ Second one is written as pure php. It is most performed than SymfonyConsoleComma
 
 ```bash
 
-php dpstastImporter.php $id root:root@10.61.11.29/dergipark root:root@10.61.11.29/dpstats ojs 10.61.11.29
+php dpstastImporter.php $id root:root@10.61.11.29/ojs root:root@10.61.11.29/dpstats ojs 10.61.11.29
 
 ```
 
