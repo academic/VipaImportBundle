@@ -1,5 +1,5 @@
 #!/bin/bash
-IDS=dergipark.csv
+IDS=journal_ids.csv
 
 contents=()
 i=0
