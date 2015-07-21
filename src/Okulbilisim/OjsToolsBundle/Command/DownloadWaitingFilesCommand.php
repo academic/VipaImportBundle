@@ -79,7 +79,7 @@ class DownloadWaitingFilesCommand extends ContainerAwareCommand
     public function download(WaitingFiles $file)
     {
         $file->setDownloadStartAt(time());
-        $headers = get_headers($file->getUrl(), 1);
+        $headers = @get_headers($file->getUrl(), 1);
         if ((isset($headers['Content-Type']) && $headers['Content-Type'] == "text/html") || !isset($headers['Content-Type']))
             return;
         $fullPath = $this->rootDir . DIRECTORY_SEPARATOR . "web" . DIRECTORY_SEPARATOR . $file->getPath();
