@@ -568,7 +568,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
         isset($user['fax']) && $user_entity->setFax($user['fax']);
         isset($user['mailing_address']) && $user_entity->setAddress($user['mailing_address']);
         isset($user['billing_address']) && $user_entity->setBillingAddress($user['billing_address']);
-        isset($user['billing_address']) && $user_entity->setBillingAddress($user['billing_address']);
         isset($user['locales']) && $user_entity->setLocales(serialize(explode(':', $user['locales'])));
         $user_entity->generateApiKey();
         isset($user['salutation']) && $user_entity->setTitle($user['salutation']);
@@ -583,6 +582,15 @@ class DataImportJournalCommand extends ContainerAwareCommand
              $user_entity->setCountry($country); */
         $this->em->persist($user_entity);
         $this->em->flush();
+
+        $query = "UPDATE users SET created=:created and lastlogin=:lastlogin WHERE id=:id";
+        $stmt = $this->em->getConnection()->prepare($query);
+        $stmt->execute([
+            'create'=>$user['date_registered'],
+            'lastlogin'=>$user['date_last_login'],
+            'id'=>$user_entity->getId()
+        ]);
+
         $this->saveRecordChange($journal_user['user_id'], $user_entity->getId(), 'Ojs\UserBundle\Entity\User');
         $this->output->writeln("<info>User {$user_entity->getUsername()} created. </info>");
         return $user_entity;
