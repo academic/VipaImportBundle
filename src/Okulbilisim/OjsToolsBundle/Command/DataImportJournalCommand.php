@@ -739,8 +739,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $article = $this->em->getRepository("OjsJournalBundle:Article")->findOneBy(
             $wheres
         );
-        if ($article)
-            return $article;
 
         $article = $article ? $article : new Article();
         $article->setJournal($journal);
@@ -905,7 +903,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         /** Article files */
         $this->saveArticleFiles($article->getId(), $_article['article_id']);
 
-        $published_article = $this->connection->fetchAssoc("SELECT issue_id FROM published_articles WHERE article_id={$_article['article_id']}");
+        $published_article = $this->connection->fetchAssoc("SELECT issue_id,date_published FROM published_articles WHERE article_id={$_article['article_id']}");
         if ($published_article) {
             //have an issue
             $issue = $this->connection->fetchAssoc("SELECT * FROM issues WHERE issue_id={$published_article['issue_id']}");
@@ -916,6 +914,15 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $this->em->persist($issue);
                 $this->saveRecordChange($published_article['issue_id'], $issue->getId(), 'Ojs\JournalBundle\Entity\Issue');
                 $article->setIssue($issue);
+            }
+            if($published_article['date_published']){ // some datas null
+                $query = "UPDATE article SET created=:created  WHERE id=:id";
+                $stmt = $this->em->getConnection()->prepare($query);
+                $params = [
+                    'created'=>$published_article['date_published'],
+                    'id'=>$article->getId()
+                ];
+                $stmt->execute($params);
             }
         }
 
@@ -974,34 +981,37 @@ class DataImportJournalCommand extends ContainerAwareCommand
                     $url = "{$this->base_domain}/$journal_path/article/download/{$galley['article_id']}/{$galley_setting['setting_value']}";
                 }
             }
-            $file = new File();
-            $file->setName($article_file['file_name']);
-            $file->setMimeType($article_file['file_type']);
-            $file->setSize($article_file['file_size']);
-            $version = $article_file['source_revision'];
-            $this->em->persist($file);
+            $checkfile = $this->em->getRepository('OjsJournalBundle:File')->findOneBy(['name'=>$article_file['file_name'],'size'=>$article_file['file_size']]);
+            if(!$checkfile){
+                $file = new File();
+                $file->setName($article_file['file_name']);
+                $file->setMimeType($article_file['file_type']);
+                $file->setSize($article_file['file_size']);
+                $version = $article_file['source_revision'];
+                $this->em->persist($file);
 
-            $article_file = new ArticleFile();
-            $article_file->setTitle($galley['label']);
-            $article_file->setLangCode($galley['locale']);
-            $article_file->setFile($file);
-            $article_file->setArticle($article);
-            $article_file->setType(0);
-            $article_file->setVersion($version ? $version : 1);
+                $article_file = new ArticleFile();
+                $article_file->setTitle($galley['label']);
+                $article_file->setLangCode($galley['locale']);
+                $article_file->setFile($file);
+                $article_file->setArticle($article);
+                $article_file->setType(0);
+                $article_file->setVersion($version ? $version : 1);
 
-            $this->em->persist($article_file);
-            $this->em->flush();
-            $this->saveRecordChange($galley['file_id'], $file->getId(), 'Ojs\JournalBundle\Entity\File');
+                $this->em->persist($article_file);
+                $this->em->flush();
+                $this->saveRecordChange($galley['file_id'], $file->getId(), 'Ojs\JournalBundle\Entity\File');
 
-            $waitingfile = new WaitingFiles();
-            $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()->getName()) . $article_file->getFile()->getName();
-            $waitingfile->setPath($filepath)
-                ->setUrl($url)
-                ->setOldId($galley['file_id'])
-                ->setNewId($file->getId());
-            $this->dm->persist($waitingfile);
-            $this->dm->flush();
-            $this->output->writeln("<question>FileId: {$file->getId()} \n FileUrl: $url \n FilePath: $filepath</question>");
+                $waitingfile = new WaitingFiles();
+                $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()->getName()) . $article_file->getFile()->getName();
+                $waitingfile->setPath($filepath)
+                    ->setUrl($url)
+                    ->setOldId($galley['file_id'])
+                    ->setNewId($file->getId());
+                $this->dm->persist($waitingfile);
+                $this->dm->flush();
+                $this->output->writeln("<question>FileId: {$file->getId()} \n FileUrl: $url \n FilePath: $filepath</question>");
+            }
 
 
         }
@@ -1034,37 +1044,40 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $defaultLocale = 'default';
             }
 
+            $checkfile = $this->em->getRepository('OjsJournalBundle:File')->findOneBy(['name'=>$sup_file_detail['file_name'],'size'=>$sup_file_detail['file_size']]);
 
-            $file = new File();
-            $file->setName(strtolower($sup_file_detail['file_name']));
-            $file->setMimeType($sup_file_detail['file_type']);
-            $file->setSize($sup_file_detail['file_size']);
-            $version = $sup_file_detail['source_revision'];
-            $this->em->persist($file);
+            if(!$checkfile){
+                $file = new File();
+                $file->setName(strtolower($sup_file_detail['file_name']));
+                $file->setMimeType($sup_file_detail['file_type']);
+                $file->setSize($sup_file_detail['file_size']);
+                $version = $sup_file_detail['source_revision'];
+                $this->em->persist($file);
 
 
-            $article_file = new ArticleFile();
-            isset($supp_settings[$defaultLocale]) && isset($supp_settings[$defaultLocale]['title']) && $article_file->setTitle($supp_settings[$defaultLocale]['title']);
-            $article_file->setLangCode($defaultLocale);
-            $article_file->setFile($file);
-            $article_file->setArticle($article);
-            $article_file->setType($this->supplementary_files($sup_file['type']));
-            $article_file->setVersion($version ? $version : 1);
-            isset($supp_settings[$defaultLocale]) && isset($supp_settings[$defaultLocale]['subject']) && $article_file->setKeywords($supp_settings[$defaultLocale]['subject']);
-            $this->em->persist($article_file);
+                $article_file = new ArticleFile();
+                isset($supp_settings[$defaultLocale]) && isset($supp_settings[$defaultLocale]['title']) && $article_file->setTitle($supp_settings[$defaultLocale]['title']);
+                $article_file->setLangCode($defaultLocale);
+                $article_file->setFile($file);
+                $article_file->setArticle($article);
+                $article_file->setType($this->supplementary_files($sup_file['type']));
+                $article_file->setVersion($version ? $version : 1);
+                isset($supp_settings[$defaultLocale]) && isset($supp_settings[$defaultLocale]['subject']) && $article_file->setKeywords($supp_settings[$defaultLocale]['subject']);
+                $this->em->persist($article_file);
 
-            $this->em->flush();
-            if (isset($sup_file['supp_id'])) {
-                $url = "{$this->base_domain}/{$journal_path}/article/downloadSuppFile/{$sup_file['article_id']}/{$sup_file['supp_id']}";
-                $waitingfile = new WaitingFiles();
-                $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()->getName()) . $article_file->getFile()->getName();
-                $waitingfile->setPath($filepath)
-                    ->setUrl($url)
-                    ->setOldId($sup_file['supp_id'])
-                    ->setNewId($file->getId());
-                $this->dm->persist($waitingfile);
-                $this->dm->flush();
-                $this->output->writeln("<question>FileId: {$file->getId()} \n FileUrl: $url \n FilePath: $filepath</question>");
+                $this->em->flush();
+                if (isset($sup_file['supp_id'])) {
+                    $url = "{$this->base_domain}/{$journal_path}/article/downloadSuppFile/{$sup_file['article_id']}/{$sup_file['supp_id']}";
+                    $waitingfile = new WaitingFiles();
+                    $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()->getName()) . $article_file->getFile()->getName();
+                    $waitingfile->setPath($filepath)
+                        ->setUrl($url)
+                        ->setOldId($sup_file['supp_id'])
+                        ->setNewId($file->getId());
+                    $this->dm->persist($waitingfile);
+                    $this->dm->flush();
+                    $this->output->writeln("<question>FileId: {$file->getId()} \n FileUrl: $url \n FilePath: $filepath</question>");
+                }
             }
         }
 
