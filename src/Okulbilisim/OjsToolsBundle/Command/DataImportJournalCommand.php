@@ -583,13 +583,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em->persist($user_entity);
         $this->em->flush();
 
-        $query = "UPDATE users SET created=:created and lastlogin=:lastlogin WHERE id=:id";
+        $query = "UPDATE users SET created=:created , lastlogin=:lastlogin WHERE id=:id";
         $stmt = $this->em->getConnection()->prepare($query);
-        $stmt->execute([
-            'create'=>$user['date_registered'],
+        $params = [
+            'created'=>$user['date_registered'],
             'lastlogin'=>$user['date_last_login'],
             'id'=>$user_entity->getId()
-        ]);
+        ];
+        $stmt->execute($params);
 
         $this->saveRecordChange($journal_user['user_id'], $user_entity->getId(), 'Ojs\UserBundle\Entity\User');
         $this->output->writeln("<info>User {$user_entity->getUsername()} created. </info>");
@@ -658,6 +659,12 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     protected function saveAuthorData(User $user)
     {
+        $author = $this->em->getRepository('OjsJournalBundle:Author')->findOneBy([
+            'user'=>$user,
+            'title'=>$user->getTitle()
+        ]);
+        if($author)
+            return $author;
         $author = new Author();
         $author->setFirstName($user->getFirstName());
         $author->setLastName($user->getLastName());
@@ -1297,6 +1304,15 @@ class DataImportJournalCommand extends ContainerAwareCommand
      */
     protected function saveRecordChange($old_id, $new_id, $entity)
     {
+        $check = $this->dm->getRepository('OjsJournalBundle:TransferredRecord')->findOneBy(
+            [
+                'old_id'=>(int)$old_id,
+                'new_id'=>(int)$new_id,
+                'entity'=>$entity
+            ]
+        );
+        if($check)
+            return;
         $changeRecordJournal = new TransferredRecord();
         $changeRecordJournal
             ->setOldId($old_id)
