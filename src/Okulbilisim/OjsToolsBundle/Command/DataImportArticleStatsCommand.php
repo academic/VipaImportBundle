@@ -4,6 +4,7 @@ namespace Okulbilisim\OjsToolsBundle\Command;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\Mapping\Annotations\Date;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManager;
 use Ojs\AnalyticsBundle\Document\ObjectDownload;
@@ -117,7 +118,7 @@ class DataImportArticleStatsCommand extends ContainerAwareCommand
                         $ado = new ObjectDownloads();
                         $ado->setEntity('article')
                             ->setObjectId($article['id'])
-                            ->setLogDate((new \DateTime($download['download_time'])));
+                            ->setLogDate((new \DateTime($download['download_time']))->getTimestamp());
                         $this->dm->persist($ado);
                     }
                 }
@@ -135,9 +136,10 @@ class DataImportArticleStatsCommand extends ContainerAwareCommand
                         $avo = new ObjectViews();
                         $avo->setEntity('article')
                             ->setObjectId($article['id'])
-                            ->setLogDate((new \DateTime($view['view_time'])));
+                            ->setLogDate((new \DateTime($view['view_time']))->getTimestamp());
                         $this->dm->persist($avo);
                     }
+
                 }
 
                 $this->dm->flush();
