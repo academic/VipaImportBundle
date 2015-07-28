@@ -169,6 +169,8 @@ function parseConnectionString($connectionString)
     }
 
 function single($result){
+  if(!$result)
+    return;
   $result = iterator_to_array($result);
   if(!$result)
     return false;

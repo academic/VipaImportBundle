@@ -748,8 +748,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
         if ($section instanceof JournalSection) {
             $article->setSection($section);
         }
-        isset($article_settings['default']['pub-id::doi']) && $article->setDoi($article_settings['default']['pub-id::doi']);
-        isset($article_settings['default']['subject']) && $article->setSubjects($article_settings['default']['subject']);
+        isset($article_settings[$defaultLocale]['pub-id::doi']) && $article->setDoi($article_settings[$defaultLocale]['pub-id::doi']);
+        isset($article_settings[$defaultLocale]['subject']) && $article->setSubjects($article_settings[$defaultLocale]['subject']);
 
 
         switch ($_article['status']) {
@@ -786,11 +786,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         isset($_article['hide_author']) && $article->setIsAnonymous($_article['hide_author'] ? true : false);
         isset($_article['fileName']) && $article->setHeader($_article['fileName'] ? true : false);
 
-        unset($article_settings['default']);
 
-        if (count($article_settings) < 1) {
-            return false;
-        }
 
 
         $article->setPrimaryLanguage($defaultLocale);
@@ -845,7 +841,6 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $i++;
         }
         unset($i);
-
 
         unset($article_settings[$defaultLocale]);
 
