@@ -105,8 +105,8 @@ class DataImportArticleStatsCommand extends ContainerAwareCommand
                 $totalView = $this->connection->fetchAssoc("select total from article_total_view_stats where article_id={$oldId->getOldId()}");
                 $singleViews = $this->connection->fetchAll("select * from article_view_stats where article_id={$oldId->getOldId()}");
                 $singleDownloads = $this->connection->fetchAll("select * from article_download_stats where article_id={$oldId->getOldId()}");
-                $adoCheck = $this->dm->getRepository("OjsAnalyticsBundle:ObjectDownload")->findOneBy(['objectId'=>$article['id'],'entity'=>'article']);
-                if(!$adoCheck && $totalDownload['total']) {
+                $adoCheck = $this->dm->getRepository("OjsAnalyticsBundle:ObjectDownload")->findOneBy(['objectId' => $article['id'], 'entity' => 'article']);
+                if (!$adoCheck && $totalDownload['total']) {
                     $ados = new ObjectDownload();
                     $ados->setEntity('article')
                         ->setObjectId($article['id'])
@@ -118,13 +118,13 @@ class DataImportArticleStatsCommand extends ContainerAwareCommand
                         $ado = new ObjectDownloads();
                         $ado->setEntity('article')
                             ->setObjectId($article['id'])
-                            ->setLogDate((new \DateTime($download['download_time']))->getTimestamp());
+                            ->setLogDate(date_create_from_format('Y-m-d H:i:s', $download['download_time'])->getTimestamp());
                         $this->dm->persist($ado);
                     }
                 }
 
-                $avoCheck = $this->dm->getRepository("OjsAnalyticsBundle:ObjectView")->findOneBy(["objectId"=>$article['id'],'entity'=>'article']);
-                if(!$avoCheck && $totalView['total']){
+                $avoCheck = $this->dm->getRepository("OjsAnalyticsBundle:ObjectView")->findOneBy(["objectId" => $article['id'], 'entity' => 'article']);
+                if (!$avoCheck && $totalView['total']) {
                     $avos = new ObjectView();
                     $avos->setTotal($totalView['total'])
                         ->setEntity('article')
@@ -136,7 +136,7 @@ class DataImportArticleStatsCommand extends ContainerAwareCommand
                         $avo = new ObjectViews();
                         $avo->setEntity('article')
                             ->setObjectId($article['id'])
-                            ->setLogDate((new \DateTime($view['view_time']))->getTimestamp());
+                            ->setLogDate(date_create_from_format('Y-m-d H:i:s', $view['view_time'])->getTimestamp());
                         $this->dm->persist($avo);
                     }
 
