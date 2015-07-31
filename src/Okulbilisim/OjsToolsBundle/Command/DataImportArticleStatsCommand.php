@@ -7,10 +7,10 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\Annotations\Date;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManager;
-use Ojs\AnalyticsBundle\Document\ObjectDownload;
-use Ojs\AnalyticsBundle\Document\ObjectDownloads;
-use Ojs\AnalyticsBundle\Document\ObjectView;
-use Ojs\AnalyticsBundle\Document\ObjectViews;
+use Ojs\ReportBundle\Document\ObjectDownload;
+use Ojs\ReportBundle\Document\ObjectDownloads;
+use Ojs\ReportBundle\Document\ObjectView;
+use Ojs\ReportBundle\Document\ObjectViews;
 use Ojs\JournalBundle\Document\TransferredRecord;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -105,7 +105,7 @@ class DataImportArticleStatsCommand extends ContainerAwareCommand
                 $totalView = $this->connection->fetchAssoc("select total from article_total_view_stats where article_id={$oldId->getOldId()}");
                 $singleViews = $this->connection->fetchAll("select * from article_view_stats where article_id={$oldId->getOldId()}");
                 $singleDownloads = $this->connection->fetchAll("select * from article_download_stats where article_id={$oldId->getOldId()}");
-                $adoCheck = $this->dm->getRepository("OjsAnalyticsBundle:ObjectDownload")->findOneBy(['objectId' => $article['id'], 'entity' => 'article']);
+                $adoCheck = $this->dm->getRepository("OjsReportBundle:ObjectDownload")->findOneBy(['objectId' => $article['id'], 'entity' => 'article']);
                 if (!$adoCheck && $totalDownload['total']) {
                     $ados = new ObjectDownload();
                     $ados->setEntity('article')
@@ -123,7 +123,7 @@ class DataImportArticleStatsCommand extends ContainerAwareCommand
                     }
                 }
 
-                $avoCheck = $this->dm->getRepository("OjsAnalyticsBundle:ObjectView")->findOneBy(["objectId" => $article['id'], 'entity' => 'article']);
+                $avoCheck = $this->dm->getRepository("OjsReportBundle:ObjectView")->findOneBy(["objectId" => $article['id'], 'entity' => 'article']);
                 if (!$avoCheck && $totalView['total']) {
                     $avos = new ObjectView();
                     $avos->setTotal($totalView['total'])
