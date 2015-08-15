@@ -16,7 +16,6 @@ use Ojs\JournalBundle\Entity\ArticleFile;
 use Ojs\JournalBundle\Entity\ArticleTranslation;
 use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\CitationSetting;
-use Ojs\JournalBundle\Entity\File;
 use Ojs\JournalBundle\Entity\JournalContact;
 use Ojs\JournalBundle\Entity\JournalContactTranslation;
 use Ojs\JournalBundle\Entity\JournalSection;
@@ -336,7 +335,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             if ($institution) {
                 $journal->setInstitution($institution);
             } else {
-                $institution = $this->createInstitution($journal_detail);
+                $institution = $this->createInstitution($journal_detail,$defaultLocale);
                 $journal->setInstitution($institution);
             }
         }
@@ -571,12 +570,11 @@ class DataImportJournalCommand extends ContainerAwareCommand
         isset($user['mailing_address']) && $user_entity->setAddress($user['mailing_address']);
         isset($user['billing_address']) && $user_entity->setBillingAddress($user['billing_address']);
         isset($user['locales']) && $user_entity->setLocales(serialize(explode(':', $user['locales'])));
+        $user_entity->setPlainPassword('ojs_!!123123');
         $user_entity->generateApiKey();
         isset($user['salutation']) && $user_entity->setTitle($user['salutation']);
         if ($user['disabled'] == 1 && !$usercheck) {
-            $user_entity->setIsActive(false);
-            $user_entity->setDisableReason(isset($user['disable_reason']) && $user['disable_reason']);
-            $user_entity->setStatus(0);
+            $user_entity->setEnabled(false);
         }
         /*
          $country = $this->em->getRepository('OkulbilisimLocationBundle:Location')->findOneBy(['iso_code' => $user['country']]);
@@ -585,11 +583,11 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $this->em->persist($user_entity);
         $this->em->flush();
 
-        $query = "UPDATE users SET created=:created , lastlogin=:lastlogin WHERE id=:id";
+        $query = "UPDATE users SET created=:created , last_login=:last_login WHERE id=:id";
         $stmt = $this->em->getConnection()->prepare($query);
         $params = [
             'created'=>$user['date_registered'],
-            'lastlogin'=>$user['date_last_login'],
+            'last_login'=>$user['date_last_login'],
             'id'=>$user_entity->getId()
         ];
         $stmt->execute($params);
@@ -677,6 +675,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $author->setAddress($user->getAddress());
         $author->setBillingAddress($user->getBillingAddress());
         $author->setLocales($user->getLocales());
+        $author->setLocale($user->getLocale());
         $author->setUrl($user->getUrl());
         $author->setPhone($user->getPhone());
         $user->getCountry() !== null && $author->setCountry($user->getCountry());
@@ -976,36 +975,31 @@ class DataImportJournalCommand extends ContainerAwareCommand
                     $url = "{$this->base_domain}/$journal_path/article/download/{$galley['article_id']}/{$galley_setting['setting_value']}";
                 }
             }
-            $checkfile = $this->em->getRepository('OjsJournalBundle:File')->findOneBy(['name'=>$article_file['file_name'],'size'=>$article_file['file_size']]);
+            $checkfile = $this->em->getRepository('OjsJournalBundle:ArticleFile')->findOneBy(['file'=>$article_file['file_name']]);
             if(!$checkfile){
-                $file = new File();
-                $file->setName($article_file['file_name']);
-                $file->setMimeType($article_file['file_type']);
-                $file->setSize($article_file['file_size']);
                 $version = $article_file['source_revision'];
-                $this->em->persist($file);
-
+                $filename = $article_file['file_name'];
                 $article_file = new ArticleFile();
                 $article_file->setTitle($galley['label']);
                 $article_file->setLangCode($galley['locale']);
-                $article_file->setFile($file);
+                $article_file->setFile($filename);
                 $article_file->setArticle($article);
                 $article_file->setType(0);
                 $article_file->setVersion($version ? $version : 1);
 
                 $this->em->persist($article_file);
                 $this->em->flush();
-                $this->saveRecordChange($galley['file_id'], $file->getId(), 'Ojs\JournalBundle\Entity\File');
+                $this->saveRecordChange($galley['file_id'], $article_file->getId(), 'Ojs\JournalBundle\Entity\ArticleFile');
 
                 $waitingfile = new WaitingFiles();
-                $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()->getName()) . $article_file->getFile()->getName();
+                $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()) . $article_file->getFile();
                 $waitingfile->setPath($filepath)
                     ->setUrl($url)
                     ->setOldId($galley['file_id'])
-                    ->setNewId($file->getId());
+                    ->setNewId($article_file->getId());
                 $this->dm->persist($waitingfile);
                 $this->dm->flush();
-                $this->output->writeln("<question>FileId: {$file->getId()} \n FileUrl: $url \n FilePath: $filepath</question>");
+                $this->output->writeln("<question>FileId: {$article_file->getId()} \n FileUrl: $url \n FilePath: $filepath</question>");
             }
 
 
@@ -1039,21 +1033,16 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $defaultLocale = 'default';
             }
 
-            $checkfile = $this->em->getRepository('OjsJournalBundle:File')->findOneBy(['name'=>$sup_file_detail['file_name'],'size'=>$sup_file_detail['file_size']]);
+            $checkfile = $this->em->getRepository('OjsJournalBundle:ArticleFile')->findOneBy(['file'=>$sup_file_detail['file_name']]);
 
             if(!$checkfile){
-                $file = new File();
-                $file->setName(strtolower($sup_file_detail['file_name']));
-                $file->setMimeType($sup_file_detail['file_type']);
-                $file->setSize($sup_file_detail['file_size']);
                 $version = $sup_file_detail['source_revision'];
-                $this->em->persist($file);
 
 
                 $article_file = new ArticleFile();
                 isset($supp_settings[$defaultLocale]) && isset($supp_settings[$defaultLocale]['title']) && $article_file->setTitle($supp_settings[$defaultLocale]['title']);
                 $article_file->setLangCode($defaultLocale);
-                $article_file->setFile($file);
+                $article_file->setFile(strtolower($sup_file_detail['file_name']));
                 $article_file->setArticle($article);
                 $article_file->setType($this->supplementary_files($sup_file['type']));
                 $article_file->setVersion($version ? $version : 1);
@@ -1064,14 +1053,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 if (isset($sup_file['supp_id'])) {
                     $url = "{$this->base_domain}/{$journal_path}/article/downloadSuppFile/{$sup_file['article_id']}/{$sup_file['supp_id']}";
                     $waitingfile = new WaitingFiles();
-                    $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()->getName()) . $article_file->getFile()->getName();
+                    $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()) . $article_file->getFile();
                     $waitingfile->setPath($filepath)
                         ->setUrl($url)
                         ->setOldId($sup_file['supp_id'])
-                        ->setNewId($file->getId());
+                        ->setNewId($article_file->getId());
                     $this->dm->persist($waitingfile);
                     $this->dm->flush();
-                    $this->output->writeln("<question>FileId: {$file->getId()} \n FileUrl: $url \n FilePath: $filepath</question>");
+                    $this->output->writeln("<question>FileId: {$article_file->getId()} \n FileUrl: $url \n FilePath: $filepath</question>");
                 }
             }
         }
@@ -1087,7 +1076,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 ->setTitle($author['suffix'])
                 ->setEmail($author['email'])
                 ->setUrl($author['url'])
-            ->setTranslatableLocale($article->getTranslatableLocale());
+                ->setTranslatableLocale($article->getTranslatableLocale());
             $this->em->persist($newAuthor);
             $articleAuthor = new ArticleAuthor();
             $articleAuthor->setArticle($article)
@@ -1150,7 +1139,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
      * @return bool|\Doctrine\Common\Proxy\Proxy|object|Institution
      * @throws \Doctrine\ORM\ORMException
      */
-    protected function createInstitution($data)
+    protected function createInstitution($data,$locale)
     {
         if (!isset($data['publisherInstitution']) || empty($data['publisherInstitution'])) {
             return $this->em->find("OjsJournalBundle:Institution", 1);
@@ -1162,6 +1151,8 @@ class DataImportJournalCommand extends ContainerAwareCommand
         isset($data['publisherType']) && $institutionType = $this->getInstitutionType($data['publisherType']);
         if ($institutionType)
             $institution->setInstitutionType($institutionType);
+
+        $institution->setLocale($locale);
 
         $this->em->persist($institution);
         $this->em->flush();
@@ -1269,24 +1260,20 @@ class DataImportJournalCommand extends ContainerAwareCommand
         foreach ($galleys as $galley) {
 
             $oldFile = $this->connection->fetchAssoc("SELECT * FROM issue_files WHERE file_id={$galley['file_id']}");
-            $file = new File();
-            $file->setName($oldFile['file_name'])
-                ->setMimeType($oldFile['file_type'])
-                ->setSize($oldFile['file_size']);
 
             //@todo continue after issuefile feature
             $issueFile = new IssueFile();
-            $issueFile->setFile($file)
+            $issueFile->setFile($oldFile['file_name'])
                 ->setIssue($issue)
                 ->setTitle($oldFile['file_name']);
 
             $fileUrl = "{$this->base_domain}/$journalPath/issue/download/{$galley['issue_id']}/{$galley['galley_id']}";
             $waitingfile = new WaitingFiles();
-            $filepath = "uploads/issuefiles/" . $fileHelper->generatePath($issueFile->getFile()->getName()) . $issueFile->getFile()->getName();
+            $filepath = "uploads/issuefiles/" . $fileHelper->generatePath($issueFile->getFile()) . $issueFile->getFile();
             $waitingfile->setPath($filepath)
                 ->setUrl($fileUrl)
                 ->setOldId($galley['file_id'])
-                ->setNewId($file->getId());
+                ->setNewId($issueFile->getId());
             $this->dm->persist($waitingfile);
             $this->dm->flush();
         }
@@ -1378,7 +1365,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             if(!$contact){
                 $contact = new JournalContact();
                 $contact->setAffiliation($journal_detail[$defaultLocale]['contactAffiliation']);
-
+                $contact->setLocale($defaultLocale);
                 isset($journal_detail[$defaultLocale]['contactEmail']) && $contact->setEmail($journal_detail[$defaultLocale]['contactEmail']);
                 isset($journal_detail[$defaultLocale]['contactFax']) && $contact->setFax($journal_detail[$defaultLocale]['contactFax']);
                 isset($journal_detail[$defaultLocale]['contactMailingAddress']) && $contact->setAddress($journal_detail[$defaultLocale]['contactMailingAddress']);
@@ -1445,6 +1432,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $contact->setEmail($journal_detail[$defaultLocale]['supportEmail']);
                 $contact->setPhone($journal_detail[$defaultLocale]['supportPhone']);
                 $contact->setFirstName($journal_detail[$defaultLocale]['supportName']);
+                $contact->setLocale($defaultLocale);
                 if (!$contactType) {
                     throw new \Exception("You must import default contact types.");
                 }
@@ -1507,6 +1495,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
         }
         $newSection = new JournalSection();
         $newSection->setJournal($journal);
+        $newSection->setLocale($defaultLocale);
         $newSection->setTitle($section_settings[$defaultLocale]['title']);
         isset($section_detail['hide_title']) && $newSection->setHideTitle($section_detail['hide_title']);
         $this->em->persist($newSection);
