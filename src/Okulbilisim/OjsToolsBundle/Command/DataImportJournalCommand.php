@@ -996,6 +996,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()) . $article_file->getFile();
                 $waitingfile->setPath($filepath)
                     ->setUrl($url)
+                    ->setType('articlefiles')
                     ->setOldId($galley['file_id'])
                     ->setNewId($article_file->getId());
                 $this->dm->persist($waitingfile);
@@ -1238,13 +1239,26 @@ class DataImportJournalCommand extends ContainerAwareCommand
 
             $this->em->persist($journal);
             $fileUrl = "{$this->base_domain}/public/journals/{$this->journalOldId}/{$issue_settings[$defaultLocale]['fileName']}";
-            $waitingfile = new WaitingFiles();
             $fileHelper = new FileHelper();
+            $new_path = $fileHelper->generatePath($issue_settings[$defaultLocale]['fileName']);
+            $waitingfile = new WaitingFiles();
 
-            $filepath = "uploads/journalfiles/" . $fileHelper->generatePath($issue_settings[$defaultLocale]['fileName']) . $issue_settings[$defaultLocale]['fileName'];
+            $filepath = "uploads/journal/" . $newpath . $issue_settings[$defaultLocale]['fileName'];
             $waitingfile->setPath($filepath)
                 ->setUrl($fileUrl)
-                ->setOldId($issueData['issue_id']);
+                ->setOldId($issueData['issue_id'])
+                ->setType('journal')
+            ;
+            $this->dm->persist($waitingfile);
+            $this->dm->flush();
+            $waitingfile = new WaitingFiles();
+
+            $filepath = "uploads/issue/" . $newpath . $issue_settings[$defaultLocale]['fileName'];
+            $waitingfile->setPath($filepath)
+                ->setUrl($fileUrl)
+                ->setOldId($issueData['issue_id'])
+                ->setType('issue')
+            ;
             $this->dm->persist($waitingfile);
             $this->dm->flush();
             $this->output->writeln("<comment>Saved issue cover image #{$waitingfile->getPath()} to waiting files</comment>");
@@ -1280,6 +1294,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $filepath = "uploads/issuefiles/" . $fileHelper->generatePath($issueFile->getFile()) . $issueFile->getFile();
             $waitingfile->setPath($filepath)
                 ->setUrl($fileUrl)
+                ->setType('issuefiles')
                 ->setOldId($galley['file_id'])
                 ->setNewId($issueFile->getId());
             $this->dm->persist($waitingfile);
