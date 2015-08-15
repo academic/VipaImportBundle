@@ -10,6 +10,7 @@ namespace Okulbilisim\OjsToolsBundle\Command;
 use Doctrine\MongoDB\EagerCursor;
 use Doctrine\ODM\MongoDB\Cursor;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Liip\ImagineBundle\Model\Binary;
 use Ojs\JournalBundle\Document\WaitingFiles;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Application;
@@ -102,6 +103,9 @@ class DownloadWaitingFilesCommand extends ContainerAwareCommand
         curl_setopt($ch, CURLOPT_FILE, $wrap);
         curl_exec($ch);
         curl_close($ch);
+        $binary = new Binary();
+        $image_manager = $this->getContainer()->get('liip_imagine.cache.resolver.no_cache_web_path');
+        $image_manager->store($binary,$fullPath,'');
         if(file_exists($fullPath)){
             $file->setDownloaded(true);
             $this->dm->persist($file);
