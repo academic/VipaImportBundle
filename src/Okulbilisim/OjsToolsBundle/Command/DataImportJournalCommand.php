@@ -7,6 +7,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Gedmo\Translatable\Entity\Repository\TranslationRepository;
+use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
 use Ojs\Common\Helper\FileHelper;
 use Ojs\Common\Params\ArticleFileParams;
 use \Ojs\JournalBundle\Document\TransferredRecord;
@@ -990,7 +991,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $this->em->persist($article_file);
                 $this->em->flush();
                 $this->saveRecordChange($galley['file_id'], $article_file->getId(), 'Ojs\JournalBundle\Entity\ArticleFile');
-
+                $this->saveToJbFileHistory($article_file->getTitle(),$article_file->getFile(),'articlefiles',1);
                 $waitingfile = new WaitingFiles();
                 $filepath = "uploads/articlefiles/" . $filehelper->generatePath($article_file->getFile()) . $article_file->getFile();
                 $waitingfile->setPath($filepath)
@@ -1048,6 +1049,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
                 $article_file->setVersion($version ? $version : 1);
                 isset($supp_settings[$defaultLocale]) && isset($supp_settings[$defaultLocale]['subject']) && $article_file->setKeywords($supp_settings[$defaultLocale]['subject']);
                 $this->em->persist($article_file);
+                $this->saveToJbFileHistory($article_file->getTitle(),$article_file->getFile(),'articlefiles',1);
 
                 $this->em->flush();
                 if (isset($sup_file['supp_id'])) {
@@ -1226,9 +1228,14 @@ class DataImportJournalCommand extends ContainerAwareCommand
         $issue->setTranslatableLocale($defaultLocale);
         $issue->setNumber($issueData['number']);
         if (isset($issue_settings[$defaultLocale]['fileName'])) {
+
             $journal = $issue->getJournal();
             $issue->setCover($issue_settings[$defaultLocale]['fileName']);
             $journal->setImage($issue_settings[$defaultLocale]['fileName']);
+
+            $this->saveToJbFileHistory($issue_settings[$defaultLocale]['fileName'],$issue_settings[$defaultLocale]['fileName'],'issue',1);
+            $this->saveToJbFileHistory($issue_settings[$defaultLocale]['fileName'],$issue_settings[$defaultLocale]['fileName'],'journal',1);
+
             $this->em->persist($journal);
             $fileUrl = "{$this->base_domain}/public/journals/{$this->journalOldId}/{$issue_settings[$defaultLocale]['fileName']}";
             $waitingfile = new WaitingFiles();
@@ -1266,6 +1273,7 @@ class DataImportJournalCommand extends ContainerAwareCommand
             $issueFile->setFile($oldFile['file_name'])
                 ->setIssue($issue)
                 ->setTitle($oldFile['file_name']);
+            $this->saveToJbFileHistory($issueFile->getTitle(),$issueFile->getFile(),'issuefiles',1);
 
             $fileUrl = "{$this->base_domain}/$journalPath/issue/download/{$galley['issue_id']}/{$galley['galley_id']}";
             $waitingfile = new WaitingFiles();
@@ -1669,5 +1677,17 @@ class DataImportJournalCommand extends ContainerAwareCommand
             throw new \Exception("Hatalı parametre.");
 
         $this->database['charset'] = 'utf8';
+    }
+
+    private function saveToJbFileHistory($original_name,$file_name,$type,$user)
+    {
+        $jbFileHistory = new FileHistory();
+        $jbFileHistory->setFileName($file_name)
+            ->setOriginalName($original_name)
+            ->setType($type)
+            ->setUserId($user)
+        ;
+        $this->em->persist($jbFileHistory);
+        $this->em->flush();
     }
 }
