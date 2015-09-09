@@ -18,6 +18,7 @@
     },
     "require": {
         "php": ">=5.4",
-        "h4cc/alice-fixtures-bundle": "~0.5"
+        "h4cc/alice-fixtures-bundle": "~0.5",
+        "doctrine/dbal": "2.5.1"
     }
 }
