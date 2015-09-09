@@ -1,6 +1,6 @@
 <?php
 
-namespace Okulbilisim\OjsToolsBundle\Command;
+namespace Okulbilisim\OjsImportBundle\Command;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ODM\MongoDB\DocumentManager;
@@ -36,7 +36,7 @@ use Ojs\SiteBundle\Entity\BlockLink;
 use Ojs\UserBundle\Entity\Role;
 use Okulbilisim\CmsBundle\Entity\Post;
 use Okulbilisim\CmsBundle\Entity\PostTranslation;
-use Okulbilisim\OjsToolsBundle\Helper\StringHelper;
+use Okulbilisim\OjsImportBundle\Helper\StringHelper;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\Institution;
 use Ojs\LocationBundle\Entity\Location;
@@ -62,7 +62,7 @@ use Symfony\Component\Finder\Exception\ShellCommandFailureException;
  *
  * JournalId Integer
  * MysqlConnectionString user:password@host/db
- * @package Okulbilisim\OjsToolsBundle\Command
+ * @package Okulbilisim\OjsImportBundle\Command
  */
 class DataImportJournalCommand extends ContainerAwareCommand
 {

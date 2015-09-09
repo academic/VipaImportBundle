@@ -1,6 +1,6 @@
 <?php
 
-namespace Okulbilisim\OjsToolsBundle\DependencyInjection;
+namespace Okulbilisim\OjsImportBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;

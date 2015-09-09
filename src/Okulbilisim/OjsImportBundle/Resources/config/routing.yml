@@ -1,0 +1,3 @@
+okulbilisim_ojs_tools_homepage:
+    path:     /tools
+    defaults: { _controller: OkulbilisimOjsImportBundle:Default:index }

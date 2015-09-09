@@ -1,6 +1,6 @@
 <?php
 
-namespace Okulbilisim\OjsToolsBundle\Command;
+namespace Okulbilisim\OjsImportBundle\Command;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ODM\MongoDB\DocumentManager;

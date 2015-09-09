@@ -4,7 +4,7 @@
  * Time: 16:31
  */
 
-namespace Okulbilisim\OjsToolsBundle\Command;
+namespace Okulbilisim\OjsImportBundle\Command;
 
 
 use Doctrine\MongoDB\EagerCursor;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Okulbilisim\OjsToolsBundle\Tests\Controller;
+namespace Okulbilisim\OjsImportBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

@@ -6,7 +6,7 @@
  * Time: 10:23
  */
 
-namespace Okulbilisim\OjsToolsBundle\Helper;
+namespace Okulbilisim\OjsImportBundle\Helper;
 
 
 class StringHelper
