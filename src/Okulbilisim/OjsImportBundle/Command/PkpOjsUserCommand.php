@@ -69,9 +69,7 @@ class PkpOjsUserCommand extends ImportCommand
         $statement->execute();
         $pkpUser = $statement->fetch();
 
-        /** @var EntityManager $em */
-        $em = $this->getContainer()->get('doctrine.orm.entity_manager');
-        $user = $em->getRepository('OjsUserBundle:User')->find($newId);
+        $user = $this->em->getRepository('OjsUserBundle:User')->find($newId);
 
         // Fields which can't be blank
         isset($pkpUser['first_name']) ? $user->setFirstName($pkpUser['first_name']) : $user->setFirstName('Anonymous');
@@ -85,7 +83,7 @@ class PkpOjsUserCommand extends ImportCommand
         isset($pkpUser['fax']) && $user->setFax($pkpUser['fax']);
         isset($pkpUser['url']) && $user->setUrl($pkpUser['url']);
 
-        $em->persist($user);
-        $em->flush();
+        $this->em->persist($user);
+        $this->em->flush();
     }
 }
