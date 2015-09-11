@@ -4,6 +4,7 @@ namespace Okulbilisim\OjsImportBundle\Command;
 
 use Doctrine\ORM\EntityManager;
 use Okulbilisim\OjsImportBundle\Helper\ImportCommand;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -14,7 +15,8 @@ class PkpOjsUserCommand extends ImportCommand
     {
         $this
             ->setName('ojs:import:pkp:user')
-            ->setDescription('Import an user from PKP/OJS');
+            ->setDescription('Import an user from PKP/OJS')
+            ->addArgument('id', InputArgument::REQUIRED, 'User ID');
 
         parent::configure();
     }

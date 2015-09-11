@@ -19,7 +19,6 @@ class ImportCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->addArgument('id', InputArgument::REQUIRED, 'User ID')
             ->addArgument('host', InputArgument::REQUIRED, 'Hostname of PKP/OJS database server')
             ->addArgument('username', InputArgument::REQUIRED, 'Username for PKP/OJS database server')
             ->addArgument('password', InputArgument::REQUIRED, 'Password for PKP/OJS database server')
