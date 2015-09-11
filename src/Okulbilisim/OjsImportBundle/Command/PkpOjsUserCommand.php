@@ -2,50 +2,28 @@
 
 namespace Okulbilisim\OjsImportBundle\Command;
 
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Okulbilisim\OjsImportBundle\Helper\ImportCommand;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class PkpOjsUserCommand extends ImportCommand
 {
-    /**
-     * @var Connection
-     */
-    private $connection;
 
     protected function configure()
     {
         $this
             ->setName('ojs:import:pkp:user')
-            ->setDescription('Import an user from PKP/OJS')
-            ->addArgument('id', InputArgument::REQUIRED, 'User ID')
-            ->addArgument('host', InputArgument::REQUIRED, 'Hostname of PKP/OJS database server')
-            ->addArgument('username', InputArgument::REQUIRED, 'Username for PKP/OJS database server')
-            ->addArgument('password', InputArgument::REQUIRED, 'Password for PKP/OJS database server')
-            ->addArgument('database', InputArgument::REQUIRED, 'Name of PKP/OJS database')
-            ->addArgument('driver', InputArgument::OPTIONAL, 'Database driver', 'pdo_mysql');
+            ->setDescription('Import an user from PKP/OJS');
+
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $parameters = [
-            'host' => $input->getArgument('host'),
-            'user' => $input->getArgument('username'),
-            'password' => $input->getArgument('password'),
-            'dbname' => $input->getArgument('database'),
-            'driver' => $input->getArgument('driver'),
-        ];
-
-        $this->connection = $this
-            ->getContainer()
-            ->get('doctrine.dbal.connection_factory')
-            ->createConnection($parameters);
+        parent::execute($input, $output);
 
         $id = $input->getArgument('id');
-
         $this->importUser($id);
     }
 
