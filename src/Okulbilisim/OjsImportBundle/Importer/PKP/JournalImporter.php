@@ -46,35 +46,37 @@ class JournalImporter extends Importer
         }
 
         $this->journal = new Journal();
-        $this->journal->setCurrentLocale($primaryLocale);
         $this->journal->setSlug($pkpJournal['path']);
 
         // Fill translatable fields in all available languages
         foreach ($this->settings as $fieldLocale => $fields) {
             $translation = new JournalTranslation();
             $translation->setLocale(substr($fieldLocale, 0, 2));
+            $this->journal->setCurrentLocale(substr($fieldLocale, 0, 2));
 
-            isset($fields['title']) ?
+            !empty($fields['title']) ?
                 $translation->setTitle($fields['title']) :
                 $translation->setTitle('Unknown Journal');
 
-            isset($fields['description']) ?
+            !empty($fields['description']) ?
                 $translation->setDescription($fields['description']) :
                 $translation->setDescription('-');
 
             $this->journal->addTranslation($translation);
         }
 
-        isset($this->settings[$primaryLocale]['printIssn']) ?
+        $this->journal->setCurrentLocale($primaryLocale);
+
+        !empty($this->settings[$primaryLocale]['printIssn']) ?
             $this->journal->setIssn($this->settings[$primaryLocale]['printIssn']) :
             $this->journal->setIssn('1234-5679');
 
-        isset($this->settings[$primaryLocale]['onlineIssn']) ?
+        !empty($this->settings[$primaryLocale]['onlineIssn']) ?
             $this->journal->setEissn($this->settings[$primaryLocale]['onlineIssn']) :
             $this->journal->setEissn('1234-5679');
 
         $date = sprintf('%d-01-01 00:00:00',
-            isset($this->settings[$primaryLocale]['initialYear']) ?
+            !empty($this->settings[$primaryLocale]['initialYear']) ?
                 $this->settings[$primaryLocale]['initialYear'] : '2015');
         $this->journal->setFounded(DateTime::createFromFormat('Y-m-d H:i:s', $date));
 
@@ -101,14 +103,14 @@ class JournalImporter extends Importer
             ->findOneBy(['name' => $name]);
 
         if (!$publisher) {
-            $url = isset($this->settings[$locale]['publisherUrl']) ? $this->settings[$locale]['publisherUrl'] : null;
+            $url = !empty($this->settings[$locale]['publisherUrl']) ? $this->settings[$locale]['publisherUrl'] : null;
             $publisher = $this->createPublisher($this->settings[$locale]['publisherInstitution'], $url);
 
             foreach ($this->settings as $fieldLocale => $fields) {
                 $translation = new PublisherTranslation();
                 $translation->setLocale(substr($fieldLocale, 0, 2));
 
-                isset($fields['publisherNote']) ?
+                !empty($fields['publisherNote']) ?
                     $translation->setAbout($fields['publisherNote']) :
                     $translation->setAbout('-');
 
@@ -162,7 +164,7 @@ class JournalImporter extends Importer
 
         $lang = new Lang();
         $lang->setCode($code);
-        isset($nameMap[$code]) ?
+        !empty($nameMap[$code]) ?
             $lang->setName($nameMap[$code]) :
             $lang->setName('Unknown Language');
 
