@@ -6,7 +6,6 @@ use DateTime;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\JournalBundle\Entity\IssueTranslation;
 use Ojs\JournalBundle\Entity\Journal;
-use Symfony\Component\Validator\Constraints\Date;
 
 class IssueImporter extends Importer
 {
@@ -17,6 +16,7 @@ class IssueImporter extends Importer
 
     /**
      * @param Journal $journal Issue's Journal
+     * @param int $oldId Issue's ID in the old database
      */
     public function importJournalsIssues($journal, $oldId)
     {
