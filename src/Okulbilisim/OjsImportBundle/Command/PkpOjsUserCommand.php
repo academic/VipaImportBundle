@@ -2,7 +2,6 @@
 
 namespace Okulbilisim\OjsImportBundle\Command;
 
-use Doctrine\ORM\EntityManager;
 use Okulbilisim\OjsImportBundle\Helper\ImportCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
