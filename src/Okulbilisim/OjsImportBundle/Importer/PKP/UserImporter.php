@@ -1,34 +1,42 @@
 <?php
 
-namespace Okulbilisim\OjsImportBundle\Command;
+namespace Okulbilisim\OjsImportBundle\Importer\PKP;
 
-use Okulbilisim\OjsImportBundle\Helper\ImportCommand;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+use Doctrine\DBAL\Driver\Connection;
+use Doctrine\ORM\EntityManager;
+use FOS\UserBundle\Model\UserManager;
+use FOS\UserBundle\Util\TokenGenerator;
 
-class PkpOjsUserCommand extends ImportCommand
+class UserImporter extends Importer
 {
+    /**
+     * @var UserManager
+     */
+    private $userManager;
 
-    protected function configure()
+    /**
+     * @var TokenGenerator
+     */
+    private $tokenGenerator;
+
+    /**
+     * UserImporter constructor.
+     * @param Connection $connection
+     * @param EntityManager $em
+     * @param UserManager $userManager
+     * @param TokenGenerator $tokenGenerator
+     */
+    public function __construct(Connection $connection,
+                                EntityManager $em,
+                                UserManager $userManager,
+                                TokenGenerator $tokenGenerator)
     {
-        $this
-            ->setName('ojs:import:pkp:user')
-            ->setDescription('Import an user from PKP/OJS')
-            ->addArgument('id', InputArgument::REQUIRED, 'User ID');
-
-        parent::configure();
+        parent::__construct($connection, $em);
+        $this->userManager = $userManager;
+        $this->tokenGenerator = $tokenGenerator;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        parent::execute($input, $output);
-
-        $id = $input->getArgument('id');
-        $this->importUser($id);
-    }
-
-    private function importUser($id)
+    public function importUser($id)
     {
         $sql = "SELECT username, email, disabled FROM users WHERE user_id = :id LIMIT 1";
         $statement = $this->connection->prepare($sql);
@@ -36,8 +44,7 @@ class PkpOjsUserCommand extends ImportCommand
         $statement->execute();
         $pkpUser = $statement->fetch();
 
-        $userManager = $this->getContainer()->get('fos_user.user_manager');
-        $user = $userManager->createUser();
+        $user = $this->userManager->createUser();
 
         isset($pkpUser['username']) ?
             $user->setUsername($pkpUser['username']) :
@@ -52,11 +59,10 @@ class PkpOjsUserCommand extends ImportCommand
             $user->setEnabled(1);
 
         // Set a random password
-        $tokenGenerator = $this->getContainer()->get('fos_user.util.token_generator');
-        $password = substr($tokenGenerator->generateToken(), 0, 8);
+        $password = substr($this->tokenGenerator->generateToken(), 0, 8);
         $user->setPlainPassword($password);
 
-        $userManager->updateUser($user);
+        $this->userManager->updateUser($user);
         $this->importProfile($id, $user->getId());
     }
 

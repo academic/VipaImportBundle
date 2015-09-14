@@ -1,6 +1,6 @@
 <?php
 
-namespace Okulbilisim\OjsImportBundle\Command;
+namespace Okulbilisim\OjsImportBundle\Importer\PKP;
 
 use DateTime;
 use Ojs\JournalBundle\Entity\Journal;
@@ -8,12 +8,8 @@ use Ojs\JournalBundle\Entity\JournalTranslation;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
 use Ojs\JournalBundle\Entity\PublisherTranslation;
-use Okulbilisim\OjsImportBundle\Helper\ImportCommand;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
-class PkpOjsJournalCommand extends ImportCommand
+class JournalImporter extends Importer
 {
     /**
      * @var Journal
@@ -25,24 +21,7 @@ class PkpOjsJournalCommand extends ImportCommand
      */
     private $settings;
 
-    protected function configure()
-    {
-        $this
-            ->setName('ojs:import:pkp:journal')
-            ->setDescription('Import an user from PKP/OJS')
-            ->addArgument('id', InputArgument::REQUIRED, 'Journal ID');
-
-        parent::configure();
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        parent::execute($input, $output);
-        $id = $input->getArgument('id');
-        $this->importJournal($id);
-    }
-
-    private function importJournal($id)
+    public function importJournal($id)
     {
         $journalSql = "SELECT path, primary_locale FROM journals WHERE journal_id = :id LIMIT 1";
         $journalStatement = $this->connection->prepare($journalSql);
@@ -81,7 +60,7 @@ class PkpOjsJournalCommand extends ImportCommand
 
             isset($fields['description']) ?
                 $translation->setDescription($fields['description']) :
-                $translation->setDescription('A Journal');
+                $translation->setDescription('-');
 
             $this->journal->addTranslation($translation);
         }
@@ -131,7 +110,7 @@ class PkpOjsJournalCommand extends ImportCommand
 
                 isset($fields['publisherNote']) ?
                     $translation->setAbout($fields['publisherNote']) :
-                    $translation->setAbout('A journal');
+                    $translation->setAbout('-');
 
                 $publisher->addTranslation($translation);
             }
@@ -148,7 +127,7 @@ class PkpOjsJournalCommand extends ImportCommand
 
         !$publisher && $publisher = $this->createPublisher('Unknown Publisher', 'http://example.com');
         $publisher->setCurrentLocale('en');
-        $publisher->setAbout('A publisher');
+        $publisher->setAbout('-');
 
         $this->em->persist($publisher);
         $this->em->flush();
@@ -161,8 +140,8 @@ class PkpOjsJournalCommand extends ImportCommand
         $publisher = new Publisher();
         $publisher->setName($name);
         $publisher->setEmail('publisher@example.com');
-        $publisher->setAddress('123 Example Street, Exampletown, EX');
-        $publisher->setPhone('+1 234 567 89 01');
+        $publisher->setAddress('-');
+        $publisher->setPhone('-');
         $publisher->setUrl($url);
 
         $this->em->persist($publisher);

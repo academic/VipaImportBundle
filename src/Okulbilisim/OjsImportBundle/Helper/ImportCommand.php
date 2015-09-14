@@ -4,7 +4,6 @@ namespace Okulbilisim\OjsImportBundle\Helper;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
-use InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -48,10 +47,5 @@ class ImportCommand extends ContainerAwareCommand
             ->createConnection($parameters);
 
         $this->em = $this->getContainer()->get('doctrine.orm.entity_manager');
-    }
-
-    protected function throwInvalidArgumentException($message)
-    {
-        throw new InvalidArgumentException($message);
     }
 }
