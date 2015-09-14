@@ -38,6 +38,8 @@ class JournalImporter extends Importer
         $primaryLocale = $pkpJournal['primary_locale'];
         $languageCode = substr($primaryLocale, 0, 2);
 
+        !$pkpJournal && die('Journal not found.' . PHP_EOL);
+
         foreach ($pkpSettings as $setting) {
             $locale = !empty($setting['locale']) ? $setting['locale'] : $primaryLocale;
             $name = $setting['setting_name'];
