@@ -96,6 +96,9 @@ class JournalImporter extends Importer
 
         $issueImporter = new IssueImporter($this->connection, $this->em);
         $issueImporter->importJournalsIssues($this->journal, $id);
+        
+        $sectionImporter = new SectionImporter($this->connection, $this->em);
+        $sectionImporter->importJournalsSections($this->journal, $id);
 
         $this->em->persist($this->journal);
         $this->em->flush();
