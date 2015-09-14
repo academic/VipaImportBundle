@@ -92,8 +92,12 @@ class JournalImporter extends Importer
         $this->journal->setMandatoryLang($language ? $language : $this->createLanguage($languageCode));
         $this->journal->addLanguage($language ? $language : $this->createLanguage($languageCode));
 
+        $issueImporter = new IssueImporter($this->connection, $this->em);
+        $issueImporter->importJournalsIssues($this->journal, $id);
+
         $this->em->persist($this->journal);
         $this->em->flush();
+
     }
 
     private function importAndSetPublisher($name, $locale)
