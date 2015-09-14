@@ -6,6 +6,7 @@ use DateTime;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\JournalBundle\Entity\IssueTranslation;
 use Ojs\JournalBundle\Entity\Journal;
+use Symfony\Component\Validator\Constraints\Date;
 
 class IssueImporter extends Importer
 {
@@ -65,7 +66,7 @@ class IssueImporter extends Importer
         $issue->setPublished($pkpIssue['published']);
         $issue->setDatePublished(
             !empty($pkpIssue['date_published']) ?
-                new DateTime() :
+                DateTime::createFromFormat('Y-m-d h:m:s', $pkpIssue['date_published']) :
                 new DateTime() // Use current date and time if publishing date is not defined
         );
 
