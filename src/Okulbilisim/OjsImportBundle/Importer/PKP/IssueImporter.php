@@ -64,11 +64,16 @@ class IssueImporter extends Importer
         $issue->setNumber($pkpIssue['number']);
         $issue->setYear($pkpIssue['year']);
         $issue->setPublished($pkpIssue['published']);
-        $issue->setDatePublished(
-            !empty($pkpIssue['date_published']) ?
-                DateTime::createFromFormat('Y-m-d h:m:s', $pkpIssue['date_published']) :
-                new DateTime() // Use current date and time if publishing date is not defined
-        );
+
+        // In some instances, imported data is not in a proper date format so DateTime::createFromFormat returns false
+        // This part handles cases where data_published column is empty or when the data is in a bad format
+        $date = false;
+        if (!empty($pkpIssue['date_published'])) {
+            // This might assign 'false' to the variable
+            $date = DateTime::createFromFormat('Y-m-d h:m:s', $pkpIssue['date_published']);
+        }
+        // Current date & time is used when date is false
+        $issue->setDatePublished($date ? $date : new DateTime());
 
         foreach ($this->settings as $fieldLocale => $fields) {
             $translation = new IssueTranslation();
