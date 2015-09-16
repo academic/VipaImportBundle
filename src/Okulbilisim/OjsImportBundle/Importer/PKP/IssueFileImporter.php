@@ -47,19 +47,18 @@ class IssueFileImporter extends Importer
         $pkpIssueFile = $issueFileStatement->fetch();
         $pkpGalleys = $galleysStatement->fetchAll();
 
-        $issueFile = new IssueFile();
-        $issueFile->setFile($pkpIssueFile['file_name']);
-        $issueFile->setIssue($issue);
-        $issueFile->setVersion(0);
-
-        $history = new FileHistory();
-        $history->setFileName($pkpIssueFile['file_name']);
-        $history->setOriginalName($pkpIssueFile['original_file_name']);
-        $history->setType('issuefiles');
-
         foreach ($pkpGalleys as $galley) {
             $locale = !empty($galley['locale']) ? substr($galley['locale'], 0, 2) : 'en';
             $label = !empty($galley['label']) ? $galley['label'] : '-';
+            $filename = sprintf('imported/%s/%s.%s',
+                $galley['issue_id'],
+                $galley['galley_id'],
+                FileHelper::$mimeToExtMap[$pkpIssueFile['file_type']]);
+
+            $issueFile = new IssueFile();
+            $issueFile->setFile($filename);
+            $issueFile->setIssue($issue);
+            $issueFile->setVersion(0);
 
             $translation = new IssueFileTranslation();
             $translation->setLocale($locale);
@@ -67,19 +66,24 @@ class IssueFileImporter extends Importer
             $translation->setDescription('-');
             $issueFile->addTranslation($translation);
 
+            $history = new FileHistory();
+            $history->setFileName($filename);
+            $history->setOriginalName($pkpIssueFile['original_file_name']);
+            $history->setType('issuefiles');
+
             $source = sprintf('%s/issue/download/%s/%s', $slug, $galley['issue_id'], $galley['galley_id']);
             $target = sprintf('/../web/uploads/issuefiles/imported/%s/%s.%s',
-                $pkpIssueFile['issue_id'],
-                $pkpIssueFile['file_id'],
+                $galley['issue_id'],
+                $galley['galley_id'],
                 FileHelper::$mimeToExtMap[$pkpIssueFile['file_type']]);
 
             $pendingDownload = new PendingDownload();
             $pendingDownload->setSource($source);
             $pendingDownload->setTarget($target);
-            $this->em->persist($pendingDownload);
-        }
 
-        $this->em->persist($issueFile);
-        $this->em->persist($history);
+            $this->em->persist($pendingDownload);
+            $this->em->persist($issueFile);
+            $this->em->persist($history);
+        }
     }
 }
