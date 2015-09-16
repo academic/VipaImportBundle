@@ -11,8 +11,6 @@ use Okulbilisim\OjsImportBundle\Helper\FileHelper;
 
 class IssueFileImporter extends Importer
 {
-    private $galleys;
-
     public function importIssueFiles($issue, $oldId, $slug)
     {
         $issueFilesSql = "SELECT * FROM issue_files WHERE issue_id = :id";
@@ -39,7 +37,8 @@ class IssueFileImporter extends Importer
         $issueFileStatement->bindValue('id', $id);
         $issueFileStatement->execute();
 
-        $galleysSql = "SELECT locale, label FROM issue_galleys WHERE issue_id = :issue_id AND file_id = :id";
+        $galleysSql = "SELECT galley_id, issue_id, locale, label FROM issue_galleys " .
+            "WHERE issue_id = :issue_id AND file_id = :id";
         $galleysStatement = $this->connection->prepare($galleysSql);
         $galleysStatement->bindValue('issue_id', $oldId);
         $galleysStatement->bindValue('id', $id);
@@ -67,20 +66,20 @@ class IssueFileImporter extends Importer
             $translation->setTitle($label);
             $translation->setDescription('-');
             $issueFile->addTranslation($translation);
+
+            $source = sprintf('%s/issue/download/%s/%s', $slug, $galley['issue_id'], $galley['galley_id']);
+            $target = sprintf('/../web/uploads/issuefiles/imported/%s/%s.%s',
+                $pkpIssueFile['issue_id'],
+                $pkpIssueFile['file_id'],
+                FileHelper::$mimeToExtMap[$pkpIssueFile['file_type']]);
+
+            $pendingDownload = new PendingDownload();
+            $pendingDownload->setSource($source);
+            $pendingDownload->setTarget($target);
+            $this->em->persist($pendingDownload);
         }
-
-        $source = sprintf('%s/issue/download/%s/%s', $slug, $pkpIssueFile['issue_id'], $pkpIssueFile['file_id']);
-        $target = sprintf('imported/%s/%s.%s',
-            $pkpIssueFile['issue_id'],
-            $pkpIssueFile['file_id'],
-            FileHelper::$mimeToExtMap[$pkpIssueFile['file_type']]);
-
-        $pendingDownload = new PendingDownload();
-        $pendingDownload->setSource($source);
-        $pendingDownload->setTarget($target);
 
         $this->em->persist($issueFile);
         $this->em->persist($history);
-        $this->em->persist($pendingDownload);
     }
 }
