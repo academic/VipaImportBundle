@@ -34,7 +34,6 @@ class SectionImporter extends Importer
     /**
      * @param int $id Section's ID
      * @param Journal $journal Section's Journal
-     * @return Section
      */
     public function importSection($id, $journal)
     {
@@ -73,7 +72,5 @@ class SectionImporter extends Importer
         }
 
         $this->em->persist($section);
-
-        return $section;
     }
 }

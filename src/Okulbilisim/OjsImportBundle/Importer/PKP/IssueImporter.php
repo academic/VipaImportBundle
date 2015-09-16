@@ -85,8 +85,9 @@ class IssueImporter extends Importer
             $issue->addTranslation($translation);
         }
 
-        $this->em->persist($issue);
+        $importer = new IssueFileImporter($this->connection, $this->em);
+        $importer->importIssueFiles($issue, $id, $journal->getSlug());
 
-        return $issue;
+        $this->em->persist($issue);
     }
 }
