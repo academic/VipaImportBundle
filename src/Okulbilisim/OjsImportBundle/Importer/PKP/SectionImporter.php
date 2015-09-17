@@ -17,6 +17,7 @@ class SectionImporter extends Importer
     /**
      * @param Journal $journal Section's Journal
      * @param int $oldId Section's ID in the old database
+     * @return array
      */
     public function importJournalsSections($journal, $oldId)
     {
@@ -26,14 +27,18 @@ class SectionImporter extends Importer
         $sectionsStatement->execute();
 
         $sections = $sectionsStatement->fetchAll();
+        $createdSections = array();
         foreach ($sections as $section) {
-            $this->importSection($section['section_id'], $journal);
+            $createdSections[] = $this->importSection($section['section_id'], $journal);
         }
+
+        return $createdSections;
     }
 
     /**
      * @param int $id Section's ID
      * @param Journal $journal Section's Journal
+     * @return Section
      */
     public function importSection($id, $journal)
     {
@@ -72,5 +77,6 @@ class SectionImporter extends Importer
         }
 
         $this->em->persist($section);
+        return $section;
     }
 }

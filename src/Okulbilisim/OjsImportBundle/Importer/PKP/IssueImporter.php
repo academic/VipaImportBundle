@@ -17,8 +17,9 @@ class IssueImporter extends Importer
     /**
      * @param Journal $journal Issue's Journal
      * @param int $oldId Issue's ID in the old database
+     * @param array $sections
      */
-    public function importJournalsIssues($journal, $oldId)
+    public function importJournalsIssues($journal, $oldId, $sections)
     {
         $issuesSql = "SELECT * FROM issues WHERE journal_id = :id";
         $issuesStatement = $this->connection->prepare($issuesSql);
@@ -27,16 +28,16 @@ class IssueImporter extends Importer
 
         $issues = $issuesStatement->fetchAll();
         foreach ($issues as $issue) {
-            $this->importIssue($issue['issue_id'], $journal);
+            $this->importIssue($issue['issue_id'], $journal, $sections);
         }
     }
 
     /**
-     * @param int $id Issue's ID
-     * @param Journal $journal Issue's Journal
-     * @return Issue
+     * @param int     $id       Issue's ID
+     * @param Journal $journal  Issue's Journal
+     * @param array   $sections Journal sections
      */
-    public function importIssue($id, $journal)
+    public function importIssue($id, $journal, $sections)
     {
         $issueSql = "SELECT * FROM issues WHERE issue_id = :id LIMIT 1";
         $issueStatement = $this->connection->prepare($issueSql);
@@ -64,6 +65,10 @@ class IssueImporter extends Importer
         $issue->setNumber($pkpIssue['number']);
         $issue->setYear($pkpIssue['year']);
         $issue->setPublished($pkpIssue['published']);
+
+        foreach ($sections as $section) {
+            $issue->addSection($section);
+        }
 
         // In some instances, imported data is not in a proper date format so DateTime::createFromFormat returns false
         // This part handles cases where data_published column is empty or when the data is in a bad format

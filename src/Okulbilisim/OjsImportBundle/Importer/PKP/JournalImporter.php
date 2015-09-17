@@ -96,11 +96,11 @@ class JournalImporter extends Importer
         $this->journal->setMandatoryLang($language ? $language : $this->createLanguage($languageCode));
         $this->journal->addLanguage($language ? $language : $this->createLanguage($languageCode));
 
-        $issueImporter = new IssueImporter($this->connection, $this->em);
-        $issueImporter->importJournalsIssues($this->journal, $id);
-        
         $sectionImporter = new SectionImporter($this->connection, $this->em);
-        $sectionImporter->importJournalsSections($this->journal, $id);
+        $createdSections = $sectionImporter->importJournalsSections($this->journal, $id);
+
+        $issueImporter = new IssueImporter($this->connection, $this->em);
+        $issueImporter->importJournalsIssues($this->journal, $id, $createdSections);
 
         $this->em->persist($this->journal);
         $this->em->flush();
