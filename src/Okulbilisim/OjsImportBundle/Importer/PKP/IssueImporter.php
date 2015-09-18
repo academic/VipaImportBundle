@@ -41,6 +41,7 @@ class IssueImporter extends Importer
      * @param int     $id       Issue's ID
      * @param Journal $journal  Issue's Journal
      * @param array   $sections Journal sections
+     * @return Issue
      */
     public function importIssue($id, $journal, $sections)
     {
@@ -99,5 +100,6 @@ class IssueImporter extends Importer
         $importer->importIssueFiles($issue, $id, $journal->getSlug());
 
         $this->em->persist($issue);
+        return $issue;
     }
 }
