@@ -4,6 +4,7 @@ namespace Okulbilisim\OjsImportBundle\Importer\PKP;
 
 use DateTime;
 use Ojs\JournalBundle\Entity\Article;
+use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\ArticleTranslation;
 use Okulbilisim\OjsImportBundle\Helper\StringHelper;
@@ -125,6 +126,31 @@ class ArticleImporter extends Importer
             $article->setLastPage((int) $pages[1] == 0 && !empty($pages[1]) ?
                 (int) StringHelper::roman2int($pages[1]) :
                 (int) $pages[1]);
+        }
+
+        $this->importCitations($id, $article);
+    }
+
+    /**
+     * @param int $oldArticleId
+     * @param Article $article
+     */
+    public function importCitations($oldArticleId, $article)
+    {
+        $citationSql = "SELECT * FROM citations WHERE assoc_id = :id";
+        $citationStatement = $this->connection->prepare($citationSql);
+        $citationStatement->bindValue('id', $oldArticleId);
+        $citationStatement->execute();
+
+        $orderCounter = 0;
+        $citations = $citationStatement->fetchAll();
+        foreach ($citations as $pkpCitation) {
+            $citation = new Citation();
+            $citation->setRaw(!empty($pkpCitation['raw_citation']) ? $pkpCitation['raw_citation'] : '-');
+            $citation->setOrderNum(!empty($pkpCitation['seq']) ? $pkpCitation['seq'] : $orderCounter);
+            $orderCounter++;
+
+            $article->addCitation($citation);
         }
     }
 }
