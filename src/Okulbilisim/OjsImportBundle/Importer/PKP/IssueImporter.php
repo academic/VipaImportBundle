@@ -18,6 +18,7 @@ class IssueImporter extends Importer
      * @param Journal $journal Issue's Journal
      * @param int $oldId Issue's ID in the old database
      * @param array $sections
+     * @return array
      */
     public function importJournalsIssues($journal, $oldId, $sections)
     {
@@ -27,9 +28,13 @@ class IssueImporter extends Importer
         $issuesStatement->execute();
 
         $issues = $issuesStatement->fetchAll();
+        $createdIssues = array();
+
         foreach ($issues as $issue) {
-            $this->importIssue($issue['issue_id'], $journal, $sections);
+            $createdIssues[$issue['issue_id']] = $this->importIssue($issue['issue_id'], $journal, $sections);
         }
+
+        return $createdIssues;
     }
 
     /**
@@ -66,7 +71,7 @@ class IssueImporter extends Importer
         $issue->setYear($pkpIssue['year']);
         $issue->setPublished($pkpIssue['published']);
 
-        foreach ($sections as $section) {
+        foreach (array_values($sections) as $section) {
             $issue->addSection($section);
         }
 

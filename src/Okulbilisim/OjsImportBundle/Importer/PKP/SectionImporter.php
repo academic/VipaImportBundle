@@ -29,7 +29,7 @@ class SectionImporter extends Importer
         $sections = $sectionsStatement->fetchAll();
         $createdSections = array();
         foreach ($sections as $section) {
-            $createdSections[] = $this->importSection($section['section_id'], $journal);
+            $createdSections[$section['section_id']] = $this->importSection($section['section_id'], $journal);
         }
 
         return $createdSections;

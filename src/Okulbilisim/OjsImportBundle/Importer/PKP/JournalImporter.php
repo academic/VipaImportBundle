@@ -100,7 +100,10 @@ class JournalImporter extends Importer
         $createdSections = $sectionImporter->importJournalsSections($this->journal, $id);
 
         $issueImporter = new IssueImporter($this->connection, $this->em);
-        $issueImporter->importJournalsIssues($this->journal, $id, $createdSections);
+        $createdIssues = $issueImporter->importJournalsIssues($this->journal, $id, $createdSections);
+
+        $articleImporter = new ArticleImporter($this->connection, $this->em);
+        $articleImporter->importArticles($id, $this->journal, $createdIssues, $createdSections);
 
         $this->em->persist($this->journal);
         $this->em->flush();
@@ -143,7 +146,6 @@ class JournalImporter extends Importer
         $publisher->setAbout('-');
 
         $this->em->persist($publisher);
-        $this->em->flush();
 
         return $publisher;
     }
@@ -158,7 +160,6 @@ class JournalImporter extends Importer
         $publisher->setUrl($url);
 
         $this->em->persist($publisher);
-        $this->em->flush();
 
         return $publisher;
     }
@@ -180,7 +181,6 @@ class JournalImporter extends Importer
             $lang->setName('Unknown Language');
 
         $this->em->persist($lang);
-        $this->em->flush();
 
         return $lang;
     }

@@ -1,20 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: emreyilmaz
- * Date: 2.04.15
- * Time: 10:23
- */
 
 namespace Okulbilisim\OjsImportBundle\Helper;
-
 
 class StringHelper
 {
     public static function roman2int($roman)
     {
         $roman = strtoupper($roman);
-        $romans = array(
+        $romanNumerals = array(
             'M' => 1000,
             'CM' => 900,
             'D' => 500,
@@ -32,12 +25,13 @@ class StringHelper
 
         $result = 0;
 
-        foreach ($romans as $key => $value) {
+        foreach ($romanNumerals as $key => $value) {
             while (strpos($roman, $key) === 0) {
                 $result += $value;
                 $roman = substr($roman, strlen($key));
             }
         }
+
         return $result;
     }
 } 
