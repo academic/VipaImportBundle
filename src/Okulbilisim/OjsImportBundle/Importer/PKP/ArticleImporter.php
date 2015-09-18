@@ -4,6 +4,8 @@ namespace Okulbilisim\OjsImportBundle\Importer\PKP;
 
 use DateTime;
 use Ojs\JournalBundle\Entity\Article;
+use Ojs\JournalBundle\Entity\ArticleAuthor;
+use Ojs\JournalBundle\Entity\Author;
 use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\ArticleTranslation;
@@ -129,6 +131,7 @@ class ArticleImporter extends Importer
         }
 
         $this->importCitations($id, $article);
+        $this->importAuthors($id, $article);
     }
 
     /**
@@ -148,9 +151,41 @@ class ArticleImporter extends Importer
             $citation = new Citation();
             $citation->setRaw(!empty($pkpCitation['raw_citation']) ? $pkpCitation['raw_citation'] : '-');
             $citation->setOrderNum(!empty($pkpCitation['seq']) ? $pkpCitation['seq'] : $orderCounter);
-            $orderCounter++;
-
             $article->addCitation($citation);
+
+            $orderCounter++;
+        }
+    }
+
+    /**
+     * @param int $oldArticleId
+     * @param Article $article
+     */
+    public function importAuthors($oldArticleId, $article)
+    {
+        $authorSql = "SELECT first_name, last_name, email, seq FROM authors " .
+            "WHERE submission_id = :id ORDER BY first_name, last_name, email";
+        $authorStatement = $this->connection->prepare($authorSql);
+        $authorStatement->bindValue('id', $oldArticleId);
+        $authorStatement->execute();
+
+        $authors = $authorStatement->fetchAll();
+        foreach ($authors as $pkpAuthor) {
+            $author = new Author();
+            $author->setCurrentLocale('en');
+            $author->setTitle('-');
+            $author->setFirstName(!empty($pkpAuthor['first_name']) ? $pkpAuthor['first_name'] : '-');
+            $author->setLastName(!empty($pkpAuthor['last_name']) ? $pkpAuthor['last_name'] : '-');
+            $author->setEmail(
+                !empty($pkpAuthor['email']) && $pkpAuthor['email'] !== '-' ?
+                    $pkpAuthor['email'] :
+                    'author@example.com'
+            );
+
+            $articleAuthor = new ArticleAuthor();
+            $articleAuthor->setAuthor($author);
+            $articleAuthor->setArticle($article);
+            $articleAuthor->setAuthorOrder(!empty($pkpAuthor['seq']) ? $pkpAuthor['seq'] : 0);
         }
     }
 }
