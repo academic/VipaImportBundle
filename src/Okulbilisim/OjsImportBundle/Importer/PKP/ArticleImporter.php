@@ -132,6 +132,9 @@ class ArticleImporter extends Importer
 
         $this->importCitations($id, $article);
         $this->importAuthors($id, $article);
+
+        $articleFileImporter = new ArticleFileImporter($this->connection, $this->em);
+        $articleFileImporter->importArticleFiles($article, $id, $journal->getSlug());
     }
 
     /**

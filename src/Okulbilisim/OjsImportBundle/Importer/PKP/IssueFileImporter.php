@@ -59,6 +59,7 @@ class IssueFileImporter extends Importer
             $issueFile->setFile($filename);
             $issueFile->setIssue($issue);
             $issueFile->setVersion(0);
+            $issueFile->setType(0);
 
             $translation = new IssueFileTranslation();
             $translation->setLocale($locale);
