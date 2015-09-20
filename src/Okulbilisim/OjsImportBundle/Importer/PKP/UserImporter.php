@@ -6,6 +6,8 @@ use Doctrine\DBAL\Driver\Connection;
 use Doctrine\ORM\EntityManager;
 use FOS\UserBundle\Model\UserManager;
 use FOS\UserBundle\Util\TokenGenerator;
+use Ojs\JournalBundle\Entity\Subject;
+use Ojs\UserBundle\Entity\User;
 
 class UserImporter extends Importer
 {
@@ -20,20 +22,30 @@ class UserImporter extends Importer
     private $tokenGenerator;
 
     /**
+     * @var string
+     */
+    private $locale;
+
+    /**
      * UserImporter constructor.
-     * @param Connection $connection
+     * @param Connection    $connection
      * @param EntityManager $em
      * @param UserManager $userManager
      * @param TokenGenerator $tokenGenerator
+     * @param string $locale
      */
-    public function __construct(Connection $connection,
-                                EntityManager $em,
-                                UserManager $userManager,
-                                TokenGenerator $tokenGenerator)
+    public function __construct(
+        Connection $connection,
+        EntityManager $em,
+        UserManager $userManager,
+        TokenGenerator $tokenGenerator,
+        $locale
+    )
     {
         parent::__construct($connection, $em);
         $this->userManager = $userManager;
         $this->tokenGenerator = $tokenGenerator;
+        $this->locale = $locale;
     }
 
     public function importUser($id)
@@ -64,6 +76,7 @@ class UserImporter extends Importer
 
         $this->userManager->updateUser($user);
         $this->importProfile($id, $user->getId());
+        $this->importSubjects($id, $user);
     }
 
     private function importProfile($oldId, $newId)
@@ -87,6 +100,37 @@ class UserImporter extends Importer
         isset($pkpUser['phone']) && $user->setPhone($pkpUser['phone']);
         isset($pkpUser['fax']) && $user->setFax($pkpUser['fax']);
         isset($pkpUser['url']) && $user->setUrl($pkpUser['url']);
+
+        $this->em->persist($user);
+        $this->em->flush();
+    }
+
+    /**
+     * @param int $oldId
+     * @param User $user
+     */
+    private function importSubjects($oldId, $user)
+    {
+        $sql = "SELECT user_interests.user_id, controlled_vocab_entry_settings.setting_value AS `subject`" .
+            " FROM user_interests JOIN controlled_vocab_entry_settings ON user_interests.controlled_vocab_entry_id" .
+            " = controlled_vocab_entry_settings.controlled_vocab_entry_id WHERE" .
+            " controlled_vocab_entry_settings.setting_name = \"interest\" AND" .
+            " user_interests.user_id = :id";
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('id', $oldId);
+        $statement->execute();
+
+        $subjects = $statement->fetchAll();
+
+        foreach ($subjects as $pkpSubject) {
+            if (!empty($pkpSubject['subject'])) {
+                $subject = new Subject();
+                $subject->setCurrentLocale($this->locale);
+                $subject->setSubject($pkpSubject['subject']);
+                $user->addSubject($subject);
+            }
+        }
 
         $this->em->persist($user);
         $this->em->flush();

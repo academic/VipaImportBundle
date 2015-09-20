@@ -28,7 +28,8 @@ class PkpUserCommand extends ImportCommand
         $id = $input->getArgument('id');
         $um = $this->getContainer()->get('fos_user.user_manager');
         $tokenGenrator = $this->getContainer()->get('fos_user.util.token_generator');
-        $importer = new UserImporter($this->connection, $this->em, $um, $tokenGenrator);
+        $locale = $this->getContainer()->getParameter('locale');
+        $importer = new UserImporter($this->connection, $this->em, $um, $tokenGenrator, $locale);
         $importer->importUser($id);
     }
 }
