@@ -125,14 +125,22 @@ class UserImporter extends Importer
 
         foreach ($subjects as $pkpSubject) {
             if (!empty($pkpSubject['subject'])) {
-                $subject = new Subject();
-                $subject->setCurrentLocale($this->locale);
-                $subject->setSubject($pkpSubject['subject']);
+                $translation = $this->em
+                    ->getRepository('OjsJournalBundle:SubjectTranslation')
+                    ->findOneBy(['subject' => $pkpSubject['subject']]);
+
+                if (!$translation) {
+                    $subject = new Subject();
+                    $subject->setCurrentLocale($this->locale);
+                    $subject->setSubject($pkpSubject['subject']);
+                } else {
+                    $subject = $translation->getTranslatable();
+                }
+
                 $user->addSubject($subject);
+                $this->em->persist($user);
+                $this->em->flush();
             }
         }
-
-        $this->em->persist($user);
-        $this->em->flush();
     }
 }
