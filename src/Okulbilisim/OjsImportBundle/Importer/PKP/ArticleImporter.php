@@ -3,6 +3,8 @@
 namespace Okulbilisim\OjsImportBundle\Importer\PKP;
 
 use DateTime;
+use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManager;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\ArticleAuthor;
 use Ojs\JournalBundle\Entity\Author;
@@ -13,6 +15,28 @@ use Okulbilisim\OjsImportBundle\Helper\StringHelper;
 
 class ArticleImporter extends Importer
 {
+    /**
+     * @var UserImporter
+     */
+    private $ui;
+
+    /**
+     * @var array
+     */
+    private $submitterUsers;
+
+    /**
+     * ArticleImporter constructor.
+     * @param Connection $connection
+     * @param EntityManager $em
+     * @param UserImporter $ui
+     */
+    public function __construct(Connection $connection, EntityManager $em, UserImporter $ui)
+    {
+        parent::__construct($connection, $em);
+        $this->ui = $ui;
+    }
+
     /**
      * @param int $oldJournalId
      * @param Journal $journal
@@ -135,6 +159,12 @@ class ArticleImporter extends Importer
 
         $articleFileImporter = new ArticleFileImporter($this->connection, $this->em);
         $articleFileImporter->importArticleFiles($article, $id, $journal->getSlug());
+
+        if (empty($this->submitterUsers[$pkpArticle['user_id']])) {
+            $this->submitterUsers[$pkpArticle['user_id']] = $this->ui->importUser($pkpArticle['user_id'], false);
+        }
+
+        $article->setSubmitterUser($this->submitterUsers[$pkpArticle['user_id']]);
     }
 
     /**

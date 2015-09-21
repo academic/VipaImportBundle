@@ -3,6 +3,8 @@
 namespace Okulbilisim\OjsImportBundle\Importer\PKP;
 
 use DateTime;
+use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManager;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\JournalTranslation;
 use Ojs\JournalBundle\Entity\Lang;
@@ -20,6 +22,36 @@ class JournalImporter extends Importer
      * @var array
      */
     private $settings;
+
+    /**
+     * @var SectionImporter
+     */
+    private $sectionImporter;
+
+    /**
+     * @var IssueImporter
+     */
+    private $issueImporter;
+
+    /**
+     * @var ArticleImporter
+     */
+    private $articleImporter;
+
+    /**
+     * JournalImporter constructor.
+     * @param Connection $connection
+     * @param EntityManager $em
+     * @param UserImporter $ui
+     */
+    public function __construct(Connection $connection, EntityManager $em, UserImporter $ui)
+    {
+        parent::__construct($connection, $em);
+
+        $this->sectionImporter = new SectionImporter($this->connection, $this->em);
+        $this->issueImporter = new IssueImporter($this->connection, $this->em);
+        $this->articleImporter = new ArticleImporter($this->connection, $this->em, $ui);
+    }
 
     public function importJournal($id)
     {
@@ -96,14 +128,9 @@ class JournalImporter extends Importer
         $this->journal->setMandatoryLang($language ? $language : $this->createLanguage($languageCode));
         $this->journal->addLanguage($language ? $language : $this->createLanguage($languageCode));
 
-        $sectionImporter = new SectionImporter($this->connection, $this->em);
-        $createdSections = $sectionImporter->importJournalsSections($this->journal, $id);
-
-        $issueImporter = new IssueImporter($this->connection, $this->em);
-        $createdIssues = $issueImporter->importJournalsIssues($this->journal, $id, $createdSections);
-
-        $articleImporter = new ArticleImporter($this->connection, $this->em);
-        $articleImporter->importArticles($id, $this->journal, $createdIssues, $createdSections);
+        $createdSections = $this->sectionImporter->importJournalsSections($this->journal, $id);
+        $createdIssues = $this->issueImporter->importJournalsIssues($this->journal, $id, $createdSections);
+        $this->articleImporter->importArticles($id, $this->journal, $createdIssues, $createdSections);
 
         $this->em->persist($this->journal);
         $this->em->flush();

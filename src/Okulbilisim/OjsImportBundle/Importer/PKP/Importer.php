@@ -3,7 +3,7 @@
 namespace Okulbilisim\OjsImportBundle\Importer\PKP;
 
 use InvalidArgumentException;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 
 class Importer
