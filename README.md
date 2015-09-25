@@ -1,5 +1,5 @@
 # OjsImportBundle
-This is a bundle which helps with importing a database of PKP/OJS instance to OJS.
+This is a bundle which helps with importing databases of other journal softwares to a new instance of OJS.
 
 ## PKP/OJS
 
