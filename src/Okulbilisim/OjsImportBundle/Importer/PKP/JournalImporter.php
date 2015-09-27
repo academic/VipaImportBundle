@@ -24,6 +24,11 @@ class JournalImporter extends Importer
     private $settings;
 
     /**
+     * @var UserImporter
+     */
+    private $userImporter;
+
+    /**
      * @var SectionImporter
      */
     private $sectionImporter;
@@ -48,9 +53,10 @@ class JournalImporter extends Importer
     {
         parent::__construct($connection, $em);
 
+        $this->userImporter = $ui;
         $this->sectionImporter = new SectionImporter($this->connection, $this->em);
         $this->issueImporter = new IssueImporter($this->connection, $this->em);
-        $this->articleImporter = new ArticleImporter($this->connection, $this->em, $ui);
+        $this->articleImporter = new ArticleImporter($this->connection, $this->em, $this->userImporter);
     }
 
     public function importJournal($id)
@@ -135,6 +141,7 @@ class JournalImporter extends Importer
         $this->em->persist($this->journal);
         $this->em->flush();
 
+        return ['new' => $this->journal->getId(), 'old' => $id];
     }
 
     private function importAndSetPublisher($name, $locale)
