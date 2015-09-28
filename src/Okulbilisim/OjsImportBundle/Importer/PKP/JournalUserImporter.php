@@ -17,6 +17,7 @@ class JournalUserImporter extends Importer
      */
     public function importJournalUsers($newJournalId, $oldJournalId, $userImporter)
     {
+        $this->em->clear();
         $journal = $this->em->getRepository('OjsJournalBundle:Journal')->find($newJournalId);
 
         $roleMap = [

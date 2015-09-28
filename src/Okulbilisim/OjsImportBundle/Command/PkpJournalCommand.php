@@ -33,7 +33,7 @@ class PkpJournalCommand extends ImportCommand
         $journalImporter = new JournalImporter($this->connection, $this->em, $userImporter);
         $ids = $journalImporter->importJournal($input->getArgument('id'));
 
-        // $journalUserImporter = new JournalUserImporter($this->connection, $this->em);
-        // $journalUserImporter->importJournalUsers($ids['new'], $ids['old'], $userImporter);
+        $journalUserImporter = new JournalUserImporter($this->connection, $this->em);
+        $journalUserImporter->importJournalUsers($ids['new'], $ids['old'], $userImporter);
     }
 }
