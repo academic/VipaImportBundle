@@ -36,7 +36,7 @@ class JournalUserImporter extends Importer
 
         // Replace role names with role entities
         foreach ($roleMap as $id => $name) {
-            $role = $this->em->getRepository('OjsUserBundle:Role')->findOneBy(['name' => $name]);
+            $role = $this->em->getRepository('OjsUserBundle:Role')->findOneBy(['role' => $name]);
 
             if (!$role) {
                 $role = new Role();
