@@ -5,6 +5,7 @@ namespace Okulbilisim\OjsImportBundle\Importer\PKP;
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use Ojs\AnalyticsBundle\Entity\ArticleFileStatistic;
 use Ojs\AnalyticsBundle\Entity\ArticleStatistic;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\ArticleAuthor;
@@ -77,15 +78,22 @@ class ArticleImporter extends Importer
         $settingsStatement->bindValue('id', $id);
         $settingsStatement->execute();
 
-        $statsSql = "SELECT DATE(view_time) AS date, COUNT(*) as view FROM " .
+        $viewStatsSql = "SELECT DATE(view_time) AS date, COUNT(*) as view FROM " .
             "article_view_stats WHERE article_id = :id GROUP BY DATE(view_time)";
-        $statsStatement = $this->connection->prepare($statsSql);
-        $statsStatement->bindValue('id', $id);
-        $statsStatement->execute();
+        $viewStatsStatement = $this->connection->prepare($viewStatsSql);
+        $viewStatsStatement->bindValue('id', $id);
+        $viewStatsStatement->execute();
+
+        $downloadStatsSql = "SELECT DATE(download_time) AS date, COUNT(*) as download FROM " .
+            "article_download_stats WHERE article_id = :id GROUP BY DATE(download_time)";
+        $downloadStatsStatement = $this->connection->prepare($downloadStatsSql);
+        $downloadStatsStatement->bindValue('id', $id);
+        $downloadStatsStatement->execute();
 
         $pkpArticle = $articleStatement->fetch();
         $pkpSettings = $settingsStatement->fetchAll();
-        $pkpStats = $statsStatement->fetchAll();
+        $pkpViewStats = $viewStatsStatement->fetchAll();
+        $pkpDownloadStats = $downloadStatsStatement->fetchAll();
         $settings = array();
 
         foreach ($pkpSettings as $setting) {
@@ -162,14 +170,6 @@ class ArticleImporter extends Importer
                 (int) $pages[1]);
         }
 
-        foreach ($pkpStats as $stat) {
-            $articleStatistic = new ArticleStatistic();
-            $articleStatistic->setArticle($article);
-            $articleStatistic->setDate(DateTime::createFromFormat('Y-m-d', $stat['date']));
-            $articleStatistic->setView($stat['view']);
-            $this->em->persist($articleStatistic);
-        }
-
         $this->importCitations($id, $article);
         $this->importAuthors($id, $article);
 
@@ -181,6 +181,24 @@ class ArticleImporter extends Importer
         }
 
         $article->setSubmitterUser($this->submitterUsers[$pkpArticle['user_id']]);
+
+        foreach ($pkpViewStats as $stat) {
+            $articleFileStatistic = new ArticleStatistic();
+            $articleFileStatistic->setArticle($article);
+            $articleFileStatistic->setDate(DateTime::createFromFormat('Y-m-d', $stat['date']));
+            $articleFileStatistic->setView($stat['view']);
+            $this->em->persist($articleFileStatistic);
+        }
+
+        if (!$article->getArticleFiles()->isEmpty()) {
+            foreach ($pkpDownloadStats as $stat) {
+                $articleFileStatistic = new ArticleFileStatistic();
+                $articleFileStatistic->setArticleFile($article->getArticleFiles()->first());
+                $articleFileStatistic->setDate(DateTime::createFromFormat('Y-m-d', $stat['date']));
+                $articleFileStatistic->setDownload($stat['download']);
+                $this->em->persist($articleFileStatistic);
+            }
+        }
     }
 
     /**
