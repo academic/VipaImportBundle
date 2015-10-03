@@ -1,12 +1,12 @@
 <?php
 
-namespace Okulbilisim\OjsImportBundle\Entity;
+namespace OkulBilisim\OjsImportBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Class PendingDownload
- * @package Okulbilisim\OjsImportBundle\Entity
+ * @package OkulBilisim\OjsImportBundle\Entity
  * @ORM\Entity
  * @ORM\Table("pending_download")
  */

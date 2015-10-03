@@ -1,6 +1,6 @@
 <?php
 
-namespace Okulbilisim\OjsImportBundle\Command;
+namespace OkulBilisim\OjsImportBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -23,7 +23,7 @@ class DownloadCommand extends ContainerAwareCommand
     {
         /** @var EntityManager $em */
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
-        $pendingDownloads = $em->getRepository('OkulbilisimOjsImportBundle:PendingDownload')->findAll();
+        $pendingDownloads = $em->getRepository('OkulBilisimOjsImportBundle:PendingDownload')->findAll();
 
         foreach ($pendingDownloads as $download) {
             $this->download($input->getArgument('host'), $download->getSource(), $download->getTarget());

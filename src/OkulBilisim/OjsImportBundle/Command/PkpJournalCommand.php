@@ -1,11 +1,11 @@
 <?php
 
-namespace Okulbilisim\OjsImportBundle\Command;
+namespace OkulBilisim\OjsImportBundle\Command;
 
-use Okulbilisim\OjsImportBundle\Helper\ImportCommand;
-use Okulbilisim\OjsImportBundle\Importer\PKP\JournalImporter;
-use Okulbilisim\OjsImportBundle\Importer\PKP\JournalUserImporter;
-use Okulbilisim\OjsImportBundle\Importer\PKP\UserImporter;
+use OkulBilisim\OjsImportBundle\Helper\ImportCommand;
+use OkulBilisim\OjsImportBundle\Importer\PKP\JournalImporter;
+use OkulBilisim\OjsImportBundle\Importer\PKP\JournalUserImporter;
+use OkulBilisim\OjsImportBundle\Importer\PKP\UserImporter;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

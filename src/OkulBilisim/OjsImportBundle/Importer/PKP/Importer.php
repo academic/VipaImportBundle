@@ -1,6 +1,6 @@
 <?php
 
-namespace Okulbilisim\OjsImportBundle\Importer\PKP;
+namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
 use InvalidArgumentException;
 use Doctrine\DBAL\Connection;
