@@ -4,6 +4,7 @@ namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use Faker\Factory;
 use FOS\UserBundle\Model\UserManager;
 use FOS\UserBundle\Util\TokenGenerator;
 use Ojs\JournalBundle\Entity\Subject;
@@ -55,22 +56,25 @@ class UserImporter extends Importer
         $statement->bindValue('id', $id);
         $statement->execute();
 
+        $faker = Factory::create();
         $pkpUser = $statement->fetch();
         $user = null;
 
-        !empty($pkpUser['username']) ?
+        if(!empty($pkpUser['username'])) {
             $user = $this->em
                 ->getRepository('OjsUserBundle:User')
-                ->findOneBy(['username' => $pkpUser['username']]) :
-            $this->throwInvalidArgumentException('The email is empty');
+                ->findOneBy(['username' => $pkpUser['username']]);
+        }
 
         if ($user == null) {
             $user = new User();
-            $user->setUsername($pkpUser['username']);
+            !empty($pkpUser['username']) ?
+                $user->setUsername($pkpUser['username']) :
+                $user->setUsername($faker->userName);
 
             !empty($pkpUser['email']) ?
                 $user->setEmail($pkpUser['email']) :
-                $this->throwInvalidArgumentException('The email is empty');
+                $user->setEmail($faker->companyEmail);
 
             !empty($pkpUser['disabled']) ?
                 $user->setEnabled(!$pkpUser['disabled']) :
