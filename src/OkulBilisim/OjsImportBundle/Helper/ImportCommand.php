@@ -39,6 +39,7 @@ class ImportCommand extends ContainerAwareCommand
             'password' => $input->getArgument('password'),
             'dbname' => $input->getArgument('database'),
             'driver' => $input->getArgument('driver'),
+            'charset' => 'utf8',
         ];
 
         $this->connection = $this
