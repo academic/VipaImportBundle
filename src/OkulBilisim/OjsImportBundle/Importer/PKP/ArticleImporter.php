@@ -113,8 +113,8 @@ class ArticleImporter extends Importer
             $translation->setLocale(substr($fieldLocale, 0, 2));
 
             $translation->setTitle(!empty($fields['title']) ? $fields['title'] : '-');
-            $translation->setSubjects(!empty($fields['subject']) ? $fields['subject'] : '-');
-            $translation->setKeywords(!empty($fields['subject']) ? $fields['subject'] : '-');
+            $translation->setSubjects(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
+            $translation->setKeywords(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
             $translation->setAbstract(!empty($fields['abstract']) ? $fields['abstract'] : '-');
             $article->addTranslation($translation);
         }
