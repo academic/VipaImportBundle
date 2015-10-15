@@ -24,9 +24,12 @@ class DownloadCommand extends ContainerAwareCommand
         /** @var EntityManager $em */
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
         $pendingDownloads = $em->getRepository('OkulBilisimOjsImportBundle:PendingDownload')->findAll();
+        $output->writeln("Downloading...");
 
         foreach ($pendingDownloads as $download) {
-            $this->download($input->getArgument('host'), $download->getSource(), $download->getTarget());
+            $output->writeln("Downloading " . $download->getSource());
+            $status = $this->download($input->getArgument('host'), $download->getSource(), $download->getTarget());
+            $status ? $em->remove($download) : $output->writeln("Couldn't download " . $download->getSource());;
         }
     }
 
@@ -49,7 +52,9 @@ class DownloadCommand extends ContainerAwareCommand
         $fs->mkdir($rootDir . '/'. $targetDir);
 
         $file = fopen($rootDir . $target, "x");
-        fputs($file, $data);
+        $status = fputs($file, $data);
         fclose($file);
+
+        return $status;
     }
 }
