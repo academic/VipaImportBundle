@@ -13,6 +13,7 @@ use Ojs\JournalBundle\Entity\Author;
 use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\ArticleTranslation;
+use OkulBilisim\OjsImportBundle\Entity\PendingStatisticImport;
 use OkulBilisim\OjsImportBundle\Helper\StringHelper;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -82,24 +83,8 @@ class ArticleImporter extends Importer
         $settingsStatement->bindValue('id', $id);
         $settingsStatement->execute();
 
-//        $this->consoleOutput->writeln("Reading view statistics...");
-//        $viewStatsSql = "SELECT DATE(view_time) AS date, COUNT(*) as view FROM " .
-//            "article_view_stats WHERE article_id = :id GROUP BY DATE(view_time)";
-//        $viewStatsStatement = $this->connection->prepare($viewStatsSql);
-//        $viewStatsStatement->bindValue('id', $id);
-//        $viewStatsStatement->execute();
-//
-//        $this->consoleOutput->writeln("Reading download statistics...");
-//        $downloadStatsSql = "SELECT DATE(download_time) AS date, COUNT(*) as download FROM " .
-//            "article_download_stats WHERE article_id = :id GROUP BY DATE(download_time)";
-//        $downloadStatsStatement = $this->connection->prepare($downloadStatsSql);
-//        $downloadStatsStatement->bindValue('id', $id);
-//        $downloadStatsStatement->execute();
-
         $pkpArticle = $articleStatement->fetch();
         $pkpSettings = $settingsStatement->fetchAll();
-//        $pkpViewStats = $viewStatsStatement->fetchAll();
-//        $pkpDownloadStats = $downloadStatsStatement->fetchAll();
         $settings = array();
 
         foreach ($pkpSettings as $setting) {
@@ -188,23 +173,8 @@ class ArticleImporter extends Importer
 
         $article->setSubmitterUser($this->submitterUsers[$pkpArticle['user_id']]);
 
-//        foreach ($pkpViewStats as $stat) {
-//            $articleFileStatistic = new ArticleStatistic();
-//            $articleFileStatistic->setArticle($article);
-//            $articleFileStatistic->setDate(DateTime::createFromFormat('Y-m-d', $stat['date']));
-//            $articleFileStatistic->setView($stat['view']);
-//            $this->em->persist($articleFileStatistic);
-//        }
-//
-//        if (!$article->getArticleFiles()->isEmpty()) {
-//            foreach ($pkpDownloadStats as $stat) {
-//                $articleFileStatistic = new ArticleFileStatistic();
-//                $articleFileStatistic->setArticleFile($article->getArticleFiles()->first());
-//                $articleFileStatistic->setDate(DateTime::createFromFormat('Y-m-d', $stat['date']));
-//                $articleFileStatistic->setDownload($stat['download']);
-//                $this->em->persist($articleFileStatistic);
-//            }
-//        }
+        $pendingStatImport = new PendingStatisticImport($article, $id);
+        $this->em->persist($pendingStatImport);
     }
 
     /**
