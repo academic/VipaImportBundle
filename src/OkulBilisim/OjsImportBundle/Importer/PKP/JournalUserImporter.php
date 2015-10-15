@@ -85,7 +85,9 @@ class JournalUserImporter extends Importer
             $this->em->persist($item['journal_user']);
         }
 
+        $this->consoleOutput->writeln("Writing data...");
         $this->em->flush();
+        $this->consoleOutput->writeln("Imported users.");
     }
 
     private function getJournalUser(&$cache, $email, $journal)

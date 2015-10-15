@@ -147,8 +147,9 @@ class JournalImporter extends Importer
         $this->articleImporter->importArticles($id, $this->journal, $createdIssues, $createdSections);
 
         $this->em->persist($this->journal);
-        $this->em->flush();
 
+        $this->consoleOutput->writeln("Writing data...");
+        $this->em->flush();
         $this->consoleOutput->writeln("Imported journal.");
 
         return ['new' => $this->journal->getId(), 'old' => $id];

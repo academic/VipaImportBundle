@@ -2,6 +2,7 @@
 
 namespace OkulBilisim\OjsImportBundle\Command;
 
+use Ojs\CoreBundle\Helper\StringHelper;
 use OkulBilisim\OjsImportBundle\Helper\ImportCommand;
 use OkulBilisim\OjsImportBundle\Importer\PKP\JournalImporter;
 use OkulBilisim\OjsImportBundle\Importer\PKP\JournalUserImporter;
@@ -41,6 +42,6 @@ class PkpJournalCommand extends ImportCommand
         $journalUserImporter->importJournalUsers($ids['new'], $ids['old'], $userImporter);
 
         $event = $stopwatch->stop('journal_import');
-        $output->write('Duration: ' . $event->getDuration());
+        $output->write('Duration: ' . StringHelper::formatMilliseconds($event->getDuration()));
     }
 }
