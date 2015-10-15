@@ -42,6 +42,6 @@ class PkpJournalCommand extends ImportCommand
         $journalUserImporter->importJournalUsers($ids['new'], $ids['old'], $userImporter);
 
         $event = $stopwatch->stop('journal_import');
-        $output->write('Duration: ' . StringHelper::formatMilliseconds($event->getDuration()));
+        $output->writeln('Duration: ' . StringHelper::formatMilliseconds($event->getDuration()));
     }
 }
