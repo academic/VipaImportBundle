@@ -14,6 +14,7 @@ use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\ArticleTranslation;
 use OkulBilisim\OjsImportBundle\Helper\StringHelper;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class ArticleImporter extends Importer
 {
@@ -31,11 +32,12 @@ class ArticleImporter extends Importer
      * ArticleImporter constructor.
      * @param Connection $connection
      * @param EntityManager $em
+     * @param OutputInterface $consoleOutput
      * @param UserImporter $ui
      */
-    public function __construct(Connection $connection, EntityManager $em, UserImporter $ui)
+    public function __construct(Connection $connection, EntityManager $em, OutputInterface $consoleOutput, UserImporter $ui)
     {
-        parent::__construct($connection, $em);
+        parent::__construct($connection, $em, $consoleOutput);
         $this->ui = $ui;
     }
 
@@ -66,6 +68,8 @@ class ArticleImporter extends Importer
      */
     private function importArticle($id, $journal, $issues, $sections)
     {
+        $this->consoleOutput->writeln("Reading article #" . $id . "... ", true);
+
         $articleSql = "SELECT articles.*, published_articles.issue_id FROM articles LEFT JOIN " .
             "published_articles ON published_articles.article_id = articles.article_id WHERE " .
             "articles.article_id = :id";
@@ -78,12 +82,14 @@ class ArticleImporter extends Importer
         $settingsStatement->bindValue('id', $id);
         $settingsStatement->execute();
 
+        $this->consoleOutput->writeln("Reading view statistics...");
         $viewStatsSql = "SELECT DATE(view_time) AS date, COUNT(*) as view FROM " .
             "article_view_stats WHERE article_id = :id GROUP BY DATE(view_time)";
         $viewStatsStatement = $this->connection->prepare($viewStatsSql);
         $viewStatsStatement->bindValue('id', $id);
         $viewStatsStatement->execute();
 
+        $this->consoleOutput->writeln("Reading download statistics...");
         $downloadStatsSql = "SELECT DATE(download_time) AS date, COUNT(*) as download FROM " .
             "article_download_stats WHERE article_id = :id GROUP BY DATE(download_time)";
         $downloadStatsStatement = $this->connection->prepare($downloadStatsSql);
@@ -173,7 +179,7 @@ class ArticleImporter extends Importer
         $this->importCitations($id, $article);
         $this->importAuthors($id, $article);
 
-        $articleFileImporter = new ArticleFileImporter($this->connection, $this->em);
+        $articleFileImporter = new ArticleFileImporter($this->connection, $this->em, $this->consoleOutput);
         $articleFileImporter->importArticleFiles($article, $id, $journal->getSlug());
 
         if (empty($this->submitterUsers[$pkpArticle['user_id']])) {
@@ -207,6 +213,8 @@ class ArticleImporter extends Importer
      */
     public function importCitations($oldArticleId, $article)
     {
+        $this->consoleOutput->writeln("Reading citations...");
+
         $citationSql = "SELECT * FROM citations WHERE assoc_id = :id";
         $citationStatement = $this->connection->prepare($citationSql);
         $citationStatement->bindValue('id', $oldArticleId);
@@ -230,6 +238,8 @@ class ArticleImporter extends Importer
      */
     public function importAuthors($oldArticleId, $article)
     {
+        $this->consoleOutput->writeln("Reading authors...");
+
         $authorSql = "SELECT first_name, last_name, email, seq FROM authors " .
             "WHERE submission_id = :id ORDER BY first_name, last_name, email";
         $authorStatement = $this->connection->prepare($authorSql);

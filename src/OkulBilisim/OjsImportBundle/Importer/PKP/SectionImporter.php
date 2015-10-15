@@ -21,6 +21,8 @@ class SectionImporter extends Importer
      */
     public function importJournalsSections($journal, $oldId)
     {
+        $this->consoleOutput->writeln("Importing journal's sections...");
+
         $sectionsSql = "SELECT * FROM sections WHERE journal_id = :id";
         $sectionsStatement = $this->connection->prepare($sectionsSql);
         $sectionsStatement->bindValue('id', $oldId);
@@ -42,6 +44,8 @@ class SectionImporter extends Importer
      */
     public function importSection($id, $journal)
     {
+        $this->consoleOutput->writeln("Reading section #" . $id . "... ", true);
+
         $sectionSql = "SELECT * FROM sections WHERE section_id = :id LIMIT 1";
         $sectionStatement = $this->connection->prepare($sectionSql);
         $sectionStatement->bindValue('id', $id);

@@ -31,6 +31,8 @@ class ArticleFileImporter extends Importer
      */
     public function importArticleFile($id, $oldId, $article, $slug)
     {
+        $this->consoleOutput->writeln("Reading article file #" . $id . "... ", true);
+
         $articleFileSql = "SELECT * FROM article_files WHERE file_id = :id LIMIT 1";
         $articleFileStatement = $this->connection->prepare($articleFileSql);
         $articleFileStatement->bindValue('id', $id);

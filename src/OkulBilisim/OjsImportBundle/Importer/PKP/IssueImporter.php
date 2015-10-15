@@ -45,6 +45,8 @@ class IssueImporter extends Importer
      */
     public function importIssue($id, $journal, $sections)
     {
+        $this->consoleOutput->writeln("Reading issue #" . $id . "... ", true);
+
         $issueSql = "SELECT * FROM issues WHERE issue_id = :id LIMIT 1";
         $issueStatement = $this->connection->prepare($issueSql);
         $issueStatement->bindValue('id', $id);
@@ -96,7 +98,7 @@ class IssueImporter extends Importer
             $issue->addTranslation($translation);
         }
 
-        $importer = new IssueFileImporter($this->connection, $this->em);
+        $importer = new IssueFileImporter($this->connection, $this->em, $this->consoleOutput);
         $importer->importIssueFiles($issue, $id, $journal->getSlug());
 
         $this->em->persist($issue);

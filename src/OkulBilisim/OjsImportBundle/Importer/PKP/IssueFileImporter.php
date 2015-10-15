@@ -32,6 +32,8 @@ class IssueFileImporter extends Importer
      */
     public function importIssueFile($id, $oldId, $issue, $slug)
     {
+        $this->consoleOutput->writeln("Reading issue file #" . $id . "... ", true);
+
         $issueFileSql = "SELECT * FROM issue_files WHERE file_id = :id LIMIT 1";
         $issueFileStatement = $this->connection->prepare($issueFileSql);
         $issueFileStatement->bindValue('id', $id);

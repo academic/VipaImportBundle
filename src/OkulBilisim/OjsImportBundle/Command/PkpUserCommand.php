@@ -29,7 +29,7 @@ class PkpUserCommand extends ImportCommand
         $um = $this->getContainer()->get('fos_user.user_manager');
         $tokenGenrator = $this->getContainer()->get('fos_user.util.token_generator');
         $locale = $this->getContainer()->getParameter('locale');
-        $importer = new UserImporter($this->connection, $this->em, $um, $tokenGenrator, $locale);
+        $importer = new UserImporter($this->connection, $this->em, $output, $um, $tokenGenrator, $locale);
         $importer->importUser($id);
     }
 }

@@ -10,6 +10,8 @@ use Ojs\JournalBundle\Entity\JournalTranslation;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
 use Ojs\JournalBundle\Entity\PublisherTranslation;
+use Symfony\Component\Console\Output\Output;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class JournalImporter extends Importer
 {
@@ -47,20 +49,23 @@ class JournalImporter extends Importer
      * JournalImporter constructor.
      * @param Connection $connection
      * @param EntityManager $em
+     * @param OutputInterface $consoleOutput
      * @param UserImporter $ui
      */
-    public function __construct(Connection $connection, EntityManager $em, UserImporter $ui)
+    public function __construct(Connection $connection, EntityManager $em, OutputInterface $consoleOutput, UserImporter $ui)
     {
-        parent::__construct($connection, $em);
+        parent::__construct($connection, $em, $consoleOutput);
 
         $this->userImporter = $ui;
-        $this->sectionImporter = new SectionImporter($this->connection, $this->em);
-        $this->issueImporter = new IssueImporter($this->connection, $this->em);
-        $this->articleImporter = new ArticleImporter($this->connection, $this->em, $this->userImporter);
+        $this->sectionImporter = new SectionImporter($this->connection, $this->em, $consoleOutput);
+        $this->issueImporter = new IssueImporter($this->connection, $this->em, $consoleOutput);
+        $this->articleImporter = new ArticleImporter($this->connection, $this->em, $consoleOutput, $this->userImporter);
     }
 
     public function importJournal($id)
     {
+        $this->consoleOutput->writeln("Importing the journal...");
+
         $journalSql = "SELECT path, primary_locale FROM journals WHERE journal_id = :id LIMIT 1";
         $journalStatement = $this->connection->prepare($journalSql);
         $journalStatement->bindValue('id', $id);
@@ -77,6 +82,7 @@ class JournalImporter extends Importer
         $languageCode = substr($primaryLocale, 0, 2);
 
         !$pkpJournal && die('Journal not found.' . PHP_EOL);
+        $this->consoleOutput->writeln("Reading journal settings...");
 
         foreach ($pkpSettings as $setting) {
             $locale = !empty($setting['locale']) ? $setting['locale'] : $primaryLocale;
@@ -134,12 +140,16 @@ class JournalImporter extends Importer
         $this->journal->setMandatoryLang($language ? $language : $this->createLanguage($languageCode));
         $this->journal->addLanguage($language ? $language : $this->createLanguage($languageCode));
 
+        $this->consoleOutput->writeln("Read journal's settings.");
+
         $createdSections = $this->sectionImporter->importJournalsSections($this->journal, $id);
         $createdIssues = $this->issueImporter->importJournalsIssues($this->journal, $id, $createdSections);
         $this->articleImporter->importArticles($id, $this->journal, $createdIssues, $createdSections);
 
         $this->em->persist($this->journal);
         $this->em->flush();
+
+        $this->consoleOutput->writeln("Imported journal.");
 
         return ['new' => $this->journal->getId(), 'old' => $id];
     }

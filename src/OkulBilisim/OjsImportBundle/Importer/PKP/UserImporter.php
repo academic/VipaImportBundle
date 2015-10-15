@@ -9,6 +9,7 @@ use FOS\UserBundle\Model\UserManager;
 use FOS\UserBundle\Util\TokenGenerator;
 use Ojs\JournalBundle\Entity\Subject;
 use Ojs\UserBundle\Entity\User;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class UserImporter extends Importer
 {
@@ -29,8 +30,9 @@ class UserImporter extends Importer
 
     /**
      * UserImporter constructor.
-     * @param Connection    $connection
+     * @param Connection $connection
      * @param EntityManager $em
+     * @param OutputInterface $consoleOutput
      * @param UserManager $userManager
      * @param TokenGenerator $tokenGenerator
      * @param string $locale
@@ -38,12 +40,13 @@ class UserImporter extends Importer
     public function __construct(
         Connection $connection,
         EntityManager $em,
+        OutputInterface $consoleOutput,
         UserManager $userManager,
         TokenGenerator $tokenGenerator,
         $locale
     )
     {
-        parent::__construct($connection, $em);
+        parent::__construct($connection, $em, $consoleOutput);
         $this->userManager = $userManager;
         $this->tokenGenerator = $tokenGenerator;
         $this->locale = $locale;
@@ -51,6 +54,8 @@ class UserImporter extends Importer
 
     public function importUser($id, $flush = true)
     {
+        $this->consoleOutput->writeln("Reading user #" . $id . "... ", true);
+
         $sql = "SELECT username, email, disabled FROM users WHERE user_id = :id LIMIT 1";
         $statement = $this->connection->prepare($sql);
         $statement->bindValue('id', $id);
