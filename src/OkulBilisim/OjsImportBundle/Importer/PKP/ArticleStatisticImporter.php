@@ -60,5 +60,7 @@ class ArticleStatisticImporter extends Importer
                 $this->em->persist($articleFileStatistic);
             }
         }
+
+        $this->em->flush();
     }
 }
