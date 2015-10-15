@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class PendingDownload
  * @package OkulBilisim\OjsImportBundle\Entity
  * @ORM\Entity
- * @ORM\Table("pending_download")
+ * @ORM\Table("import_pending_download")
  */
 class PendingDownload
 {
