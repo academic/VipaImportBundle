@@ -29,7 +29,8 @@ class DownloadCommand extends ContainerAwareCommand
         foreach ($pendingDownloads as $download) {
             $output->writeln("Downloading " . $download->getSource());
             $status = $this->download($input->getArgument('host'), $download->getSource(), $download->getTarget());
-            $status ? $em->remove($download) : $output->writeln("Couldn't download " . $download->getSource());;
+            $status ? $em->remove($download) : $output->writeln("Couldn't download " . $download->getSource());
+            $em->flush($download);
         }
     }
 

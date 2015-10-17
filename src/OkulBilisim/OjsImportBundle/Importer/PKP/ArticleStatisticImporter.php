@@ -15,6 +15,8 @@ class ArticleStatisticImporter extends Importer
 
         foreach ($pendingImports as $import) {
             $this->importArticleStatistic($import->getOldId(), $import->getArticle()->getId());
+            $this->em->remove($import);
+            $this->em->flush($import);
         }
     }
 
