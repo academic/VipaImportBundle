@@ -194,11 +194,12 @@ class JournalImporter extends Importer
             ->getRepository('OjsJournalBundle:Publisher')
             ->findOneBy(['name' => 'Unknown Publisher']);
 
-        !$publisher && $publisher = $this->createPublisher('Unknown Publisher', 'http://example.com');
-        $publisher->setCurrentLocale('en');
-        $publisher->setAbout('-');
-
-        $this->em->persist($publisher);
+        if (!$publisher) {
+            $publisher = $this->createPublisher('Unknown Publisher', 'http://example.com');
+            $publisher->setCurrentLocale('en');
+            $publisher->setAbout('-');
+            $this->em->persist($publisher);
+        }
 
         return $publisher;
     }
