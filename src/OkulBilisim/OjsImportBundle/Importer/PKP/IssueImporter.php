@@ -73,6 +73,7 @@ class IssueImporter extends Importer
         $issue->setNumber($pkpIssue['number']);
         $issue->setYear($pkpIssue['year']);
         $issue->setPublished($pkpIssue['published']);
+        $issue->setSpecial(false);
 
         foreach (array_values($sections) as $section) {
             $issue->addSection($section);
