@@ -128,6 +128,14 @@ class JournalImporter extends Importer
                 $this->settings[$primaryLocale]['initialYear'] : '2015');
         $this->journal->setFounded(DateTime::createFromFormat('Y-m-d H:i:s', $date));
 
+        // Set view and download counts
+        !empty($this->settings[$primaryLocale]['total_views']) ?
+            $this->journal->setViewCount($this->settings[$primaryLocale]['total_views']) :
+            $this->journal->setViewCount(0);
+        !empty($this->settings[$primaryLocale]['total_downloads']) ?
+            $this->journal->setDownloadCount($this->settings[$primaryLocale]['total_downloads']) :
+            $this->journal->setDownloadCount(0);
+
         // Set publisher
         !empty($this->settings[$primaryLocale]['publisherInstitution']) ?
             $this->importAndSetPublisher($this->settings[$primaryLocale]['publisherInstitution'], $primaryLocale) :
