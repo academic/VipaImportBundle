@@ -5,8 +5,6 @@ namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
-use Ojs\AnalyticsBundle\Entity\ArticleFileStatistic;
-use Ojs\AnalyticsBundle\Entity\ArticleStatistic;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\ArticleAuthor;
 use Ojs\JournalBundle\Entity\Author;

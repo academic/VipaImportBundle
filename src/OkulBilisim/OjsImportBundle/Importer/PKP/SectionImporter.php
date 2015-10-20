@@ -2,7 +2,6 @@
 
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
-use DateTime;
 use Ojs\JournalBundle\Entity\Section;
 use Ojs\JournalBundle\Entity\SectionTranslation;
 use Ojs\JournalBundle\Entity\Journal;
