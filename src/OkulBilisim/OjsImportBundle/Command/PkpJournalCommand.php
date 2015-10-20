@@ -30,15 +30,15 @@ class PkpJournalCommand extends ImportCommand
         $userManager = $this->getContainer()->get('fos_user.user_manager');
         $locale = $this->getContainer()->getParameter('locale');
         $tokenGenrator = $this->getContainer()->get('fos_user.util.token_generator');
-        $userImporter = new UserImporter($this->connection, $this->em, $output, $userManager, $tokenGenrator, $locale);
+        $userImporter = new UserImporter($this->connection, $this->em, $this->logger, $output, $userManager, $tokenGenrator, $locale);
 
         $stopwatch = new Stopwatch();
         $stopwatch->start('journal_import');
 
-        $journalImporter = new JournalImporter($this->connection, $this->em, $output, $userImporter);
+        $journalImporter = new JournalImporter($this->connection, $this->em, $this->logger, $output, $userImporter);
         $ids = $journalImporter->importJournal($input->getArgument('id'));
 
-        $journalUserImporter = new JournalUserImporter($this->connection, $this->em, $output);
+        $journalUserImporter = new JournalUserImporter($this->connection, $this->em, $this->logger, $output);
         $journalUserImporter->importJournalUsers($ids['new'], $ids['old'], $userImporter);
 
         $event = $stopwatch->stop('journal_import');

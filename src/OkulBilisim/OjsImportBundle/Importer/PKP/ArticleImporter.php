@@ -15,6 +15,7 @@ use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\ArticleTranslation;
 use OkulBilisim\OjsImportBundle\Entity\PendingStatisticImport;
 use OkulBilisim\OjsImportBundle\Helper\StringHelper;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ArticleImporter extends Importer
@@ -34,11 +35,18 @@ class ArticleImporter extends Importer
      * @param Connection $connection
      * @param EntityManager $em
      * @param OutputInterface $consoleOutput
+     * @param LoggerInterface $logger
      * @param UserImporter $ui
      */
-    public function __construct(Connection $connection, EntityManager $em, OutputInterface $consoleOutput, UserImporter $ui)
+    public function __construct(
+        Connection $connection,
+        EntityManager $em,
+        LoggerInterface $logger,
+        OutputInterface $consoleOutput,
+        UserImporter $ui
+    )
     {
-        parent::__construct($connection, $em, $consoleOutput);
+        parent::__construct($connection, $em, $logger, $consoleOutput);
         $this->ui = $ui;
     }
 
@@ -183,7 +191,7 @@ class ArticleImporter extends Importer
         $this->importCitations($id, $article);
         $this->importAuthors($id, $article);
 
-        $articleFileImporter = new ArticleFileImporter($this->connection, $this->em, $this->consoleOutput);
+        $articleFileImporter = new ArticleFileImporter($this->connection, $this->em, $this->logger, $this->consoleOutput);
         $articleFileImporter->importArticleFiles($article, $id, $journal->getSlug());
 
         if (empty($this->submitterUsers[$pkpArticle['user_id']])) {

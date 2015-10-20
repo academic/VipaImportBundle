@@ -4,6 +4,7 @@ namespace OkulBilisim\OjsImportBundle\Helper;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,6 +21,11 @@ class ImportCommand extends ContainerAwareCommand
      * @var EntityManager
      */
     protected $em;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
 
     protected function configure()
     {
@@ -48,5 +54,6 @@ class ImportCommand extends ContainerAwareCommand
             ->createConnection($parameters);
 
         $this->em = $this->getContainer()->get('doctrine.orm.entity_manager');
+        $this->logger = $this->getContainer()->get('logger');
     }
 }

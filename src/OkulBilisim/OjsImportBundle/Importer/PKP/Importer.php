@@ -2,9 +2,10 @@
 
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
-use InvalidArgumentException;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Importer
@@ -25,15 +26,24 @@ class Importer
     protected $consoleOutput;
 
     /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * Importer constructor.
      * @param Connection $connection
      * @param EntityManager $em
+     * @param LoggerInterface $logger
      * @param OutputInterface $consoleOutput
      */
-    public function __construct(Connection $connection, EntityManager $em, OutputInterface $consoleOutput)
+    public function __construct(
+        Connection $connection, EntityManager $em, LoggerInterface $logger, OutputInterface $consoleOutput
+    )
     {
         $this->connection = $connection;
         $this->em = $em;
+        $this->logger = $logger;
         $this->consoleOutput = $consoleOutput;
     }
 

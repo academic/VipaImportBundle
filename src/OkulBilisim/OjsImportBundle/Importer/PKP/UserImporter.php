@@ -9,6 +9,7 @@ use FOS\UserBundle\Model\UserManager;
 use FOS\UserBundle\Util\TokenGenerator;
 use Ojs\JournalBundle\Entity\Subject;
 use Ojs\UserBundle\Entity\User;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class UserImporter extends Importer
@@ -33,6 +34,7 @@ class UserImporter extends Importer
      * @param Connection $connection
      * @param EntityManager $em
      * @param OutputInterface $consoleOutput
+     * @param LoggerInterface $logger
      * @param UserManager $userManager
      * @param TokenGenerator $tokenGenerator
      * @param string $locale
@@ -40,13 +42,14 @@ class UserImporter extends Importer
     public function __construct(
         Connection $connection,
         EntityManager $em,
+        LoggerInterface $logger,
         OutputInterface $consoleOutput,
         UserManager $userManager,
         TokenGenerator $tokenGenerator,
         $locale
     )
     {
-        parent::__construct($connection, $em, $consoleOutput);
+        parent::__construct($connection, $em, $logger, $consoleOutput);
         $this->userManager = $userManager;
         $this->tokenGenerator = $tokenGenerator;
         $this->locale = $locale;

@@ -10,7 +10,7 @@ use Ojs\JournalBundle\Entity\JournalTranslation;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
 use Ojs\JournalBundle\Entity\PublisherTranslation;
-use Symfony\Component\Console\Output\Output;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class JournalImporter extends Importer
@@ -50,16 +50,24 @@ class JournalImporter extends Importer
      * @param Connection $connection
      * @param EntityManager $em
      * @param OutputInterface $consoleOutput
+     * @param LoggerInterface $logger
      * @param UserImporter $ui
      */
-    public function __construct(Connection $connection, EntityManager $em, OutputInterface $consoleOutput, UserImporter $ui)
+    public function __construct(
+        Connection $connection,
+        EntityManager $em,
+        LoggerInterface $logger,
+        OutputInterface $consoleOutput,
+        UserImporter $ui)
     {
-        parent::__construct($connection, $em, $consoleOutput);
+        parent::__construct($connection, $em, $logger, $consoleOutput);
 
         $this->userImporter = $ui;
-        $this->sectionImporter = new SectionImporter($this->connection, $this->em, $consoleOutput);
-        $this->issueImporter = new IssueImporter($this->connection, $this->em, $consoleOutput);
-        $this->articleImporter = new ArticleImporter($this->connection, $this->em, $consoleOutput, $this->userImporter);
+        $this->sectionImporter = new SectionImporter($this->connection, $this->em, $this->logger, $consoleOutput);
+        $this->issueImporter = new IssueImporter($this->connection, $this->em, $this->logger, $consoleOutput);
+        $this->articleImporter = new ArticleImporter(
+            $this->connection,$this->em,  $logger, $consoleOutput, $this->userImporter
+        );
     }
 
     public function importJournal($id)

@@ -24,7 +24,7 @@ class PkpImportStatsCommand extends ImportCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
-        $importer = new ArticleStatisticImporter($this->connection, $this->em, $output);
+        $importer = new ArticleStatisticImporter($this->connection, $this->em,  $this->logger, $output);
 
         $stopwatch = new Stopwatch();
         $stopwatch->start('stats_import');
