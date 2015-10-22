@@ -35,10 +35,8 @@ class GivenJournalsImporter extends Importer
 
     public function importJournals($ids)
     {
-        $journalsSql = "SELECT journal_id, path FROM journals WHERE journal_id IN (:ids)";
-        $journalsStatement = $this->connection->prepare($journalsSql);
-        $journalsStatement->bindValue('ids', implode(', ', $ids));
-        $journalsStatement->execute();
+        $journalsSql = 'SELECT journal_id, path FROM journals WHERE journal_id IN (?)';
+        $journalsStatement = $this->connection->executeQuery($journalsSql, array($ids), array(Connection::PARAM_INT_ARRAY));
         $journals = $journalsStatement->fetchAll();
 
         $journalImporter = new JournalImporter(
