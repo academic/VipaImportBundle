@@ -18,7 +18,7 @@ class PkpJournalCommand extends ImportCommand
     {
         $this
             ->setName('ojs:import:pkp:journal')
-            ->setDescription('Import an user from PKP/OJS')
+            ->setDescription('Import a journal from PKP/OJS')
             ->addArgument('id', InputArgument::REQUIRED, 'Journal ID');
 
         parent::configure();
