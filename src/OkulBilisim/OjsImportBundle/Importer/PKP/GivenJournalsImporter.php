@@ -62,7 +62,7 @@ class GivenJournalsImporter extends Importer
                         $exception->getLine()
                     );
 
-                    $this->consoleOutput->writeln('Importing of journal #' . $journal['id'] . 'failed.');
+                    $this->consoleOutput->writeln('Importing of journal #' . $journal['journal_id'] . 'failed.');
                     $this->consoleOutput->writeln($message);
                     $this->consoleOutput->writeln($exception->getTraceAsString());
                 }
