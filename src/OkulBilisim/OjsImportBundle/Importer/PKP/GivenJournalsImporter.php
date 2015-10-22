@@ -67,7 +67,7 @@ class GivenJournalsImporter extends Importer
                     $this->consoleOutput->writeln($exception->getTraceAsString());
                 }
             } else {
-                $this->consoleOutput->writeln('Journal #' . $journal['id'] . ' already imported. Skipped.');
+                $this->consoleOutput->writeln('Journal #' . $journal['journal_id'] . ' already imported. Skipped.');
             }
         }
     }
