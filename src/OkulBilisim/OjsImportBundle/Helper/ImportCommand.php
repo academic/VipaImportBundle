@@ -4,6 +4,8 @@ namespace OkulBilisim\OjsImportBundle\Helper;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -54,6 +56,9 @@ class ImportCommand extends ContainerAwareCommand
             ->createConnection($parameters);
 
         $this->em = $this->getContainer()->get('doctrine.orm.entity_manager');
+
+        $path = $this->getContainer()->getParameter('kernel.root_dir') . '/logs/import.log';
         $this->logger = $this->getContainer()->get('logger');
+        $this->logger->pushHandler(new StreamHandler($path, Logger::INFO));
     }
 }
