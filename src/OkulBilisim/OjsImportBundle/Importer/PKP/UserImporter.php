@@ -74,7 +74,7 @@ class UserImporter extends Importer
                 ->findOneBy(['username' => $pkpUser['username']]);
         }
 
-        if ($user == null) {
+        if (is_null($user)) {
             $user = new User();
             !empty($pkpUser['username']) ?
                 $user->setUsername($pkpUser['username']) :
