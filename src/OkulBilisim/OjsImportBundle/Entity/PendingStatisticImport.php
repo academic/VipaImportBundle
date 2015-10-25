@@ -24,7 +24,7 @@ class PendingStatisticImport
 
     /**
      * @var Article
-     * @ORM\OneToOne(targetEntity="Ojs\JournalBundle\Entity\Article")
+     * @ORM\OneToOne(targetEntity="Ojs\JournalBundle\Entity\Article", cascade={"persist"})
      * @ORM\JoinColumn(name="article_id", referencedColumnName="id")
      **/
     private $article;

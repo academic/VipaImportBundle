@@ -200,7 +200,6 @@ class ArticleImporter extends Importer
 
         $pendingStatImport = new PendingStatisticImport($article, $id);
         $this->em->persist($pendingStatImport);
-        $this->em->persist($article);
     }
 
     /**
