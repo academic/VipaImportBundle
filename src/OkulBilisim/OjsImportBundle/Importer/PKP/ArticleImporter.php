@@ -193,7 +193,7 @@ class ArticleImporter extends Importer
         $articleFileImporter->importArticleFiles($article, $id, $journal->getSlug());
 
         if (empty($this->submitterUsers[$pkpArticle['user_id']])) {
-            $this->submitterUsers[$pkpArticle['user_id']] = $this->ui->importUser($pkpArticle['user_id'], false);
+            $this->submitterUsers[$pkpArticle['user_id']] = $this->ui->importUser($pkpArticle['user_id']);
         }
 
         $article->setSubmitterUser($this->submitterUsers[$pkpArticle['user_id']]);
