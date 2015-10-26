@@ -197,8 +197,6 @@ class ArticleImporter extends Importer
 //            $this->submitterUsers[$pkpArticle['user_id']] = $this->ui->importUser($pkpArticle['user_id'], false);
 //        }
 
-        $article->setSubmitterUser(null);
-
         $pendingStatImport = new PendingStatisticImport($article, $id);
         $pendingSubmitterImport = new PendingSubmitterImport($article, $pkpArticle['user_id']);
         $this->em->persist($pendingStatImport);
