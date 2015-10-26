@@ -97,7 +97,7 @@ class UserImporter extends Importer
 
             if ($flush) {
                 $this->em->persist($user);
-                $this->em->flush($user);
+                $this->em->flush();
             }
         }
 
