@@ -12,6 +12,7 @@ use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\ArticleTranslation;
 use OkulBilisim\OjsImportBundle\Entity\PendingStatisticImport;
+use OkulBilisim\OjsImportBundle\Entity\PendingSubmitterImport;
 use OkulBilisim\OjsImportBundle\Helper\StringHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -192,14 +193,16 @@ class ArticleImporter extends Importer
         $articleFileImporter = new ArticleFileImporter($this->connection, $this->em, $this->logger, $this->consoleOutput);
         $articleFileImporter->importArticleFiles($article, $id, $journal->getSlug());
 
-        if (empty($this->submitterUsers[$pkpArticle['user_id']])) {
-            $this->submitterUsers[$pkpArticle['user_id']] = $this->ui->importUser($pkpArticle['user_id'], false);
-        }
+//        if (empty($this->submitterUsers[$pkpArticle['user_id']])) {
+//            $this->submitterUsers[$pkpArticle['user_id']] = $this->ui->importUser($pkpArticle['user_id'], false);
+//        }
 
-        $article->setSubmitterUser($this->submitterUsers[$pkpArticle['user_id']]);
+        $article->setSubmitterUser(null);
 
         $pendingStatImport = new PendingStatisticImport($article, $id);
+        $pendingSubmitterImport = new PendingSubmitterImport($article, $pkpArticle['user_id']);
         $this->em->persist($pendingStatImport);
+        $this->em->persist($pendingSubmitterImport);
     }
 
     /**
