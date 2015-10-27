@@ -26,44 +26,43 @@ class DergiParkCoverCommand extends ImportCommand
             ->getRepository('OjsJournalBundle:Journal')
             ->findBy(['image' => null]);
 
-        foreach ($coverless as $journal) {
-            $sql = "SELECT journal_id, primary_locale FROM journals WHERE path = :path LIMIT 1";
-            $statement = $this->connection->prepare($sql);
-            $statement->bindValue('path', $journal->getSlug());
-            $statement->execute();
-            $result = $statement->fetch();
+        try {
+            foreach ($coverless as $journal) {
+                $sql = "SELECT journal_id, primary_locale FROM journals WHERE path = :path LIMIT 1";
+                $statement = $this->connection->prepare($sql);
+                $statement->bindValue('path', $journal->getSlug());
+                $statement->execute();
+                $result = $statement->fetch();
 
-            if (empty($result)) {
-                continue;
-            }
+                if (empty($result)) {
+                    continue;
+                }
 
-            $id = $result['journal_id'];
-            $locale = $result['primary_locale'];
+                $id = $result['journal_id'];
+                $locale = $result['primary_locale'];
 
-            if ($this->downloadCover($id, $locale)) {
-                $output->writeln("Downloaded a cover for journal #" . $id);
-            } else {
-                $output->writeln("Couldn't download a cover for journal #" . $id);
-            }
+                if ($this->downloadCover($id, $locale)) {
+                    $output->writeln("Downloaded a cover for journal #" . $id);
+                } else {
+                    $output->writeln("Couldn't download a cover for journal #" . $id);
+                    continue;
+                }
 
-            $filename = "imported/cover/" . $id . ".jpg";
+                $filename = "imported/cover/" . $id . ".jpg";
 
-            $history = new FileHistory();
-            $history->setFileName($filename);
-            $history->setOriginalName($id . "/journalThumbnail_" . $locale . ".jpg");
-            $history->setType('journal');
+                $history = new FileHistory();
+                $history->setFileName($filename);
+                $history->setOriginalName($id . "/journalThumbnail_" . $locale . ".jpg");
+                $history->setType('journal');
 
-            $journal->setImage($filename);
-
-            $this->em->persist($journal);
-            $this->em->persist($history);
-
-            try {
+                $journal->setImage($filename);
+                $this->em->persist($journal);
+                $this->em->persist($history);
                 $this->em->flush();
-            } catch (Exception $e) {
-                $this->logger->error($e->getMessage());
-                $this->getContainer()->get('doctrine')->resetManager();
             }
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
+            $this->getContainer()->get('doctrine')->resetManager();
         }
     }
 
