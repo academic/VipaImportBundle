@@ -4,6 +4,7 @@ namespace OkulBilisim\OjsImportBundle\Command;
 
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
 use OkulBilisim\OjsImportBundle\Helper\ImportCommand;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -56,7 +57,13 @@ class DergiParkCoverCommand extends ImportCommand
 
             $this->em->persist($journal);
             $this->em->persist($history);
-            $this->em->flush();
+
+            try {
+                $this->em->flush();
+            } catch (Exception $e) {
+                $this->logger->error($e->getMessage());
+                $this->getContainer()->get('doctrine')->resetManager();
+            }
         }
     }
 
