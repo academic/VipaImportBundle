@@ -79,6 +79,10 @@ class DergiParkCoverCommand extends ImportCommand
         $data = curl_exec($curl);
         curl_close($curl);
 
+        if (empty($data)) {
+            return false;
+        }
+
         $rootDir = $this->getContainer()->get('kernel')->getRootDir();
         $fs = new Filesystem();
 
