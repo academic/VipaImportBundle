@@ -71,6 +71,14 @@ class DergiParkCoverCommand extends ImportCommand
         $url = "http://static.dergipark.gov.tr/public/journals/" . $id . "/journalThumbnail_" . $locale . ".jpg";
         $target = sprintf('/../web/uploads/journal/imported/cover/%s.jpg', $id);
 
+        // return false if HTTP status code isn't 200
+        $headers = get_headers($url);
+        $statusCode = substr($headers[0], 9, 3);
+
+        if ($statusCode != "200") {
+            return false;
+        }
+
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
