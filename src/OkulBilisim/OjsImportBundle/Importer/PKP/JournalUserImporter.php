@@ -6,6 +6,7 @@ use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\JournalUser;
 use Ojs\UserBundle\Entity\Role;
 use Ojs\UserBundle\Entity\User;
+use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class JournalUserImporter extends Importer
 {

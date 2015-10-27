@@ -1,6 +1,6 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Importer\PKP;
+namespace OkulBilisim\OjsImportBundle\Importer;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;

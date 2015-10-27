@@ -8,6 +8,7 @@ use Ojs\JournalBundle\Entity\IssueFile;
 use Ojs\JournalBundle\Entity\IssueFileTranslation;
 use OkulBilisim\OjsImportBundle\Entity\PendingDownload;
 use OkulBilisim\OjsImportBundle\Helper\FileHelper;
+use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class IssueFileImporter extends Importer
 {

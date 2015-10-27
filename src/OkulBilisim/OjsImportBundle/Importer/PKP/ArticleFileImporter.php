@@ -7,6 +7,7 @@ use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\ArticleFile;
 use OkulBilisim\OjsImportBundle\Entity\PendingDownload;
 use OkulBilisim\OjsImportBundle\Helper\FileHelper;
+use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class ArticleFileImporter extends Importer
 {

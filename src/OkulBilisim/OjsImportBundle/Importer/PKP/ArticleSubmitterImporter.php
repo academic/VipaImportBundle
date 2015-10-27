@@ -3,6 +3,7 @@
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
 use Ojs\JournalBundle\Entity\Article;
+use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class ArticleSubmitterImporter extends Importer
 {

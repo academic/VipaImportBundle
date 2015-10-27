@@ -5,6 +5,7 @@ namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Exception;
+use OkulBilisim\OjsImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

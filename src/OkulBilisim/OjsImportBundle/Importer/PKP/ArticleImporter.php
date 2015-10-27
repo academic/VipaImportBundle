@@ -14,6 +14,7 @@ use Ojs\JournalBundle\Entity\ArticleTranslation;
 use OkulBilisim\OjsImportBundle\Entity\PendingStatisticImport;
 use OkulBilisim\OjsImportBundle\Entity\PendingSubmitterImport;
 use OkulBilisim\OjsImportBundle\Helper\StringHelper;
+use OkulBilisim\OjsImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

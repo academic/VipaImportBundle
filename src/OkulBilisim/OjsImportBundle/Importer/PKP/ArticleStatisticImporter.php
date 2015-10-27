@@ -5,6 +5,7 @@ namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 use DateTime;
 use Ojs\AnalyticsBundle\Entity\ArticleFileStatistic;
 use Ojs\AnalyticsBundle\Entity\ArticleStatistic;
+use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class ArticleStatisticImporter extends Importer
 {

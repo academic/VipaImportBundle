@@ -6,6 +6,7 @@ use DateTime;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\JournalBundle\Entity\IssueTranslation;
 use Ojs\JournalBundle\Entity\Journal;
+use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class IssueImporter extends Importer
 {

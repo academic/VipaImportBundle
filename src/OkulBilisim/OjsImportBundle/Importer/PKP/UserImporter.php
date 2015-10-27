@@ -9,6 +9,7 @@ use FOS\UserBundle\Model\UserManager;
 use FOS\UserBundle\Util\TokenGenerator;
 use Ojs\JournalBundle\Entity\Subject;
 use Ojs\UserBundle\Entity\User;
+use OkulBilisim\OjsImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
