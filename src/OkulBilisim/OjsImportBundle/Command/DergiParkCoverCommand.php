@@ -2,6 +2,7 @@
 
 namespace OkulBilisim\OjsImportBundle\Command;
 
+use GuzzleHttp\Exception\BadResponseException;
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
 use OkulBilisim\OjsImportBundle\Helper\ImportCommand;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -76,7 +77,12 @@ class DergiParkCoverCommand extends ImportCommand
         $relativeUri = "journalThumbnail_%s.jpg";
 
         $client = new Client(['base_uri' => $baseUri]);
-        $response = $client->request('GET', sprintf($relativeUri, $locale));
+
+        try {
+            $response = $client->request('GET', sprintf($relativeUri, $locale));
+        } catch (BadResponseException $e) {
+            return false;
+        }
 
         if ($response->getStatusCode() === 200 && $response->getHeader('Content-Type')[0] === 'image/jpeg') {
             $body = $response->getBody();
