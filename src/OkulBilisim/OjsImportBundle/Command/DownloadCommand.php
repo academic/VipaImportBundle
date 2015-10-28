@@ -52,7 +52,7 @@ class DownloadCommand extends ContainerAwareCommand
         $targetDir = implode('/', $targetDir);
         $fs->mkdir($rootDir . '/'. $targetDir);
 
-        $file = fopen($rootDir . $target, "x");
+        $file = fopen($rootDir . $target, "w");
         $status = fputs($file, $data);
         fclose($file);
 
