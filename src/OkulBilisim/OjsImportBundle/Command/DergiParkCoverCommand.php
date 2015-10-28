@@ -8,6 +8,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use GuzzleHttp\Client;
 
 class DergiParkCoverCommand extends ImportCommand
 {
@@ -68,41 +69,28 @@ class DergiParkCoverCommand extends ImportCommand
 
     public function downloadCover($id, $locale)
     {
-        $url = "http://static.dergipark.gov.tr/public/journals/" . $id . "/journalThumbnail_" . $locale . ".jpg";
-        $target = sprintf('/../web/uploads/journal/imported/cover/%s.jpg', $id);
-
-        // return false if HTTP status code isn't 200
-        $headers = get_headers($url);
-        $statusCode = substr($headers[0], 9, 3);
-
-        if ($statusCode != "200") {
-            return false;
-        }
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_BINARYTRANSFER, true);
-
-        $data = curl_exec($curl);
-        curl_close($curl);
-
-        if (empty($data)) {
-            return false;
-        }
-
+        $filesystem = new Filesystem();
         $rootDir = $this->getContainer()->get('kernel')->getRootDir();
-        $fs = new Filesystem();
+        $target = sprintf("%s/../web/uploads/journal/imported/cover/%s.jpg", $rootDir, $id);
+        $baseUri = sprintf("http://static.dergipark.gov.tr/public/journals/%s/", $id);
+        $relativeUri = "journalThumbnail_%s.jpg";
 
-        $targetDir = explode('/', $target);
-        array_pop($targetDir);
-        $targetDir = implode('/', $targetDir);
-        $fs->mkdir($rootDir . '/'. $targetDir);
+        $client = new Client(['base_uri' => $baseUri]);
+        $response = $client->request('GET', sprintf($relativeUri, $locale));
 
-        $file = fopen($rootDir . $target, "w");
-        $status = fputs($file, $data);
-        fclose($file);
+        if ($response->getStatusCode() === 200 && $response->getHeader('Content-Type')[0] === 'image/jpeg') {
+            $body = $response->getBody();
 
-        return $status;
+            // Create the directory
+            $targetDir = explode('/', $target);
+            array_pop($targetDir); // Remove filename
+            $targetDir = implode('/', $targetDir);
+            $filesystem->mkdir($targetDir);
+
+            $file = fopen($target, "w");
+            return fputs($file, $body->getContents());
+        }
+
+        return false;
     }
 }
