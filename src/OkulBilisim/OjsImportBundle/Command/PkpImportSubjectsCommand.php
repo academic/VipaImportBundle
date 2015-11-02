@@ -41,9 +41,10 @@ class PkpImportSubjectsCommand extends ImportCommand
                 foreach($categories as $categoryId) {
                     $categorySql = "SELECT locale, setting_value FROM " .
                         "controlled_vocab_entry_settings WHERE " .
-                        "controlled_vocab_entry_id = 5000000112";
+                        "controlled_vocab_entry_id = :categoryId";
 
                     $categoryStatement = $this->connection->prepare($categorySql);
+                    $categoryStatement->bindValue('categoryId', $categoryId);
                     $categoryStatement->execute();
 
                     $categoryResult = $categoryStatement->fetchAll();
