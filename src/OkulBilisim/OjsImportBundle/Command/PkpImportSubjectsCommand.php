@@ -37,6 +37,7 @@ class PkpImportSubjectsCommand extends ImportCommand
             $settingResult = $settingStatement->fetch();
 
             if ($settingResult) {
+                $output->writeln('Reading categories of journal #' . $journal->getId());
                 $categories = unserialize($settingResult['setting_value']);
                 foreach($categories as $categoryId) {
                     $categorySql = "SELECT locale, setting_value FROM " .
@@ -56,6 +57,8 @@ class PkpImportSubjectsCommand extends ImportCommand
                             ->findOneBy(['slug' => $slug]);
 
                         if (!$subject) {
+                            $output->writeln('Importing ' . $slug);
+
                             $subject = new Subject();
                             $subject->setSlug($slug);
                             $subject->setCurrentLocale('en');
@@ -73,6 +76,7 @@ class PkpImportSubjectsCommand extends ImportCommand
                             $this->em->persist($subject);
                             $this->em->flush();
                         } elseif (!$journal->getSubjects()->contains($subject)) {
+                            $output->writeln($slug . ' already exists. Adding to journal.');
                             $journal->addSubject($subject);
                             $this->em->persist($journal);
                             $this->em->flush();
