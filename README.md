@@ -1,6 +1,17 @@
 # OjsImportBundle
 This is a bundle which helps with importing databases of other journal softwares to a new instance of OJS.
 
+## Available Commands
+```
+  ojs:import:download            Download all files added to the queue during imports
+  ojs:import:pkp:all-journals    Import all journals from PKP/OJS
+  ojs:import:pkp:given-journals  Import given journals from PKP/OJS
+  ojs:import:pkp:journal         Import a journal from PKP/OJS
+  ojs:import:pkp:stats           Import article stats from PKP/OJS
+  ojs:import:pkp:subjects        Import subjects from PKP/OJS
+  ojs:import:pkp:submitters      Import article submitters from PKP/OJS
+  ojs:import:pkp:user            Import an user from PKP/OJS
+```
 ## PKP/OJS
 
 ### Importing an user
