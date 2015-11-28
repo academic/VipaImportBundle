@@ -10,7 +10,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class PkpUserCommand extends ImportCommand
 {
-
     protected function configure()
     {
         $this
