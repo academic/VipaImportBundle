@@ -16,7 +16,8 @@ class DergiParkCoverCommand extends ImportCommand
     protected function configure()
     {
         $this
-            ->setName('ojs:import:dergipark:covers');
+            ->setName('ojs:import:dergipark:covers')
+            ->setDescription('Imports DergiPark covers');
         parent::configure();
     }
 

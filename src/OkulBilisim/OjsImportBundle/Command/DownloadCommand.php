@@ -15,6 +15,7 @@ class DownloadCommand extends ContainerAwareCommand
     {
         $this
             ->setName('ojs:import:download')
+            ->setDescription('Downloads files of imported entities')
             ->addArgument('host', InputArgument::REQUIRED, 'Hostname of the server where the files are stored');
     }
 
