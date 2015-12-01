@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 
-class PkpImportSubmittersCommand extends ImportCommand
+class PkpSubmittersCommand extends ImportCommand
 {
     protected function configure()
     {

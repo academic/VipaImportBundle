@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 
-class PkpImportStatsCommand extends ImportCommand
+class PkpStatsCommand extends ImportCommand
 {
     protected function configure()
     {

@@ -9,7 +9,7 @@ use OkulBilisim\OjsImportBundle\Helper\ImportCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class PkpImportSubjectsCommand extends ImportCommand
+class PkpSubjectsCommand extends ImportCommand
 {
     protected function configure()
     {
