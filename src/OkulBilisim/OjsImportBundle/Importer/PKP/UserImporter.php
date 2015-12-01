@@ -94,7 +94,6 @@ class UserImporter extends Importer
             $user->setPlainPassword($password);
 
             $this->importProfile($id, $user);
-            $this->importSubjects($id, $user);
 
             if ($flush) {
                 $this->em->persist($user);
@@ -129,42 +128,5 @@ class UserImporter extends Importer
         !empty($pkpUser['phone']) && $user->setPhone($pkpUser['phone']);
         !empty($pkpUser['fax']) && $user->setFax($pkpUser['fax']);
         !empty($pkpUser['url']) && $user->setUrl($pkpUser['url']);
-    }
-
-    /**
-     * @param int $oldId
-     * @param User $user
-     */
-    private function importSubjects($oldId, &$user)
-    {
-        $sql = "SELECT user_interests.user_id, controlled_vocab_entry_settings.setting_value AS `subject`" .
-            " FROM user_interests JOIN controlled_vocab_entry_settings ON user_interests.controlled_vocab_entry_id" .
-            " = controlled_vocab_entry_settings.controlled_vocab_entry_id WHERE" .
-            " controlled_vocab_entry_settings.setting_name = \"interest\" AND" .
-            " user_interests.user_id = :id";
-
-        $statement = $this->connection->prepare($sql);
-        $statement->bindValue('id', $oldId);
-        $statement->execute();
-
-        $subjects = $statement->fetchAll();
-
-        foreach ($subjects as $pkpSubject) {
-            if (!empty($pkpSubject['subject'])) {
-                $translation = $this->em
-                    ->getRepository('OjsJournalBundle:SubjectTranslation')
-                    ->findOneBy(['subject' => $pkpSubject['subject']]);
-
-                if (!$translation) {
-                    $subject = new Subject();
-                    $subject->setCurrentLocale($this->locale);
-                    $subject->setSubject($pkpSubject['subject']);
-                } else {
-                    $subject = $translation->getTranslatable();
-                }
-
-                $user->addSubject($subject);
-            }
-        }
     }
 }
