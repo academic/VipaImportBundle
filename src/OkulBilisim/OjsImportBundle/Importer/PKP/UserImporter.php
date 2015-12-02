@@ -60,7 +60,8 @@ class UserImporter extends Importer
     {
         $this->consoleOutput->writeln("Reading user #" . $id . "... ", true);
 
-        $sql = "SELECT username, email, disabled FROM users WHERE user_id = :id LIMIT 1";
+        // There are a lot of spam users with the phone number '123456'
+        $sql = "SELECT username, email, disabled FROM users WHERE user_id = :id AND phone != '123456' LIMIT 1";
         $statement = $this->connection->prepare($sql);
         $statement->bindValue('id', $id);
         $statement->execute();
@@ -93,7 +94,17 @@ class UserImporter extends Importer
             $password = substr($this->tokenGenerator->generateToken(), 0, 8);
             $user->setPlainPassword($password);
 
-            $this->importProfile($id, $user);
+            // Fields which can't be blank
+            !empty($pkpUser['first_name']) ? $user->setFirstName($pkpUser['first_name']) : $user->setFirstName('Anonymous');
+            !empty($pkpUser['last_name']) ? $user->setLastName($pkpUser['last_name']) : $user->setLastName('Anonymous');
+
+            // Optional fields
+            !empty($pkpUser['billing_address']) && $user->setBillingAddress($pkpUser['billing_address']);
+            !empty($pkpUser['mailing_address']) && $user->setAddress($pkpUser['mailing_address']);
+            !empty($pkpUser['gender']) && $user->setGender($pkpUser['gender']);
+            !empty($pkpUser['phone']) && $user->setPhone($pkpUser['phone']);
+            !empty($pkpUser['fax']) && $user->setFax($pkpUser['fax']);
+            !empty($pkpUser['url']) && $user->setUrl($pkpUser['url']);
 
             if ($flush) {
                 $this->em->persist($user);
@@ -102,31 +113,5 @@ class UserImporter extends Importer
         }
 
         return $user;
-    }
-
-    /**
-     * @param   int  $oldId
-     * @param   User $user
-     * @throws  \Doctrine\DBAL\DBALException
-     */
-    private function importProfile($oldId, &$user)
-    {
-        $sql = "SELECT * FROM users WHERE user_id = :id LIMIT 1";
-        $statement = $this->connection->prepare($sql);
-        $statement->bindValue('id', $oldId);
-        $statement->execute();
-        $pkpUser = $statement->fetch();
-
-        // Fields which can't be blank
-        !empty($pkpUser['first_name']) ? $user->setFirstName($pkpUser['first_name']) : $user->setFirstName('Anonymous');
-        !empty($pkpUser['last_name']) ? $user->setLastName($pkpUser['last_name']) : $user->setLastName('Anonymous');
-
-        // Optional fields
-        !empty($pkpUser['billing_address']) && $user->setBillingAddress($pkpUser['billing_address']);
-        !empty($pkpUser['mailing_address']) && $user->setAddress($pkpUser['mailing_address']);
-        !empty($pkpUser['gender']) && $user->setGender($pkpUser['gender']);
-        !empty($pkpUser['phone']) && $user->setPhone($pkpUser['phone']);
-        !empty($pkpUser['fax']) && $user->setFax($pkpUser['fax']);
-        !empty($pkpUser['url']) && $user->setUrl($pkpUser['url']);
     }
 }

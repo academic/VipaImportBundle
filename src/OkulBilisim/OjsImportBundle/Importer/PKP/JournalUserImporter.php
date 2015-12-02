@@ -52,7 +52,7 @@ class JournalUserImporter extends Importer
         $roleStatement = $this->connection->prepare(
             "SELECT roles.journal_id, roles.user_id, roles.role_id, users.email FROM " .
             "roles JOIN users ON roles.user_id = users.user_id WHERE roles.journal_id" .
-            "= :id"
+            "= :id AND users.phone != '123456'"
         );
 
         $roleStatement->bindValue('id', $oldJournalId);
