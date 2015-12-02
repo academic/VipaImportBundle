@@ -6,6 +6,7 @@ use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\JournalUser;
 use Ojs\UserBundle\Entity\Role;
 use Ojs\UserBundle\Entity\User;
+use OkulBilisim\OjsImportBundle\Helper\ImportHelper;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class JournalUserImporter extends Importer
@@ -52,7 +53,7 @@ class JournalUserImporter extends Importer
         $roleStatement = $this->connection->prepare(
             "SELECT roles.journal_id, roles.user_id, roles.role_id, users.email FROM " .
             "roles JOIN users ON roles.user_id = users.user_id WHERE roles.journal_id" .
-            "= :id AND users.phone != '123456'"
+            "= :id " . ImportHelper::spamUsersFilterSql()
         );
 
         $roleStatement->bindValue('id', $oldJournalId);

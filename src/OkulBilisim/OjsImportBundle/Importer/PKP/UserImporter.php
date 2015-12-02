@@ -9,6 +9,7 @@ use FOS\UserBundle\Model\UserManager;
 use FOS\UserBundle\Util\TokenGenerator;
 use Ojs\JournalBundle\Entity\Subject;
 use Ojs\UserBundle\Entity\User;
+use OkulBilisim\OjsImportBundle\Helper\ImportHelper;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -60,8 +61,7 @@ class UserImporter extends Importer
     {
         $this->consoleOutput->writeln("Reading user #" . $id . "... ", true);
 
-        // There are a lot of spam users with the phone number '123456'
-        $sql = "SELECT username, email, disabled FROM users WHERE user_id = :id AND phone != '123456' LIMIT 1";
+        $sql = "SELECT username, email, disabled FROM users WHERE users.user_id = :id " . ImportHelper::spamUsersFilterSql();
         $statement = $this->connection->prepare($sql);
         $statement->bindValue('id', $id);
         $statement->execute();
