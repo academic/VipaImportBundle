@@ -6,10 +6,8 @@ use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Ojs\JournalBundle\Entity\Journal;
-use Ojs\JournalBundle\Entity\JournalTranslation;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
-use Ojs\JournalBundle\Entity\PublisherTranslation;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -107,19 +105,15 @@ class JournalImporter extends Importer
 
         // Fill translatable fields in all available languages
         foreach ($this->settings as $fieldLocale => $fields) {
-            $translation = new JournalTranslation();
-            $translation->setLocale(substr($fieldLocale, 0, 2));
             $this->journal->setCurrentLocale(substr($fieldLocale, 0, 2));
 
             !empty($fields['title']) ?
-                $translation->setTitle($fields['title']) :
-                $translation->setTitle('Unknown Journal');
+                $this->journal->setTitle($fields['title']) :
+                $this->journal->setTitle('Unknown Journal');
 
             !empty($fields['description']) ?
-                $translation->setDescription($fields['description']) :
-                $translation->setDescription('-');
-
-            $this->journal->addTranslation($translation);
+                $this->journal->setDescription($fields['description']) :
+                $this->journal->setDescription('-');
         }
 
         $this->journal->setCurrentLocale($primaryLocale);
@@ -183,14 +177,10 @@ class JournalImporter extends Importer
             $publisher = $this->createPublisher($this->settings[$locale]['publisherInstitution'], $url);
 
             foreach ($this->settings as $fieldLocale => $fields) {
-                $translation = new PublisherTranslation();
-                $translation->setLocale(substr($fieldLocale, 0, 2));
-
+                $publisher->setCurrentLocale(substr($fieldLocale, 0, 2));
                 !empty($fields['publisherNote']) ?
-                    $translation->setAbout($fields['publisherNote']) :
-                    $translation->setAbout('-');
-
-                $publisher->addTranslation($translation);
+                    $publisher->setAbout($fields['publisherNote']) :
+                    $publisher->setAbout('-');
             }
         }
 

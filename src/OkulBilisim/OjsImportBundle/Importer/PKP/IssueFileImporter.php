@@ -5,7 +5,6 @@ namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\JournalBundle\Entity\IssueFile;
-use Ojs\JournalBundle\Entity\IssueFileTranslation;
 use OkulBilisim\OjsImportBundle\Entity\PendingDownload;
 use OkulBilisim\OjsImportBundle\Helper\FileHelper;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
@@ -64,11 +63,10 @@ class IssueFileImporter extends Importer
             $issueFile->setVersion(0);
             $issueFile->setType(0);
 
-            $translation = new IssueFileTranslation();
-            $translation->setLocale($locale);
-            $translation->setTitle($label);
-            $translation->setDescription('-');
-            $issueFile->addTranslation($translation);
+            // Fill translatable fields
+            $issueFile->setCurrentLocale($locale);
+            $issueFile->setTitle($label);
+            $issueFile->setDescription('-');
 
             $history = new FileHistory();
             $history->setFileName($filename);

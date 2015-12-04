@@ -7,7 +7,6 @@ use Doctrine\ORM\EntityManager;
 use Faker\Factory;
 use FOS\UserBundle\Model\UserManager;
 use FOS\UserBundle\Util\TokenGenerator;
-use Ojs\JournalBundle\Entity\Subject;
 use Ojs\UserBundle\Entity\User;
 use OkulBilisim\OjsImportBundle\Helper\ImportHelper;
 use OkulBilisim\OjsImportBundle\Importer\Importer;

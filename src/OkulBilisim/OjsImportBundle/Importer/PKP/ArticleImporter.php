@@ -10,7 +10,6 @@ use Ojs\JournalBundle\Entity\ArticleAuthor;
 use Ojs\JournalBundle\Entity\Author;
 use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\Journal;
-use Ojs\JournalBundle\Entity\ArticleTranslation;
 use OkulBilisim\OjsImportBundle\Entity\PendingStatisticImport;
 use OkulBilisim\OjsImportBundle\Entity\PendingSubmitterImport;
 use OkulBilisim\OjsImportBundle\Helper\StringHelper;
@@ -120,14 +119,11 @@ class ArticleImporter extends Importer
         $article->setPrimaryLanguage(!empty($pkpArticle['language']) ? $pkpArticle['language'] : 'en');
 
         foreach ($settings as $fieldLocale => $fields) {
-            $translation = new ArticleTranslation();
-            $translation->setLocale(substr($fieldLocale, 0, 2));
-
-            $translation->setTitle(!empty($fields['title']) ? $fields['title'] : '-');
-            $translation->setSubjects(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
-            $translation->setKeywords(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
-            $translation->setAbstract(!empty($fields['abstract']) ? $fields['abstract'] : '-');
-            $article->addTranslation($translation);
+            $article->setCurrentLocale(substr($fieldLocale, 0, 2));
+            $article->setTitle(!empty($fields['title']) ? $fields['title'] : '-');
+            $article->setSubjects(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
+            $article->setKeywords(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
+            $article->setAbstract(!empty($fields['abstract']) ? $fields['abstract'] : '-');
         }
 
         switch ($pkpArticle['status']) {

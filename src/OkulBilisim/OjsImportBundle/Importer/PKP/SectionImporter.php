@@ -3,7 +3,6 @@
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
 use Ojs\JournalBundle\Entity\Section;
-use Ojs\JournalBundle\Entity\SectionTranslation;
 use Ojs\JournalBundle\Entity\Journal;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
 
@@ -72,12 +71,8 @@ class SectionImporter extends Importer
         $section->setHideTitle(!empty($pkpSection['hide_title']) ? $pkpSection['hide_title']: 0);
 
         foreach ($this->settings as $fieldLocale => $fields) {
-            $translation = new SectionTranslation();
-            $translation->setLocale(substr($fieldLocale, 0, 2));
             $section->setCurrentLocale(substr($fieldLocale, 0, 2));
-
-            $translation->setTitle(!empty($fields['title']) ? $fields['title']: '-');
-            $section->addTranslation($translation);
+            $section->setTitle(!empty($fields['title']) ? $fields['title']: '-');
         }
 
         $this->em->persist($section);

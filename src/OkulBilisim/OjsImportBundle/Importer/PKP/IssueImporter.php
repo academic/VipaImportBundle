@@ -91,13 +91,9 @@ class IssueImporter extends Importer
         $issue->setDatePublished($date ? $date : new DateTime());
 
         foreach ($this->settings as $fieldLocale => $fields) {
-            $translation = new IssueTranslation();
-            $translation->setLocale(substr($fieldLocale, 0, 2));
             $issue->setCurrentLocale(substr($fieldLocale, 0, 2));
-
-            $translation->setTitle(!empty($fields['title']) ? $fields['title']: '-');
-            $translation->setDescription(!empty($fields['description']) ? $fields['description']: '-');
-            $issue->addTranslation($translation);
+            $issue->setTitle(!empty($fields['title']) ? $fields['title']: '-');
+            $issue->setDescription(!empty($fields['description']) ? $fields['description']: '-');
         }
 
         $importer = new IssueFileImporter($this->connection, $this->em, $this->logger, $this->consoleOutput);
