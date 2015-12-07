@@ -13,40 +13,36 @@ class ArticleFileImporter extends Importer
 {
     public function importArticleFiles($article, $oldId, $slug)
     {
-        $articleFilesSql = "SELECT * FROM article_files WHERE article_id = :id";
+        $articleFilesSql = "SELECT file_id, file_type, original_file_name, MAX(revision) FROM article_files " .
+            "WHERE article_id = :id GROUP BY file_id";
         $articleFilesStatement = $this->connection->prepare($articleFilesSql);
         $articleFilesStatement->bindValue('id', $oldId);
         $articleFilesStatement->execute();
 
         $articleFiles = $articleFilesStatement->fetchAll();
+        
         foreach ($articleFiles as $articleFile) {
-            $this->importArticleFile($articleFile['file_id'], $oldId, $article, $slug);
+            $this->importArticleFile($articleFile, $oldId, $article, $slug);
         }
     }
 
     /**
-     * @param int     $id
-     * @param int     $oldId
+     * @param int     $pkpArticleFile
+     * @param int     $oldArticleId
      * @param Article $article
      * @param string  $slug
      */
-    public function importArticleFile($id, $oldId, $article, $slug)
+    public function importArticleFile($pkpArticleFile, $oldArticleId, $article, $slug)
     {
-        $this->consoleOutput->writeln("Reading article file #" . $id . "... ", true);
-
-        $articleFileSql = "SELECT * FROM article_files WHERE file_id = :id LIMIT 1";
-        $articleFileStatement = $this->connection->prepare($articleFileSql);
-        $articleFileStatement->bindValue('id', $id);
-        $articleFileStatement->execute();
+        $this->consoleOutput->writeln("Reading article file #" . $pkpArticleFile['file_id'] . "... ", true);
 
         $galleysSql = "SELECT galley_id, article_id, locale, label FROM article_galleys " .
             "WHERE article_id = :article_id AND file_id = :id";
         $galleysStatement = $this->connection->prepare($galleysSql);
-        $galleysStatement->bindValue('article_id', $oldId);
-        $galleysStatement->bindValue('id', $id);
+        $galleysStatement->bindValue('article_id', $oldArticleId);
+        $galleysStatement->bindValue('id', $pkpArticleFile['file_id']);
         $galleysStatement->execute();
 
-        $pkpArticleFile = $articleFileStatement->fetch();
         $pkpGalleys = $galleysStatement->fetchAll();
 
         foreach ($pkpGalleys as $galley) {
