@@ -69,48 +69,50 @@ class UserImporter extends Importer
         $pkpUser = $statement->fetch();
         $user = null;
 
-        if(!empty($pkpUser['username'])) {
-            $user = $this->em
-                ->getRepository('OjsUserBundle:User')
-                ->findOneBy(['username' => $pkpUser['username']]);
-        }
-
-        if (is_null($user)) {
-            $user = new User();
-            !empty($pkpUser['username']) ?
-                $user->setUsername($pkpUser['username']) :
-                $user->setUsername($faker->userName);
-
-            !empty($pkpUser['email']) ?
-                $user->setEmail($pkpUser['email']) :
-                $user->setEmail($faker->companyEmail);
-
-            !empty($pkpUser['disabled']) ?
-                $user->setEnabled(!$pkpUser['disabled']) :
-                $user->setEnabled(1);
-
-            // Set a random password
-            $password = substr($this->tokenGenerator->generateToken(), 0, 8);
-            $user->setPlainPassword($password);
-
-            // Fields which can't be blank
-            !empty($pkpUser['first_name']) ? $user->setFirstName($pkpUser['first_name']) : $user->setFirstName('Anonymous');
-            !empty($pkpUser['last_name']) ? $user->setLastName($pkpUser['last_name']) : $user->setLastName('Anonymous');
-
-            // Optional fields
-            !empty($pkpUser['billing_address']) && $user->setBillingAddress($pkpUser['billing_address']);
-            !empty($pkpUser['mailing_address']) && $user->setAddress($pkpUser['mailing_address']);
-            !empty($pkpUser['gender']) && $user->setGender($pkpUser['gender']);
-            !empty($pkpUser['phone']) && $user->setPhone($pkpUser['phone']);
-            !empty($pkpUser['fax']) && $user->setFax($pkpUser['fax']);
-            !empty($pkpUser['url']) && $user->setUrl($pkpUser['url']);
-
-            if ($flush) {
-                $this->em->persist($user);
-                $this->em->flush();
+        if ($pkpUser) {
+            if (!empty($pkpUser['username'])) {
+                $user = $this->em
+                    ->getRepository('OjsUserBundle:User')
+                    ->findOneBy(['username' => $pkpUser['username']]);
             }
-        }
 
-        return $user;
+            if (is_null($user)) {
+                $user = new User();
+                !empty($pkpUser['username']) ?
+                    $user->setUsername($pkpUser['username']) :
+                    $user->setUsername($faker->userName);
+
+                !empty($pkpUser['email']) ?
+                    $user->setEmail($pkpUser['email']) :
+                    $user->setEmail($faker->companyEmail);
+
+                !empty($pkpUser['disabled']) ?
+                    $user->setEnabled(!$pkpUser['disabled']) :
+                    $user->setEnabled(1);
+
+                // Set a random password
+                $password = substr($this->tokenGenerator->generateToken(), 0, 8);
+                $user->setPlainPassword($password);
+
+                // Fields which can't be blank
+                !empty($pkpUser['first_name']) ? $user->setFirstName($pkpUser['first_name']) : $user->setFirstName('Anonymous');
+                !empty($pkpUser['last_name']) ? $user->setLastName($pkpUser['last_name']) : $user->setLastName('Anonymous');
+
+                // Optional fields
+                !empty($pkpUser['billing_address']) && $user->setBillingAddress($pkpUser['billing_address']);
+                !empty($pkpUser['mailing_address']) && $user->setAddress($pkpUser['mailing_address']);
+                !empty($pkpUser['gender']) && $user->setGender($pkpUser['gender']);
+                !empty($pkpUser['phone']) && $user->setPhone($pkpUser['phone']);
+                !empty($pkpUser['fax']) && $user->setFax($pkpUser['fax']);
+                !empty($pkpUser['url']) && $user->setUrl($pkpUser['url']);
+
+                if ($flush) {
+                    $this->em->persist($user);
+                    $this->em->flush();
+                }
+            }
+
+            return $user;
+        }
     }
 }
