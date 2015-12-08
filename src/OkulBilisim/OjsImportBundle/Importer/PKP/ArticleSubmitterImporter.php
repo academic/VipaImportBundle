@@ -24,8 +24,10 @@ class ArticleSubmitterImporter extends Importer
                 $article->setSubmitterUser($user);
 
                 $this->em->persist($article);
-                $this->em->flush($article);
             }
+
+            $this->em->remove($import);
+            $this->em->flush();
         }
     }
 }
