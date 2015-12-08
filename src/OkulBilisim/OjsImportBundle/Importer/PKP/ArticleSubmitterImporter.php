@@ -17,12 +17,15 @@ class ArticleSubmitterImporter extends Importer
 
         foreach ($pendingImports as $import) {
             $user = $userImporter->importUser($import->getOldId());
-            /** @var Article $article */
-            $article = $import->getArticle();
-            $article->setSubmitterUser($user);
 
-            $this->em->persist($article);
-            $this->em->flush($article);
+            if ($user) {
+                /** @var Article $article */
+                $article = $import->getArticle();
+                $article->setSubmitterUser($user);
+
+                $this->em->persist($article);
+                $this->em->flush($article);
+            }
         }
     }
 }
