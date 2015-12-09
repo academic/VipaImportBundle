@@ -35,8 +35,8 @@ class PkpGivenJournalsCommand extends ImportCommand
         $stopwatch = new Stopwatch();
         $stopwatch->start('journals_import');
 
-        $allJournalsImporter = new GivenJournalsImporter($this->connection, $this->em, $this->logger, $output, $userImporter);
-        $allJournalsImporter->importJournals($input->getArgument('ids'));
+        $givenJournalsImporter = new GivenJournalsImporter($this->connection, $this->em, $this->logger, $output, $userImporter);
+        $givenJournalsImporter->importJournals($input->getArgument('ids'));
 
         $event = $stopwatch->stop('journals_import');
         $output->writeln('Duration: ' . StringHelper::formatMilliseconds($event->getDuration()));
