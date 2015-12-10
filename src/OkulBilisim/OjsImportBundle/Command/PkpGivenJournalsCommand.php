@@ -18,7 +18,7 @@ class PkpGivenJournalsCommand extends ImportCommand
     {
         $this
             ->setName('ojs:import:pkp:given-journals')
-            ->setDescription('Import all journals from PKP/OJS');
+            ->setDescription('Import given journals from PKP/OJS');
 
         parent::configure();
         $this->addArgument('ids', InputArgument::IS_ARRAY, 'Journal IDs (separate multiple IDs with a space)');
