@@ -4,7 +4,6 @@ namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
 use DateTime;
 use Ojs\JournalBundle\Entity\Issue;
-use Ojs\JournalBundle\Entity\IssueTranslation;
 use Ojs\JournalBundle\Entity\Journal;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
 
@@ -24,7 +23,7 @@ class IssueImporter extends Importer
     public function importJournalsIssues($journal, $oldId, $sections)
     {
         $issuesSql = "SELECT * FROM issues WHERE journal_id = :id";
-        $issuesStatement = $this->connection->prepare($issuesSql);
+        $issuesStatement = $this->dbalConnection->prepare($issuesSql);
         $issuesStatement->bindValue('id', $oldId);
         $issuesStatement->execute();
 
@@ -49,12 +48,12 @@ class IssueImporter extends Importer
         $this->consoleOutput->writeln("Reading issue #" . $id . "... ", true);
 
         $issueSql = "SELECT * FROM issues WHERE issue_id = :id LIMIT 1";
-        $issueStatement = $this->connection->prepare($issueSql);
+        $issueStatement = $this->dbalConnection->prepare($issueSql);
         $issueStatement->bindValue('id', $id);
         $issueStatement->execute();
 
         $settingsSql = "SELECT locale, setting_name, setting_value FROM issue_settings WHERE issue_id = :id";
-        $settingsStatement = $this->connection->prepare($settingsSql);
+        $settingsStatement = $this->dbalConnection->prepare($settingsSql);
         $settingsStatement->bindValue('id', $id);
         $settingsStatement->execute();
 
@@ -96,7 +95,7 @@ class IssueImporter extends Importer
             $issue->setDescription(!empty($fields['description']) ? $fields['description']: '-');
         }
 
-        $importer = new IssueFileImporter($this->connection, $this->em, $this->logger, $this->consoleOutput);
+        $importer = new IssueFileImporter($this->dbalConnection, $this->em, $this->logger, $this->consoleOutput);
         $importer->importIssueFiles($issue, $id, $journal->getSlug());
 
         $this->em->persist($issue);

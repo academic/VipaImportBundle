@@ -33,14 +33,14 @@ class ArticleStatisticImporter extends Importer
         $this->consoleOutput->writeln("Reading view statistics for #" . $oldId . "...");
         $viewStatsSql = "SELECT DATE(view_time) AS date, COUNT(*) as view FROM " .
             "article_view_stats WHERE article_id = :id GROUP BY DATE(view_time)";
-        $viewStatsStatement = $this->connection->prepare($viewStatsSql);
+        $viewStatsStatement = $this->dbalConnection->prepare($viewStatsSql);
         $viewStatsStatement->bindValue('id', $oldId);
         $viewStatsStatement->execute();
 
         $this->consoleOutput->writeln("Reading download statistics for #" . $oldId . "...");
         $downloadStatsSql = "SELECT DATE(download_time) AS date, COUNT(*) as download FROM " .
             "article_download_stats WHERE article_id = :id GROUP BY DATE(download_time)";
-        $downloadStatsStatement = $this->connection->prepare($downloadStatsSql);
+        $downloadStatsStatement = $this->dbalConnection->prepare($downloadStatsSql);
         $downloadStatsStatement->bindValue('id', $oldId);
         $downloadStatsStatement->execute();
         

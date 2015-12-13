@@ -50,7 +50,7 @@ class JournalUserImporter extends Importer
             $roleMap[$id] = $role;
         }
 
-        $roleStatement = $this->connection->prepare(
+        $roleStatement = $this->dbalConnection->prepare(
             "SELECT roles.journal_id, roles.user_id, roles.role_id, users.email FROM " .
             "roles JOIN users ON roles.user_id = users.user_id WHERE roles.journal_id" .
             "= :id " . ImportHelper::spamUsersFilterSql()

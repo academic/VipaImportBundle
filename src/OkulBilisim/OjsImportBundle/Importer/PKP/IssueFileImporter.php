@@ -14,7 +14,7 @@ class IssueFileImporter extends Importer
     public function importIssueFiles($issue, $oldId, $slug)
     {
         $issueFilesSql = "SELECT * FROM issue_files WHERE issue_id = :id";
-        $issueFilesStatement = $this->connection->prepare($issueFilesSql);
+        $issueFilesStatement = $this->dbalConnection->prepare($issueFilesSql);
         $issueFilesStatement->bindValue('id', $oldId);
         $issueFilesStatement->execute();
 
@@ -35,13 +35,13 @@ class IssueFileImporter extends Importer
         $this->consoleOutput->writeln("Reading issue file #" . $id . "... ", true);
 
         $issueFileSql = "SELECT * FROM issue_files WHERE file_id = :id LIMIT 1";
-        $issueFileStatement = $this->connection->prepare($issueFileSql);
+        $issueFileStatement = $this->dbalConnection->prepare($issueFileSql);
         $issueFileStatement->bindValue('id', $id);
         $issueFileStatement->execute();
 
         $galleysSql = "SELECT galley_id, issue_id, locale, label FROM issue_galleys " .
             "WHERE issue_id = :issue_id AND file_id = :id";
-        $galleysStatement = $this->connection->prepare($galleysSql);
+        $galleysStatement = $this->dbalConnection->prepare($galleysSql);
         $galleysStatement->bindValue('issue_id', $oldId);
         $galleysStatement->bindValue('id', $id);
         $galleysStatement->execute();

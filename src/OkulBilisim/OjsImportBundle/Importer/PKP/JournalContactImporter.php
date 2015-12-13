@@ -18,7 +18,7 @@ class JournalContactImporter extends Importer
         $this->consoleOutput->writeln("Importing journal's contacts...");
 
         $settingsSql = "SELECT locale, setting_name, setting_value FROM journal_settings WHERE journal_id = :id";
-        $settingsStatement = $this->connection->prepare($settingsSql);
+        $settingsStatement = $this->dbalConnection->prepare($settingsSql);
         $settingsStatement->bindValue('id', $journalId);
         $settingsStatement->execute();
 

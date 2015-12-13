@@ -2,7 +2,7 @@
 
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
-use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\ORM\EntityManager;
 use Faker\Factory;
 use FOS\UserBundle\Model\UserManager;
@@ -32,7 +32,7 @@ class UserImporter extends Importer
 
     /**
      * UserImporter constructor.
-     * @param Connection $connection
+     * @param DBALConnection $dbalConnection
      * @param EntityManager $em
      * @param OutputInterface $consoleOutput
      * @param LoggerInterface $logger
@@ -41,7 +41,7 @@ class UserImporter extends Importer
      * @param string $locale
      */
     public function __construct(
-        Connection $connection,
+        DBALConnection $dbalConnection,
         EntityManager $em,
         LoggerInterface $logger,
         OutputInterface $consoleOutput,
@@ -50,18 +50,24 @@ class UserImporter extends Importer
         $locale
     )
     {
-        parent::__construct($connection, $em, $logger, $consoleOutput);
+        parent::__construct($dbalConnection, $em, $logger, $consoleOutput);
         $this->userManager = $userManager;
         $this->tokenGenerator = $tokenGenerator;
         $this->locale = $locale;
     }
 
+    /**
+     * @param $id
+     * @param bool|true $flush
+     * @return null|User
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function importUser($id, $flush = true)
     {
         $this->consoleOutput->writeln("Reading user #" . $id . "... ", true);
 
         $sql = "SELECT username, email, disabled FROM users WHERE users.user_id = :id " . ImportHelper::spamUsersFilterSql();
-        $statement = $this->connection->prepare($sql);
+        $statement = $this->dbalConnection->prepare($sql);
         $statement->bindValue('id', $id);
         $statement->execute();
 
@@ -114,5 +120,7 @@ class UserImporter extends Importer
 
             return $user;
         }
+
+        return null;
     }
 }

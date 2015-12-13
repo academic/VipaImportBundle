@@ -15,7 +15,7 @@ class ArticleFileImporter extends Importer
     {
         $articleFilesSql = "SELECT file_id, file_type, original_file_name, MAX(revision) FROM article_files " .
             "WHERE article_id = :id GROUP BY file_id";
-        $articleFilesStatement = $this->connection->prepare($articleFilesSql);
+        $articleFilesStatement = $this->dbalConnection->prepare($articleFilesSql);
         $articleFilesStatement->bindValue('id', $oldId);
         $articleFilesStatement->execute();
 
@@ -38,7 +38,7 @@ class ArticleFileImporter extends Importer
 
         $galleysSql = "SELECT galley_id, article_id, locale, label FROM article_galleys " .
             "WHERE article_id = :article_id AND file_id = :id";
-        $galleysStatement = $this->connection->prepare($galleysSql);
+        $galleysStatement = $this->dbalConnection->prepare($galleysSql);
         $galleysStatement->bindValue('article_id', $oldArticleId);
         $galleysStatement->bindValue('id', $pkpArticleFile['file_id']);
         $galleysStatement->execute();

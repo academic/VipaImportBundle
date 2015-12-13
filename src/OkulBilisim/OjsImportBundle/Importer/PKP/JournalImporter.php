@@ -3,7 +3,7 @@
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
 use DateTime;
-use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\ORM\EntityManager;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\Lang;
@@ -46,26 +46,26 @@ class JournalImporter extends Importer
 
     /**
      * JournalImporter constructor.
-     * @param Connection $connection
+     * @param DBALConnection $dbalConnection
      * @param EntityManager $em
      * @param OutputInterface $consoleOutput
      * @param LoggerInterface $logger
      * @param UserImporter $ui
      */
     public function __construct(
-        Connection $connection,
+        DBALConnection $dbalConnection,
         EntityManager $em,
         LoggerInterface $logger,
         OutputInterface $consoleOutput,
         UserImporter $ui)
     {
-        parent::__construct($connection, $em, $logger, $consoleOutput);
+        parent::__construct($dbalConnection, $em, $logger, $consoleOutput);
 
         $this->userImporter = $ui;
-        $this->sectionImporter = new SectionImporter($this->connection, $this->em, $this->logger, $consoleOutput);
-        $this->issueImporter = new IssueImporter($this->connection, $this->em, $this->logger, $consoleOutput);
+        $this->sectionImporter = new SectionImporter($this->dbalConnection, $this->em, $this->logger, $consoleOutput);
+        $this->issueImporter = new IssueImporter($this->dbalConnection, $this->em, $this->logger, $consoleOutput);
         $this->articleImporter = new ArticleImporter(
-            $this->connection,$this->em,  $logger, $consoleOutput, $this->userImporter
+            $this->dbalConnection,$this->em,  $logger, $consoleOutput, $this->userImporter
         );
     }
 
@@ -74,12 +74,12 @@ class JournalImporter extends Importer
         $this->consoleOutput->writeln("Importing the journal...");
 
         $journalSql = "SELECT path, primary_locale FROM journals WHERE journal_id = :id LIMIT 1";
-        $journalStatement = $this->connection->prepare($journalSql);
+        $journalStatement = $this->dbalConnection->prepare($journalSql);
         $journalStatement->bindValue('id', $id);
         $journalStatement->execute();
 
         $settingsSql = "SELECT locale, setting_name, setting_value FROM journal_settings WHERE journal_id = :id";
-        $settingsStatement = $this->connection->prepare($settingsSql);
+        $settingsStatement = $this->dbalConnection->prepare($settingsSql);
         $settingsStatement->bindValue('id', $id);
         $settingsStatement->execute();
 

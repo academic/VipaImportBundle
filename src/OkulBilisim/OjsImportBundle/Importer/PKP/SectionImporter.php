@@ -23,7 +23,7 @@ class SectionImporter extends Importer
         $this->consoleOutput->writeln("Importing journal's sections...");
 
         $sectionsSql = "SELECT * FROM sections WHERE journal_id = :id";
-        $sectionsStatement = $this->connection->prepare($sectionsSql);
+        $sectionsStatement = $this->dbalConnection->prepare($sectionsSql);
         $sectionsStatement->bindValue('id', $oldId);
         $sectionsStatement->execute();
 
@@ -46,12 +46,12 @@ class SectionImporter extends Importer
         $this->consoleOutput->writeln("Reading section #" . $id . "... ", true);
 
         $sectionSql = "SELECT * FROM sections WHERE section_id = :id LIMIT 1";
-        $sectionStatement = $this->connection->prepare($sectionSql);
+        $sectionStatement = $this->dbalConnection->prepare($sectionSql);
         $sectionStatement->bindValue('id', $id);
         $sectionStatement->execute();
 
         $settingsSql = "SELECT locale, setting_name, setting_value FROM section_settings WHERE section_id = :id";
-        $settingsStatement = $this->connection->prepare($settingsSql);
+        $settingsStatement = $this->dbalConnection->prepare($settingsSql);
         $settingsStatement->bindValue('id', $id);
         $settingsStatement->execute();
 

@@ -2,7 +2,7 @@
 
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
-use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
@@ -16,32 +16,32 @@ class GivenJournalsImporter extends Importer
 
     /**
      * AllJournalsImporter constructor.
-     * @param Connection $connection
+     * @param DBALConnection $dbalConnection
      * @param EntityManager $em
      * @param LoggerInterface $logger
      * @param OutputInterface $consoleOutput
      * @param UserImporter $ui
      */
     public function __construct(
-        Connection $connection,
+        DBALConnection $dbalConnection,
         EntityManager $em,
         LoggerInterface $logger,
         OutputInterface $consoleOutput,
         UserImporter $ui
     )
     {
-        parent::__construct($connection, $em, $logger, $consoleOutput);
+        parent::__construct($dbalConnection, $em, $logger, $consoleOutput);
         $this->ui = $ui;
     }
 
     public function importJournals($ids)
     {
         $journalsSql = 'SELECT journal_id, path FROM journals WHERE journal_id IN (?)';
-        $journalsStatement = $this->connection->executeQuery($journalsSql, array($ids), array(Connection::PARAM_INT_ARRAY));
+        $journalsStatement = $this->dbalConnection->executeQuery($journalsSql, array($ids), array(DBALConnection::PARAM_INT_ARRAY));
         $journals = $journalsStatement->fetchAll();
 
         $journalImporter = new JournalImporter(
-            $this->connection, $this->em, $this->logger, $this->consoleOutput, $this->ui
+            $this->dbalConnection, $this->em, $this->logger, $this->consoleOutput, $this->ui
         );
 
         foreach ($journals as $journal) {
@@ -52,7 +52,7 @@ class GivenJournalsImporter extends Importer
             if (!$existingJournal) {
                 try {
                     $ids = $journalImporter->importJournal($journal['journal_id']);
-                    $journalUserImporter = new JournalUserImporter($this->connection, $this->em, $this->logger, $this->consoleOutput);
+                    $journalUserImporter = new JournalUserImporter($this->dbalConnection, $this->em, $this->logger, $this->consoleOutput);
                     $journalUserImporter->importJournalUsers($ids['new'], $ids['old'], $this->ui);
                 } catch (Exception $exception) {
                     $message = sprintf(
