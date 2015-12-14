@@ -3,7 +3,7 @@
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
 use DateTime;
-use Doctrine\DBAL\Connection as DBALConnection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\ArticleAuthor;
@@ -26,14 +26,14 @@ class ArticleImporter extends Importer
 
     /**
      * ArticleImporter constructor.
-     * @param DBALConnection $dbalConnection
+     * @param Connection $dbalConnection
      * @param EntityManager $em
      * @param OutputInterface $consoleOutput
      * @param LoggerInterface $logger
      * @param UserImporter $ui
      */
     public function __construct(
-        DBALConnection $dbalConnection,
+        Connection $dbalConnection,
         EntityManager $em,
         LoggerInterface $logger,
         OutputInterface $consoleOutput,

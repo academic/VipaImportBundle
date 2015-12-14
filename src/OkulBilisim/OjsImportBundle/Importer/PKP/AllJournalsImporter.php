@@ -2,7 +2,7 @@
 
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
-use Doctrine\DBAL\Connection as DBALConnection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
@@ -16,14 +16,14 @@ class AllJournalsImporter extends Importer
 
     /**
      * AllJournalsImporter constructor.
-     * @param DBALConnection $dbalConnection
+     * @param Connection $dbalConnection
      * @param EntityManager $em
      * @param LoggerInterface $logger
      * @param OutputInterface $consoleOutput
      * @param UserImporter $ui
      */
     public function __construct(
-        DBALConnection $dbalConnection,
+        Connection $dbalConnection,
         EntityManager $em,
         LoggerInterface $logger,
         OutputInterface $consoleOutput,

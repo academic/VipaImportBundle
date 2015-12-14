@@ -2,7 +2,7 @@
 
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
-use Doctrine\DBAL\Connection as DBALConnection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Faker\Factory;
 use FOS\UserBundle\Model\UserManager;
@@ -32,7 +32,7 @@ class UserImporter extends Importer
 
     /**
      * UserImporter constructor.
-     * @param DBALConnection $dbalConnection
+     * @param Connection $dbalConnection
      * @param EntityManager $em
      * @param OutputInterface $consoleOutput
      * @param LoggerInterface $logger
@@ -41,7 +41,7 @@ class UserImporter extends Importer
      * @param string $locale
      */
     public function __construct(
-        DBALConnection $dbalConnection,
+        Connection $dbalConnection,
         EntityManager $em,
         LoggerInterface $logger,
         OutputInterface $consoleOutput,

@@ -2,7 +2,7 @@
 
 namespace OkulBilisim\OjsImportBundle\Importer;
 
-use Doctrine\DBAL\Connection as DBALConnection;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Importer
 {
     /**
-     * @var DBALConnection
+     * @var Connection
      */
     protected $dbalConnection;
 
@@ -32,13 +32,13 @@ class Importer
 
     /**
      * Importer constructor.
-     * @param DBALConnection $dbalConnection
+     * @param Connection $dbalConnection
      * @param EntityManager $em
      * @param LoggerInterface $logger
      * @param OutputInterface $consoleOutput
      */
     public function __construct(
-        DBALConnection $dbalConnection, EntityManager $em, LoggerInterface $logger, OutputInterface $consoleOutput
+        Connection $dbalConnection, EntityManager $em, LoggerInterface $logger, OutputInterface $consoleOutput
     )
     {
         $this->dbalConnection = $dbalConnection;
