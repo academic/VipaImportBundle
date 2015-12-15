@@ -32,11 +32,10 @@ class IssueImporter extends Importer
         $issuesStatement->execute();
         $issues = $issuesStatement->fetchAll();
 
-        $createdIssues = array();
-        $persistCounter = 1;
-
         try {
             $this->em->beginTransaction();
+            $createdIssues = array();
+            $persistCounter = 1;
 
             foreach ($issues as $issue) {
                 $createdIssue = $this->importIssue($issue['issue_id'], $journal, $sections);
@@ -54,7 +53,7 @@ class IssueImporter extends Importer
             $this->em->flush();
             $this->em->commit();
         } catch (Exception $exception) {
-            $this->em->getConnection()->rollBack();
+            $this->em->rollBack();
             throw $exception;
         }
 

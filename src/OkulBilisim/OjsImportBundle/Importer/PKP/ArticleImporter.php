@@ -62,10 +62,9 @@ class ArticleImporter extends Importer
         $articleStatement->execute();
         $articles = $articleStatement->fetchAll();
 
-        $persistCounter = 1;
-
         try {
             $this->em->beginTransaction();
+            $persistCounter = 1;
 
             foreach ($articles as $article) {
                 $this->importArticle($article['article_id'], $journal, $issues, $sections);
@@ -82,7 +81,7 @@ class ArticleImporter extends Importer
             $this->em->flush();
             $this->em->commit();
         } catch (Exception $exception) {
-            $this->em->getConnection()->rollBack();
+            $this->em->rollback();
             throw $exception;
         }
     }

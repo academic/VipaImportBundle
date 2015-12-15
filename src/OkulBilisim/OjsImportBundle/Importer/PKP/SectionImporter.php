@@ -32,11 +32,10 @@ class SectionImporter extends Importer
         $sectionsStatement->execute();
         $sections = $sectionsStatement->fetchAll();
 
-        $createdSections = array();
-        $persistCounter = 1;
-
         try {
             $this->em->beginTransaction();
+            $createdSections = array();
+            $persistCounter = 1;
 
             foreach ($sections as $section) {
                 $createdSection = $this->importSection($section['section_id'], $journal);
@@ -54,7 +53,7 @@ class SectionImporter extends Importer
             $this->em->flush();
             $this->em->commit();
         }  catch (Exception $exception) {
-            $this->em->getConnection()->rollBack();
+            $this->em->rollBack();
             throw $exception;
         }
 

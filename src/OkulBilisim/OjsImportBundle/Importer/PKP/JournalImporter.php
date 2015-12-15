@@ -153,23 +153,26 @@ class JournalImporter extends Importer
         $this->journal->addLanguage($language ? $language : $this->createLanguage($languageCode));
 
         $this->consoleOutput->writeln("Read journal's settings.");
+        $this->em->beginTransaction(); // Outer transaction
 
         try {
-            $this->em->beginTransaction();
+            $this->em->beginTransaction(); // Inner transaction
             $this->em->persist($this->journal);
             $this->em->flush();
             $this->em->commit();
         } catch (Exception $exception) {
-            $this->em->getConnection()->rollBack();
+            $this->em->rollback();
             throw $exception;
         }
 
         $this->consoleOutput->writeln("Imported journal #" . $id);
 
+        // Those below also create their own inner transactions
         $createdSections = $this->sectionImporter->importJournalsSections($this->journal, $id);
         $createdIssues = $this->issueImporter->importJournalsIssues($this->journal, $id, $createdSections);
         $this->articleImporter->importArticles($id, $this->journal, $createdIssues, $createdSections);
 
+        $this->em->commit();
         return ['new' => $this->journal->getId(), 'old' => $id];
     }
 
