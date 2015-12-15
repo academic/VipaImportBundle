@@ -3,6 +3,7 @@
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
 use DateTime;
+use Exception;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\JournalBundle\Entity\Journal;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
@@ -19,6 +20,9 @@ class IssueImporter extends Importer
      * @param int $oldId Issue's ID in the old database
      * @param array $sections
      * @return array
+     * @throws Exception
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function importJournalsIssues($journal, $oldId, $sections)
     {
@@ -26,12 +30,32 @@ class IssueImporter extends Importer
         $issuesStatement = $this->dbalConnection->prepare($issuesSql);
         $issuesStatement->bindValue('id', $oldId);
         $issuesStatement->execute();
-
         $issues = $issuesStatement->fetchAll();
-        $createdIssues = array();
 
-        foreach ($issues as $issue) {
-            $createdIssues[$issue['issue_id']] = $this->importIssue($issue['issue_id'], $journal, $sections);
+        $createdIssues = array();
+        $persistCounter = 1;
+
+        try {
+            $this->em->beginTransaction();
+
+            foreach ($issues as $issue) {
+                $createdIssue = $this->importIssue($issue['issue_id'], $journal, $sections);
+                $createdIssues[$issue['issue_id']] = $createdIssue;
+                $persistCounter++;
+
+                if ($persistCounter % 10 == 0 || $persistCounter == count($issues)) {
+                    $this->consoleOutput->writeln("Writing issues...", true);
+                    $this->em->flush();
+                    $this->em->commit();
+                    $this->em->beginTransaction();
+                }
+            }
+
+            $this->em->flush();
+            $this->em->commit();
+        } catch (Exception $exception) {
+            $this->em->getConnection()->rollBack();
+            throw $exception;
         }
 
         return $createdIssues;

@@ -5,6 +5,7 @@ namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use Exception;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\ArticleAuthor;
 use Ojs\JournalBundle\Entity\Author;
@@ -49,6 +50,9 @@ class ArticleImporter extends Importer
      * @param Journal $journal
      * @param array $issues
      * @param array $sections
+     * @throws Exception
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function importArticles($oldJournalId, $journal, $issues, $sections)
     {
@@ -58,8 +62,28 @@ class ArticleImporter extends Importer
         $articleStatement->execute();
         $articles = $articleStatement->fetchAll();
 
-        foreach ($articles as $article) {
-            $this->importArticle($article['article_id'], $journal, $issues, $sections);
+        $persistCounter = 1;
+
+        try {
+            $this->em->beginTransaction();
+
+            foreach ($articles as $article) {
+                $this->importArticle($article['article_id'], $journal, $issues, $sections);
+                $persistCounter++;
+
+                if ($persistCounter % 10 == 0  || $persistCounter == count($articles)) {
+                    $this->consoleOutput->writeln("Writing articles...", true);
+                    $this->em->flush();
+                    $this->em->commit();
+                    $this->em->beginTransaction();
+                }
+            }
+
+            $this->em->flush();
+            $this->em->commit();
+        } catch (Exception $exception) {
+            $this->em->getConnection()->rollBack();
+            throw $exception;
         }
     }
 
@@ -178,6 +202,8 @@ class ArticleImporter extends Importer
         !empty($pkpDownloadStats['total']) ?
             $article->setDownloadCount($pkpDownloadStats['total']) :
             $article->setDownloadCount(0);
+
+        $this->em->persist($article);
 
         $this->importCitations($id, $article);
         $this->importAuthors($id, $article);

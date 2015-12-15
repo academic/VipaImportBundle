@@ -2,6 +2,7 @@
 
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
+use Exception;
 use Ojs\JournalBundle\Entity\Section;
 use Ojs\JournalBundle\Entity\Journal;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
@@ -17,6 +18,9 @@ class SectionImporter extends Importer
      * @param Journal $journal Section's Journal
      * @param int $oldId Section's ID in the old database
      * @return array
+     * @throws Exception
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function importJournalsSections($journal, $oldId)
     {
@@ -26,11 +30,32 @@ class SectionImporter extends Importer
         $sectionsStatement = $this->dbalConnection->prepare($sectionsSql);
         $sectionsStatement->bindValue('id', $oldId);
         $sectionsStatement->execute();
-
         $sections = $sectionsStatement->fetchAll();
+
         $createdSections = array();
-        foreach ($sections as $section) {
-            $createdSections[$section['section_id']] = $this->importSection($section['section_id'], $journal);
+        $persistCounter = 1;
+
+        try {
+            $this->em->beginTransaction();
+
+            foreach ($sections as $section) {
+                $createdSection = $this->importSection($section['section_id'], $journal);
+                $createdSections[$section['section_id']] = $createdSection;
+                $persistCounter++;
+
+                if ($persistCounter % 10 == 0) {
+                    $this->consoleOutput->writeln("Writing sections...", true);
+                    $this->em->flush();
+                    $this->em->commit();
+                    $this->em->beginTransaction();
+                }
+            }
+
+            $this->em->flush();
+            $this->em->commit();
+        }  catch (Exception $exception) {
+            $this->em->getConnection()->rollBack();
+            throw $exception;
         }
 
         return $createdSections;
@@ -75,7 +100,10 @@ class SectionImporter extends Importer
             $section->setTitle(!empty($fields['title']) ? $fields['title']: '-');
         }
 
+        $this->consoleOutput->writeln("Writing section #" . $id . "... ", true);
+
         $this->em->persist($section);
+
         return $section;
     }
 }

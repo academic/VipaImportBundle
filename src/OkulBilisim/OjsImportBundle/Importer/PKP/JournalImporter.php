@@ -5,6 +5,7 @@ namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use Exception;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
@@ -65,7 +66,7 @@ class JournalImporter extends Importer
         $this->sectionImporter = new SectionImporter($this->dbalConnection, $this->em, $this->logger, $consoleOutput);
         $this->issueImporter = new IssueImporter($this->dbalConnection, $this->em, $this->logger, $consoleOutput);
         $this->articleImporter = new ArticleImporter(
-            $this->dbalConnection,$this->em,  $logger, $consoleOutput, $this->userImporter
+            $this->dbalConnection, $this->em, $logger, $consoleOutput, $this->userImporter
         );
     }
 
@@ -153,15 +154,21 @@ class JournalImporter extends Importer
 
         $this->consoleOutput->writeln("Read journal's settings.");
 
+        try {
+            $this->em->beginTransaction();
+            $this->em->persist($this->journal);
+            $this->em->flush();
+            $this->em->commit();
+        } catch (Exception $exception) {
+            $this->em->getConnection()->rollBack();
+            throw $exception;
+        }
+
+        $this->consoleOutput->writeln("Imported journal #" . $id);
+
         $createdSections = $this->sectionImporter->importJournalsSections($this->journal, $id);
         $createdIssues = $this->issueImporter->importJournalsIssues($this->journal, $id, $createdSections);
         $this->articleImporter->importArticles($id, $this->journal, $createdIssues, $createdSections);
-
-        $this->em->persist($this->journal);
-
-        $this->consoleOutput->writeln("Writing data...");
-        $this->em->flush();
-        $this->consoleOutput->writeln("Imported journal.");
 
         return ['new' => $this->journal->getId(), 'old' => $id];
     }
