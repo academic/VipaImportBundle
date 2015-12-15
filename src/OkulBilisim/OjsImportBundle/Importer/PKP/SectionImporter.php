@@ -15,20 +15,19 @@ class SectionImporter extends Importer
     private $settings;
 
     /**
-     * @param Journal $journal Section's Journal
-     * @param int $oldId Section's ID in the old database
-     * @return array
+     * @param int $oldJournalId Section's old Journal ID
+     * @param int $newJournalId Section's new Journal ID
+     * @return array An array whose keys are old IDs and values are new IDs
      * @throws Exception
-     * @throws \Doctrine\DBAL\ConnectionException
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function importJournalsSections($journal, $oldId)
+    public function importJournalSections($oldJournalId, $newJournalId)
     {
         $this->consoleOutput->writeln("Importing journal's sections...");
 
         $sectionsSql = "SELECT * FROM sections WHERE journal_id = :id";
         $sectionsStatement = $this->dbalConnection->prepare($sectionsSql);
-        $sectionsStatement->bindValue('id', $oldId);
+        $sectionsStatement->bindValue('id', $oldJournalId);
         $sectionsStatement->execute();
         $sections = $sectionsStatement->fetchAll();
 
@@ -38,7 +37,7 @@ class SectionImporter extends Importer
             $persistCounter = 1;
 
             foreach ($sections as $section) {
-                $createdSection = $this->importSection($section['section_id'], $journal);
+                $createdSection = $this->importSection($section['section_id'], $newJournalId);
                 $createdSections[$section['section_id']] = $createdSection;
                 $persistCounter++;
 
@@ -57,16 +56,25 @@ class SectionImporter extends Importer
             throw $exception;
         }
 
-        return $createdSections;
+        $createdSectionIds = array();
+
+        /** @var Section $entity */
+        foreach ($createdSections as $oldJournalId => $entity) {
+            $createdSectionIds[$oldJournalId] = $entity->getId();
+        }
+
+        return $createdSectionIds;
     }
 
     /**
      * @param int $id Section's ID
-     * @param Journal $journal Section's Journal
+     * @param int $newJournalId Section's Journal ID
      * @return Section
      */
-    public function importSection($id, $journal)
+    public function importSection($id, $newJournalId)
     {
+        /** @var Journal $journal */
+        $journal = $this->em->getReference('OjsJournalBundle:Journal', $newJournalId);
         $this->consoleOutput->writeln("Reading section #" . $id . "... ", true);
 
         $sectionSql = "SELECT * FROM sections WHERE section_id = :id LIMIT 1";

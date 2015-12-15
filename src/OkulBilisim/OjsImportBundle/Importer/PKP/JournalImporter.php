@@ -168,9 +168,9 @@ class JournalImporter extends Importer
         $this->consoleOutput->writeln("Imported journal #" . $id);
 
         // Those below also create their own inner transactions
-        $createdSections = $this->sectionImporter->importJournalsSections($this->journal, $id);
-        $createdIssues = $this->issueImporter->importJournalsIssues($this->journal, $id, $createdSections);
-        $this->articleImporter->importArticles($id, $this->journal, $createdIssues, $createdSections);
+        $createdSections = $this->sectionImporter->importJournalSections($id, $this->journal->getId());
+        $createdIssues = $this->issueImporter->importJournalIssues($id, $this->journal->getId(), $createdSections);
+        $this->articleImporter->importArticles($id, $this->journal->getId(), $createdIssues, $createdSections);
 
         $this->em->commit();
         return ['new' => $this->journal->getId(), 'old' => $id];

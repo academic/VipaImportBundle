@@ -6,6 +6,7 @@ use DateTime;
 use Exception;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\JournalBundle\Entity\Journal;
+use Ojs\JournalBundle\Entity\Section;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class IssueImporter extends Importer
@@ -16,19 +17,18 @@ class IssueImporter extends Importer
     private $settings;
 
     /**
-     * @param Journal $journal Issue's Journal
-     * @param int $oldId Issue's ID in the old database
-     * @param array $sections
-     * @return array
+     * @param int $oldJournalId Issue's old Journal ID
+     * @param int $newJournalId Issue's new Journal ID
+     * @param array $sectionIds Sections that the created issue will include
+     * @return array An array whose keys are old IDs and values are new IDs
      * @throws Exception
-     * @throws \Doctrine\DBAL\ConnectionException
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function importJournalsIssues($journal, $oldId, $sections)
+    public function importJournalIssues($oldJournalId, $newJournalId, $sectionIds)
     {
         $issuesSql = "SELECT * FROM issues WHERE journal_id = :id";
         $issuesStatement = $this->dbalConnection->prepare($issuesSql);
-        $issuesStatement->bindValue('id', $oldId);
+        $issuesStatement->bindValue('id', $oldJournalId);
         $issuesStatement->execute();
         $issues = $issuesStatement->fetchAll();
 
@@ -38,7 +38,7 @@ class IssueImporter extends Importer
             $persistCounter = 1;
 
             foreach ($issues as $issue) {
-                $createdIssue = $this->importIssue($issue['issue_id'], $journal, $sections);
+                $createdIssue = $this->importIssue($issue['issue_id'], $newJournalId, $sectionIds);
                 $createdIssues[$issue['issue_id']] = $createdIssue;
                 $persistCounter++;
 
@@ -57,17 +57,28 @@ class IssueImporter extends Importer
             throw $exception;
         }
 
-        return $createdIssues;
+        $createdIssueIds = array();
+
+        /** @var Issue $entity */
+        foreach ($createdIssues as $oldJournalId => $entity) {
+            $createdIssueIds[$oldJournalId] = $entity->getId();
+        }
+
+        return $createdIssueIds;
     }
 
     /**
-     * @param int     $id       Issue's ID
-     * @param Journal $journal  Issue's Journal
-     * @param array   $sections Journal sections
-     * @return Issue
+     * @param int $id Issue's ID
+     * @param int $newJournalId new Journal's ID
+     * @param array $sectionIds Journal's section IDs
+     * @return Issue Created issue
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
      */
-    public function importIssue($id, $journal, $sections)
+    public function importIssue($id, $newJournalId, $sectionIds)
     {
+        /** @var Journal $journal */
+        $journal = $this->em->getReference('OjsJournalBundle:Journal', $newJournalId);
         $this->consoleOutput->writeln("Reading issue #" . $id . "... ", true);
 
         $issueSql = "SELECT * FROM issues WHERE issue_id = :id LIMIT 1";
@@ -98,7 +109,9 @@ class IssueImporter extends Importer
         $issue->setPublished($pkpIssue['published']);
         $issue->setSpecial(false);
 
-        foreach (array_values($sections) as $section) {
+        foreach (array_values($sectionIds) as $sectionId) {
+            /** @var Section $section */
+            $section = $this->em->getReference('OjsJournalBundle:Section', $sectionId);
             $issue->addSection($section);
         }
 
