@@ -45,6 +45,7 @@ class SectionImporter extends Importer
                     $this->consoleOutput->writeln("Writing sections...", true);
                     $this->em->flush();
                     $this->em->commit();
+                    $this->em->clear();
                     $this->em->beginTransaction();
                 }
             }

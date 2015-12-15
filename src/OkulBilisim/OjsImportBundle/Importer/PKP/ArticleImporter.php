@@ -76,6 +76,7 @@ class ArticleImporter extends Importer
                     $this->consoleOutput->writeln("Writing articles...", true);
                     $this->em->flush();
                     $this->em->commit();
+                    $this->em->clear();
                     $this->em->beginTransaction();
                 }
             }
