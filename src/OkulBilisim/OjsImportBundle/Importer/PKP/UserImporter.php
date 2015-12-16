@@ -111,9 +111,10 @@ class UserImporter extends Importer
                 !empty($pkpUser['phone']) && $user->setPhone($pkpUser['phone']);
                 !empty($pkpUser['fax']) && $user->setFax($pkpUser['fax']);
                 !empty($pkpUser['url']) && $user->setUrl($pkpUser['url']);
+                
+                $this->em->persist($user);
 
                 if ($flush) {
-                    $this->em->persist($user);
                     $this->em->flush();
                 }
             }
