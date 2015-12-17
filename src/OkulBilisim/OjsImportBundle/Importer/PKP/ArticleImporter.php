@@ -5,11 +5,14 @@ namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use Exception;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\ArticleAuthor;
 use Ojs\JournalBundle\Entity\Author;
 use Ojs\JournalBundle\Entity\Citation;
+use Ojs\JournalBundle\Entity\Issue;
 use Ojs\JournalBundle\Entity\Journal;
+use Ojs\JournalBundle\Entity\Section;
 use OkulBilisim\OjsImportBundle\Entity\PendingStatisticImport;
 use OkulBilisim\OjsImportBundle\Entity\PendingSubmitterImport;
 use OkulBilisim\OjsImportBundle\Helper\StringHelper;
@@ -46,11 +49,14 @@ class ArticleImporter extends Importer
 
     /**
      * @param int $oldJournalId
-     * @param Journal $journal
-     * @param array $issues
-     * @param array $sections
+     * @param int $newJournalId
+     * @param array $issueIds
+     * @param array $sectionIds
+     * @throws Exception
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function importArticles($oldJournalId, $journal, $issues, $sections)
+    public function importArticles($oldJournalId, $newJournalId, $issueIds, $sectionIds)
     {
         $articleSql = "SELECT article_id FROM articles WHERE journal_id = :journal_id";
         $articleStatement = $this->dbalConnection->prepare($articleSql);
@@ -58,19 +64,43 @@ class ArticleImporter extends Importer
         $articleStatement->execute();
         $articles = $articleStatement->fetchAll();
 
-        foreach ($articles as $article) {
-            $this->importArticle($article['article_id'], $journal, $issues, $sections);
+        try {
+            $this->em->beginTransaction();
+            $persistCounter = 1;
+
+            foreach ($articles as $article) {
+                $this->importArticle($article['article_id'], $newJournalId, $issueIds, $sectionIds);
+                $persistCounter++;
+
+                if ($persistCounter % 10 == 0  || $persistCounter == count($articles)) {
+                    $this->consoleOutput->writeln("Writing articles...", true);
+                    $this->em->flush();
+                    $this->em->commit();
+                    $this->em->clear();
+                    $this->em->beginTransaction();
+                }
+            }
+
+            $this->em->flush();
+            $this->em->commit();
+        } catch (Exception $exception) {
+            $this->em->rollback();
+            throw $exception;
         }
     }
 
     /**
      * @param int $id
-     * @param Journal $journal
-     * @param array $issues
-     * @param array $sections
+     * @param $newJournalId
+     * @param array $issueIds
+     * @param array $sectionIds
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
      */
-    private function importArticle($id, $journal, $issues, $sections)
+    private function importArticle($id, $newJournalId, $issueIds, $sectionIds)
     {
+        /** @var Journal $journal */
+        $journal = $this->em->getReference('OjsJournalBundle:Journal', $newJournalId);
         $this->consoleOutput->writeln("Reading article #" . $id . "... ", true);
 
         $articleSql = "SELECT articles.*, published_articles.issue_id FROM articles LEFT JOIN " .
@@ -136,15 +166,17 @@ class ArticleImporter extends Importer
                 break;
         }
 
-        $article->setIssue(
-            !empty($pkpArticle['issue_id']) && isset($issues[$pkpArticle['issue_id']]) ?
-                $issues[$pkpArticle['issue_id']] : null
-        );
-
-        $article->setSection(
-            !empty($pkpArticle['section_id']) && isset($sections[$pkpArticle['section_id']]) ?
-                $sections[$pkpArticle['section_id']] : null
-        );
+        if (!empty($pkpArticle['issue_id']) && isset($issueIds[$pkpArticle['issue_id']])) {
+            /** @var Issue $issue */
+            $issue = $this->em->getReference('OjsJournalBundle:Issue', $issueIds[$pkpArticle['issue_id']]);
+            $article->setIssue($issue);
+        }
+        
+        if (!empty($pkpArticle['section_id']) && isset($sectionIds[$pkpArticle['section_id']])) {
+            /** @var Section $section */
+            $section = $this->em->getReference('OjsJournalBundle:Section', $sectionIds[$pkpArticle['section_id']]);
+            $article->setSection($section);
+        }
 
         $article->setSubmissionDate(
             !empty($pkpArticle['date_submitted']) ?
@@ -178,6 +210,8 @@ class ArticleImporter extends Importer
         !empty($pkpDownloadStats['total']) ?
             $article->setDownloadCount($pkpDownloadStats['total']) :
             $article->setDownloadCount(0);
+
+        $this->em->persist($article);
 
         $this->importCitations($id, $article);
         $this->importAuthors($id, $article);

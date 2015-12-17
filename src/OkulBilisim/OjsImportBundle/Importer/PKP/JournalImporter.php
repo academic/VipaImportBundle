@@ -5,6 +5,7 @@ namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use Exception;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
@@ -65,7 +66,7 @@ class JournalImporter extends Importer
         $this->sectionImporter = new SectionImporter($this->dbalConnection, $this->em, $this->logger, $consoleOutput);
         $this->issueImporter = new IssueImporter($this->dbalConnection, $this->em, $this->logger, $consoleOutput);
         $this->articleImporter = new ArticleImporter(
-            $this->dbalConnection,$this->em,  $logger, $consoleOutput, $this->userImporter
+            $this->dbalConnection, $this->em, $logger, $consoleOutput, $this->userImporter
         );
     }
 
@@ -152,17 +153,26 @@ class JournalImporter extends Importer
         $this->journal->addLanguage($language ? $language : $this->createLanguage($languageCode));
 
         $this->consoleOutput->writeln("Read journal's settings.");
+        $this->em->beginTransaction(); // Outer transaction
 
-        $createdSections = $this->sectionImporter->importJournalsSections($this->journal, $id);
-        $createdIssues = $this->issueImporter->importJournalsIssues($this->journal, $id, $createdSections);
-        $this->articleImporter->importArticles($id, $this->journal, $createdIssues, $createdSections);
+        try {
+            $this->em->beginTransaction(); // Inner transaction
+            $this->em->persist($this->journal);
+            $this->em->flush();
+            $this->em->commit();
+        } catch (Exception $exception) {
+            $this->em->rollback();
+            throw $exception;
+        }
 
-        $this->em->persist($this->journal);
+        $this->consoleOutput->writeln("Imported journal #" . $id);
 
-        $this->consoleOutput->writeln("Writing data...");
-        $this->em->flush();
-        $this->consoleOutput->writeln("Imported journal.");
+        // Those below also create their own inner transactions
+        $createdSections = $this->sectionImporter->importJournalSections($id, $this->journal->getId());
+        $createdIssues = $this->issueImporter->importJournalIssues($id, $this->journal->getId(), $createdSections);
+        $this->articleImporter->importArticles($id, $this->journal->getId(), $createdIssues, $createdSections);
 
+        $this->em->commit();
         return ['new' => $this->journal->getId(), 'old' => $id];
     }
 

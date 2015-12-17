@@ -83,10 +83,6 @@ class JournalUserImporter extends Importer
             $journalUser->addRole($roleMap[dechex($role['role_id'])]);
         }
 
-        foreach ($cache as $item) {
-            $this->em->persist($item['journal_user']);
-        }
-
         $this->consoleOutput->writeln("Writing data...");
         $this->em->flush();
         $this->consoleOutput->writeln("Imported users.");
@@ -98,9 +94,17 @@ class JournalUserImporter extends Importer
             return $cache[$email]['journal_user'];
         }
 
-        $journalUser = new JournalUser();
-        $journalUser->setUser($cache[$email]['user']);
-        $journalUser->setJournal($journal);
+        $journalUser = $this->em
+            ->getRepository('OjsJournalBundle:JournalUser')
+            ->findOneBy(['journal' => $journal, 'user' => $cache[$email]['user']]);
+
+        if ($journalUser === null) {
+            $journalUser = new JournalUser();
+            $journalUser->setUser($cache[$email]['user']);
+            $journalUser->setJournal($journal);
+            $this->em->persist($journalUser);
+        }
+
         $cache[$email]['journal_user'] = $journalUser;
         return $cache[$email]['journal_user'];
     }
