@@ -41,16 +41,16 @@ class AllJournalsImporter extends Importer
         $journalsStatement->execute();
         $journals = $journalsStatement->fetchAll();
 
-        $journalImporter = new JournalImporter(
-            $this->dbalConnection, $this->em, $this->logger, $this->consoleOutput, $this->ui
-        );
-
         foreach ($journals as $journal) {
             $existingJournal = $this->em
                 ->getRepository('OjsJournalBundle:Journal')
                 ->findOneBy(['slug' => $journal['path']]);
 
             if (!$existingJournal) {
+                $journalImporter = new JournalImporter(
+                    $this->dbalConnection, $this->em, $this->logger, $this->consoleOutput, $this->ui
+                );
+                
                 try {
                     $ids = $journalImporter->importJournal($journal['journal_id']);
                     $journalUserImporter = new JournalUserImporter($this->dbalConnection, $this->em, $this->logger, $this->consoleOutput);

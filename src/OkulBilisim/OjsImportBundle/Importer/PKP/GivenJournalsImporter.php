@@ -40,10 +40,6 @@ class GivenJournalsImporter extends Importer
         $journalsStatement = $this->dbalConnection->executeQuery($journalsSql, array($ids), array(Connection::PARAM_INT_ARRAY));
         $journals = $journalsStatement->fetchAll();
 
-        $journalImporter = new JournalImporter(
-            $this->dbalConnection, $this->em, $this->logger, $this->consoleOutput, $this->ui
-        );
-
         foreach ($journals as $journal) {
             $existingJournal = $this->em
                 ->getRepository('OjsJournalBundle:Journal')
@@ -51,6 +47,10 @@ class GivenJournalsImporter extends Importer
 
             if (!$existingJournal) {
                 try {
+                    $journalImporter = new JournalImporter(
+                        $this->dbalConnection, $this->em, $this->logger, $this->consoleOutput, $this->ui
+                    );
+                    
                     $ids = $journalImporter->importJournal($journal['journal_id']);
                     $journalUserImporter = new JournalUserImporter($this->dbalConnection, $this->em, $this->logger, $this->consoleOutput);
                     $journalUserImporter->importJournalUsers($ids['new'], $ids['old'], $this->ui);
