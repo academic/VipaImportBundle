@@ -41,7 +41,7 @@ class SectionImporter extends Importer
                 $createdSections[$section['section_id']] = $createdSection;
                 $persistCounter++;
 
-                if ($persistCounter % 10 == 0) {
+                if ($persistCounter % 10 == 0 || $persistCounter == count($sections)) {
                     $this->consoleOutput->writeln("Writing sections...", true);
                     $this->em->flush();
                     $this->em->commit();
@@ -50,7 +50,6 @@ class SectionImporter extends Importer
                 }
             }
 
-            $this->em->flush();
             $this->em->commit();
         }  catch (Exception $exception) {
             $this->em->rollBack();

@@ -81,7 +81,6 @@ class ArticleImporter extends Importer
                 }
             }
 
-            $this->em->flush();
             $this->em->commit();
         } catch (Exception $exception) {
             $this->em->rollback();

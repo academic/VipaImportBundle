@@ -51,7 +51,6 @@ class IssueImporter extends Importer
                 }
             }
 
-            $this->em->flush();
             $this->em->commit();
         } catch (Exception $exception) {
             $this->em->rollBack();
