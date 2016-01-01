@@ -1,11 +1,13 @@
 {
-    "name": "okulbilisim/ojs-tools-bundle",
+    "name": "ojs/import-bundle",
     "license": "MIT",
     "type": "project",
-    "description": "Ojs symfony tools bundle ",
+    "description": "A helper for migrating to OJS",
     "version": "0.0.1",
     "keywords": [
-        "ojs tools",
+        "ojs",
+        "import",
+        "migration",
         "symfony"
     ],
     "support": {
@@ -18,6 +20,7 @@
     },
     "require": {
         "php": ">=5.4",
+        "ojs/ojs": "*",
         "doctrine/dbal": "2.5.1",
         "guzzlehttp/guzzle": "^6.1"
     }
