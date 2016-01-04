@@ -14,8 +14,8 @@
         "email": "info@okulbilisim.com"
     },
     "autoload": {
-        "psr-0": {
-            "OkulBilisim\\OjsImportBundle": "src/"
+        "psr-4": {
+            "OkulBilisim\\OjsImportBundle\\": ""
         }
     },
     "require": {
