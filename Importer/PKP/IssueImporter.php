@@ -110,9 +110,11 @@ class IssueImporter extends Importer
         $issue->setSpecial(false);
 
         foreach (array_values($sectionIds) as $sectionId) {
-            /** @var Section $section */
-            $section = $this->em->getReference('OjsJournalBundle:Section', $sectionId);
-            $issue->addSection($section);
+            if ($sectionId !== null) {
+                /** @var Section $section */
+                $section = $this->em->getReference('OjsJournalBundle:Section', $sectionId);
+                $issue->addSection($section);
+            }
         }
 
         // In some instances, imported data is not in a proper date format so DateTime::createFromFormat returns false
