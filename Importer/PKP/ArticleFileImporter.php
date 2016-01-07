@@ -13,13 +13,24 @@ class ArticleFileImporter extends Importer
 {
     public function importArticleFiles($article, $oldId, $slug)
     {
-        $articleFilesSql = "SELECT file_id, file_type, original_file_name, MAX(revision) FROM article_files " .
-            "WHERE article_id = :id GROUP BY file_id";
-        $articleFilesStatement = $this->dbalConnection->prepare($articleFilesSql);
-        $articleFilesStatement->bindValue('id', $oldId);
-        $articleFilesStatement->execute();
+        $fileIdsSql = "SELECT DISTINCT file_id FROM article_files WHERE article_id = :id";
+        $fileIdsStatement = $this->dbalConnection->prepare($fileIdsSql);
+        $fileIdsStatement->bindValue('id', $oldId);
+        $fileIdsStatement->execute();
 
-        $articleFiles = $articleFilesStatement->fetchAll();
+        $fileIds = $fileIdsStatement->fetchAll();
+        $articleFiles = array();
+
+        foreach ($fileIds as $fileId) {
+            $articleFileSql = "SELECT file_id, file_type, original_file_name, revision FROM article_files" .
+            " WHERE article_id = :id AND file_id = :fileId ORDER BY revision DESC LIMIT 1";
+            $articleFileStatement = $this->dbalConnection->prepare($articleFileSql);
+            $articleFileStatement->bindValue('fileId', $fileId['file_id']);
+            $articleFileStatement->bindValue('id', $oldId);
+            $articleFileStatement->execute();
+
+            $articleFiles[] = $articleFileStatement->fetch();
+        }
         
         foreach ($articleFiles as $articleFile) {
             $this->importArticleFile($articleFile, $oldId, $article, $slug);
@@ -48,6 +59,7 @@ class ArticleFileImporter extends Importer
         foreach ($pkpGalleys as $galley) {
             $locale = !empty($galley['locale']) ? substr($galley['locale'], 0, 2) : 'en';
             $label = !empty($galley['label']) ? $galley['label'] : '-';
+            $version = !empty($pkpArticleFile['revision']) ? $pkpArticleFile['revision'] : 0;
             $filename = sprintf('imported/%s/%s.%s',
                 $galley['article_id'],
                 $galley['galley_id'],
@@ -56,7 +68,7 @@ class ArticleFileImporter extends Importer
             $articleFile = new ArticleFile();
             $articleFile->setFile($filename);
             $articleFile->setArticle($article);
-            $articleFile->setVersion(0);
+            $articleFile->setVersion($version);
             $articleFile->setTitle($label);
             $articleFile->setLangCode($locale);
             $articleFile->setDescription('-');
