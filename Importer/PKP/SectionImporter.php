@@ -3,8 +3,8 @@
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
 use Exception;
-use Ojs\JournalBundle\Entity\Section;
 use Ojs\JournalBundle\Entity\Journal;
+use Ojs\JournalBundle\Entity\Section;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class SectionImporter extends Importer

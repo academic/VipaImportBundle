@@ -2,9 +2,8 @@
 
 namespace OkulBilisim\OjsImportBundle\Command;
 
-use OkulBilisim\OjsImportBundle\Helper\ImportCommand;
 use Ojs\CoreBundle\Helper\StringHelper;
-use OkulBilisim\OjsImportBundle\Importer\PKP\AllJournalsImporter;
+use OkulBilisim\OjsImportBundle\Helper\ImportCommand;
 use OkulBilisim\OjsImportBundle\Importer\PKP\GivenJournalsImporter;
 use OkulBilisim\OjsImportBundle\Importer\PKP\UserImporter;
 use Symfony\Component\Console\Input\InputArgument;
