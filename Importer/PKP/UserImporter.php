@@ -57,9 +57,10 @@ class UserImporter extends Importer
     }
 
     /**
-     * @param $id
-     * @param bool|true $flush
-     * @return null|User
+     * Imports the given user
+     * @param int $id Old ID
+     * @param bool|true $flush Should be true if the entity should get flushed
+     * @return null|User Newly imported user
      * @throws \Doctrine\DBAL\DBALException
      */
     public function importUser($id, $flush = true)
