@@ -11,6 +11,12 @@ use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class IssueFileImporter extends Importer
 {
+    /**
+     * @param Issue  $issue The issue whose files are going to be imported
+     * @param int    $oldId Old ID of the issue
+     * @param String $slug Journal's slug
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function importIssueFiles($issue, $oldId, $slug)
     {
         $issueFilesSql = "SELECT * FROM issue_files WHERE issue_id = :id";
@@ -25,10 +31,10 @@ class IssueFileImporter extends Importer
     }
 
     /**
-     * @param int    $id
-     * @param int    $oldId
-     * @param Issue  $issue
-     * @param string $slug
+     * @param int    $id    Issue file's ID
+     * @param int    $oldId Old issue file's ID
+     * @param Issue  $issue File's issue
+     * @param string $slug  Journal's slug
      */
     public function importIssueFile($id, $oldId, $issue, $slug)
     {

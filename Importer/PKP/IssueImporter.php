@@ -17,9 +17,9 @@ class IssueImporter extends Importer
     private $settings;
 
     /**
-     * @param int $oldJournalId Issue's old Journal ID
-     * @param int $newJournalId Issue's new Journal ID
-     * @param array $sectionIds Sections that the created issue will include
+     * @param  int $oldJournalId Issue's old Journal ID
+     * @param  int $newJournalId Issue's new Journal ID
+     * @param  array $sectionIds Sections that the created issue will include
      * @return array An array whose keys are old IDs and values are new IDs
      * @throws Exception
      * @throws \Doctrine\DBAL\DBALException
@@ -68,9 +68,9 @@ class IssueImporter extends Importer
     }
 
     /**
-     * @param int $id Issue's ID
-     * @param int $newJournalId new Journal's ID
-     * @param array $sectionIds Journal's section IDs
+     * @param  int $id Issue's ID
+     * @param  int $newJournalId new Journal's ID
+     * @param  array $sectionIds Journal's section IDs
      * @return Issue Created issue
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
