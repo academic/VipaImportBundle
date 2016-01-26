@@ -48,10 +48,11 @@ class ArticleImporter extends Importer
     }
 
     /**
-     * @param int $oldJournalId
-     * @param int $newJournalId
-     * @param array $issueIds
-     * @param array $sectionIds
+     * Imports the articles of given Journal.
+     * @param int $oldJournalId Old journal's ID
+     * @param int $newJournalId New journal's ID
+     * @param array $issueIds   Issue IDs of journal
+     * @param array $sectionIds Section IDs of journal
      * @throws Exception
      * @throws \Doctrine\DBAL\ConnectionException
      * @throws \Doctrine\DBAL\DBALException
@@ -89,10 +90,11 @@ class ArticleImporter extends Importer
     }
 
     /**
-     * @param int $id
-     * @param $newJournalId
-     * @param array $issueIds
-     * @param array $sectionIds
+     * Imports the given article.
+     * @param int $id Article's ID
+     * @param int $newJournalId New journal's ID
+     * @param array $issueIds   IDs of issues
+     * @param array $sectionIds IDs of sections
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      */
@@ -225,8 +227,9 @@ class ArticleImporter extends Importer
     }
 
     /**
-     * @param int $oldArticleId
-     * @param Article $article
+     * Imports citations of the given article.
+     * @param int $oldArticleId Old article's ID
+     * @param Article $article  Newly imported Article's entity
      */
     public function importCitations($oldArticleId, $article)
     {
@@ -250,8 +253,9 @@ class ArticleImporter extends Importer
     }
 
     /**
-     * @param int $oldArticleId
-     * @param Article $article
+     * Imports authors of the given article.
+     * @param int $oldArticleId Old article's ID
+     * @param Article $article  Newly imported Article entity
      */
     public function importAuthors($oldArticleId, $article)
     {

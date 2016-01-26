@@ -11,6 +11,13 @@ use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class ArticleFileImporter extends Importer
 {
+    /**
+     * Imports files of the given article
+     * @param Article $article The Article whose files are going to be important
+     * @param int     $oldId   Old ID of the article
+     * @param String  $slug    Journal's slug
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function importArticleFiles($article, $oldId, $slug)
     {
         $fileIdsSql = "SELECT DISTINCT file_id FROM article_files WHERE article_id = :id";
@@ -38,10 +45,11 @@ class ArticleFileImporter extends Importer
     }
 
     /**
-     * @param int     $pkpArticleFile
-     * @param int     $oldArticleId
-     * @param Article $article
-     * @param string  $slug
+     * Imports the given article file
+     * @param int     $pkpArticleFile ID of the old article file
+     * @param int     $oldArticleId   ID of the old article
+     * @param Article $article        Newly imported Article entity
+     * @param string  $slug           Journal's slug
      */
     public function importArticleFile($pkpArticleFile, $oldArticleId, $article, $slug)
     {
