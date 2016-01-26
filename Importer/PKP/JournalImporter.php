@@ -70,6 +70,13 @@ class JournalImporter extends Importer
         );
     }
 
+    /**
+     * Imports the journal with given ID
+     * @param  int $id Journal's ID
+     * @return array New IDs as keys, old IDs as values
+     * @throws Exception
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function importJournal($id)
     {
         $this->consoleOutput->writeln("Importing the journal...");
@@ -176,6 +183,13 @@ class JournalImporter extends Importer
         return ['new' => $this->journal->getId(), 'old' => $id];
     }
 
+    /**
+     * Imports the publisher with given name and assigns it to
+     * the journal. It uses the one from the database in case
+     * it exists.
+     * @param String $name Publisher's name
+     * @param String $locale Locale of the settings
+     */
     private function importAndSetPublisher($name, $locale)
     {
         $publisher = $this->em
@@ -197,6 +211,10 @@ class JournalImporter extends Importer
         $this->journal->setPublisher($publisher);
     }
 
+    /**
+     * Fetches the publisher with the name "Unknown Publisher".
+     * @return Publisher Publisher with the name "Unknown Publisher"
+     */
     private function getUnknownPublisher()
     {
         $publisher = $this->em
@@ -213,6 +231,12 @@ class JournalImporter extends Importer
         return $publisher;
     }
 
+    /**
+     * Creates a publisher with given properties.
+     * @param  String $name
+     * @param  String $url
+     * @return Publisher Created publisher
+     */
     private function createPublisher($name, $url)
     {
         $publisher = new Publisher();
@@ -227,6 +251,11 @@ class JournalImporter extends Importer
         return $publisher;
     }
 
+    /**
+     * Creates a language with given language code.
+     * @param  String $code Language code
+     * @return Lang Created language
+     */
     private function createLanguage($code)
     {
         $nameMap = array(
