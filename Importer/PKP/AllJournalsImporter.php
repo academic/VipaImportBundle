@@ -34,6 +34,10 @@ class AllJournalsImporter extends Importer
         $this->ui = $ui;
     }
 
+    /**
+     * Imports all journals on the database
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function importJournals()
     {
         $journalsSql = "SELECT journal_id, path FROM journals";

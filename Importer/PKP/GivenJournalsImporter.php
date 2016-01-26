@@ -34,6 +34,11 @@ class GivenJournalsImporter extends Importer
         $this->ui = $ui;
     }
 
+    /**
+     * Imports specified journals
+     * @param array $ids IDs of journals who are going to be imported
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function importJournals($ids)
     {
         $journalsSql = 'SELECT journal_id, path FROM journals WHERE journal_id IN (?)';
