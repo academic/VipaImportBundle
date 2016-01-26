@@ -12,9 +12,10 @@ use OkulBilisim\OjsImportBundle\Importer\Importer;
 class JournalUserImporter extends Importer
 {
     /**
-     * @param int $newJournalId
-     * @param int $oldJournalId
-     * @param UserImporter $userImporter
+     * Imports users of the given journal
+     * @param int $newJournalId New journal's ID
+     * @param int $oldJournalId Old journal's ID
+     * @param UserImporter $userImporter User importer class
      * @throws \Doctrine\DBAL\DBALException
      */
     public function importJournalUsers($newJournalId, $oldJournalId, $userImporter)
@@ -88,6 +89,13 @@ class JournalUserImporter extends Importer
         $this->consoleOutput->writeln("Imported users.");
     }
 
+    /**
+     * Fetches the journal user
+     * @param array $cache User cache
+     * @param String $email User's email
+     * @param Journal $journal Journal
+     * @return JournalUser Imported or retrieved JournalUser
+     */
     private function getJournalUser(&$cache, $email, $journal)
     {
         if (!empty($cache[$email]['journal_user'])) {
