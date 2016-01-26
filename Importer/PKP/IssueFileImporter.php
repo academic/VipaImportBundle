@@ -12,7 +12,7 @@ use OkulBilisim\OjsImportBundle\Importer\Importer;
 class IssueFileImporter extends Importer
 {
     /**
-     * Imports the files of given issue
+     * Imports files of given issue
      * @param Issue  $issue The issue whose files are going to be imported
      * @param int    $oldId Old ID of the issue
      * @param String $slug Journal's slug

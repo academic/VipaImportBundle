@@ -17,6 +17,7 @@ class IssueImporter extends Importer
     private $settings;
 
     /**
+     * Imports issues of given journal
      * @param  int $oldJournalId Issue's old Journal ID
      * @param  int $newJournalId Issue's new Journal ID
      * @param  array $sectionIds Sections that the created issue will include
