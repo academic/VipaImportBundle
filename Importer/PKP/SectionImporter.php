@@ -15,6 +15,7 @@ class SectionImporter extends Importer
     private $settings;
 
     /**
+     * Imports sections of the given journal.
      * @param int $oldJournalId Section's old Journal ID
      * @param int $newJournalId Section's new Journal ID
      * @return array An array whose keys are old IDs and values are new IDs
@@ -67,6 +68,7 @@ class SectionImporter extends Importer
     }
 
     /**
+     * Imports the given section
      * @param int $id Section's ID
      * @param int $newJournalId Section's Journal ID
      * @return Section
