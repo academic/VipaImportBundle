@@ -9,6 +9,9 @@ use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class ArticleStatisticImporter extends Importer
 {
+    /**
+     * Imports article statistics whose import are pending.
+     */
     public function importArticleStatistics()
     {
         $pendingImports = $this->em->getRepository('OkulBilisimOjsImportBundle:PendingStatisticImport')->findAll();
@@ -21,6 +24,12 @@ class ArticleStatisticImporter extends Importer
         }
     }
 
+    /**
+     * Imports the given article's statistics
+     * @param int $oldId Old ID of the article
+     * @param int $newId New ID of the article
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function importArticleStatistic($oldId, $newId)
     {
         $article = $this->em->getRepository('OjsJournalBundle:Article')->find($newId);
