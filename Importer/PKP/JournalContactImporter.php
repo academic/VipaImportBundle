@@ -9,8 +9,9 @@ use OkulBilisim\OjsImportBundle\Importer\Importer;
 class JournalContactImporter extends Importer
 {
     /**
-     * @param Journal $journal
-     * @param int $journalId
+     * Imports contacts of the given journal.
+     * @param Journal $journal The journal whose contacts are going to be imported
+     * @param int $journalId Old ID of the journal
      * @throws \Doctrine\DBAL\DBALException
      */
     public function importContacts($journal, $journalId)
