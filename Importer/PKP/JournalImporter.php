@@ -2,6 +2,7 @@
 
 namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
+use Behat\Transliterator\Transliterator;
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
@@ -9,6 +10,7 @@ use Exception;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
+use Ojs\JournalBundle\Entity\Subject;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -147,6 +149,12 @@ class JournalImporter extends Importer
             $this->journal->setDownloadCount($this->settings[$primaryLocale]['total_downloads']) :
             $this->journal->setDownloadCount(0);
 
+        $subjects = $this->importSubjects($primaryLocale);
+
+        foreach ($subjects as $subject) {
+            $this->journal->addSubject($subject);
+        }
+
         // Set publisher
         !empty($this->settings[$primaryLocale]['publisherInstitution']) ?
             $this->importAndSetPublisher($this->settings[$primaryLocale]['publisherInstitution'], $primaryLocale) :
@@ -275,5 +283,54 @@ class JournalImporter extends Importer
         $this->em->persist($lang);
 
         return $lang;
+    }
+
+    private function importSubjects($primaryLocale)
+    {
+        $subjects = [];
+        $categoryIds = unserialize($this->settings[$primaryLocale]['categories']);
+
+        foreach ($categoryIds as $categoryId) {
+            $categorySql = "SELECT locale, setting_value FROM " .
+                "controlled_vocab_entry_settings WHERE " .
+                "controlled_vocab_entry_id = :categoryId";
+
+            $categoryStatement = $this->dbalConnection->prepare($categorySql);
+            $categoryStatement->bindValue('categoryId', $categoryId);
+            $categoryStatement->execute();
+
+            $pkpCategorySettings = $categoryStatement->fetchAll();
+            $categorySettings = [];
+
+            foreach ($pkpCategorySettings as $pkpSetting) {
+                $locale = !empty($pkpSetting['locale']) ? $pkpSetting['locale'] : $primaryLocale;
+                $value = $pkpSetting['setting_value'];
+                $categorySettings[$locale] = $value;
+            }
+
+            $slug = Transliterator::urlize(array_values($categorySettings)[0]);
+            $tags = str_replace(' ', ', ', strtolower(array_values($categorySettings)[0]));
+
+            $subject = $this->em
+                ->getRepository('OjsJournalBundle:Subject')
+                ->findOneBy(['slug' => $slug]);
+
+            if (!$subject) {
+                $subject = new Subject();
+                $subject->setSlug($slug);
+                $subject->setTags($tags);
+
+                foreach ($categorySettings as $locale => $value) {
+                    $subject->setCurrentLocale(substr($locale, 0, 2));
+                    $subject->setSubject($value);
+                    $this->em->persist($subject);
+                    $this->em->flush();
+                }
+            }
+
+            $subjects[] = $subject;
+        }
+
+        return $subjects;
     }
 }
