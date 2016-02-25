@@ -113,8 +113,13 @@ class JournalImporter extends Importer
         $this->journal->setPublished(true);
         $this->journal->setSlug($pkpJournal['path']);
 
-        // Fill translatable fields in all available languages
+        // Fill translatable fields in all available languages except the primary one
         foreach ($this->settings as $fieldLocale => $fields) {
+            if ($fieldLocale === $primaryLocale) {
+                // We will fill fields of the primary language later.
+                continue;
+            }
+
             $this->journal->setCurrentLocale(substr($fieldLocale, 0, 2));
 
             !empty($fields['title']) ?
@@ -126,7 +131,16 @@ class JournalImporter extends Importer
                 $this->journal->setDescription('-');
         }
 
-        $this->journal->setCurrentLocale($primaryLocale);
+        $this->journal->setCurrentLocale($languageCode);
+
+        // Fill fields for the primary language
+        !empty($fields['title']) ?
+            $this->journal->setTitle($fields['title']) :
+            $this->journal->setTitle('Unknown Journal');
+
+        !empty($fields['description']) ?
+            $this->journal->setDescription($fields['description']) :
+            $this->journal->setDescription('-');
 
         !empty($this->settings[$primaryLocale]['printIssn']) ?
             $this->journal->setIssn($this->settings[$primaryLocale]['printIssn']) :
