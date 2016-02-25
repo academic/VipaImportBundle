@@ -67,7 +67,7 @@ class UserImporter extends Importer
     {
         $this->consoleOutput->writeln("Reading user #" . $id . "... ", true);
 
-        $sql = "SELECT username, email, disabled FROM users WHERE users.user_id = :id " . ImportHelper::spamUsersFilterSql();
+        $sql = "SELECT * FROM users WHERE users.user_id = :id " . ImportHelper::spamUsersFilterSql();
         $statement = $this->dbalConnection->prepare($sql);
         $statement->bindValue('id', $id);
         $statement->execute();
