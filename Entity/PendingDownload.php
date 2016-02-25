@@ -56,7 +56,7 @@ class PendingDownload
 
     /**
      * @param string $source
-     * @return $this
+     * @return PendingDownload
      */
     public function setSource($source)
     {
@@ -75,7 +75,7 @@ class PendingDownload
 
     /**
      * @param string $target
-     * @return $this
+     * @return PendingDownload
      */
     public function setTarget($target)
     {
