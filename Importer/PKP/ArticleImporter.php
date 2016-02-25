@@ -147,7 +147,7 @@ class ArticleImporter extends Importer
         foreach ($settings as $fieldLocale => $fields) {
             $article->setCurrentLocale(substr($fieldLocale, 0, 2));
             $article->setTitle(!empty($fields['title']) ? $fields['title'] : '-');
-            $article->setSubjects(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
+            $article->setTags(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
             $article->setKeywords(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
             $article->setAbstract(!empty($fields['abstract']) ? $fields['abstract'] : '-');
         }
