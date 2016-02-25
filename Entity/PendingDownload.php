@@ -56,10 +56,13 @@ class PendingDownload
 
     /**
      * @param string $source
+     * @return $this
      */
     public function setSource($source)
     {
         $this->source = $source;
+
+        return $this;
     }
 
     /**
@@ -72,10 +75,13 @@ class PendingDownload
 
     /**
      * @param string $target
+     * @return $this
      */
     public function setTarget($target)
     {
         $this->target = $target;
+
+        return $this;
     }
 
     /**
