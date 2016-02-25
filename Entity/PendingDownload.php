@@ -33,6 +33,12 @@ class PendingDownload
     private $target;
 
     /**
+     * @ORM\Column(type="string", nullable=true)
+     * @var string
+     */
+    private $tag;
+
+    /**
      * @return int
      */
     public function getId()
@@ -78,5 +84,24 @@ class PendingDownload
     public function setTarget($target)
     {
         $this->target = $target;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTag()
+    {
+        return $this->tag;
+    }
+
+    /**
+     * @param string $tag
+     * @return PendingDownload
+     */
+    public function setTag($tag)
+    {
+        $this->tag = $tag;
+
+        return $this;
     }
 }

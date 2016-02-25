@@ -16,7 +16,9 @@ class DownloadCommand extends ContainerAwareCommand
         $this
             ->setName('ojs:import:download')
             ->setDescription('Downloads files of imported entities')
-            ->addArgument('host', InputArgument::REQUIRED, 'Hostname of the server where the files are stored');
+            ->addArgument('host', InputArgument::REQUIRED, 'Hostname of the server where the files are stored')
+            ->addArgument('tag', InputArgument::OPTIONAL, 'Tag of the files which will be downloaded ' .
+                '(eg. issue-cover). Tagless ones will be downloaded if there is not any tag supplied');
     }
 
 
@@ -24,14 +26,21 @@ class DownloadCommand extends ContainerAwareCommand
     {
         /** @var EntityManager $em */
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
-        $pendingDownloads = $em->getRepository('OkulBilisimOjsImportBundle:PendingDownload')->findAll();
+        $pendingDownloads = $em
+            ->getRepository('OkulBilisimOjsImportBundle:PendingDownload')
+            ->findBy(['tag' => $input->getArgument('tag')]);
         $output->writeln("Downloading...");
 
         foreach ($pendingDownloads as $download) {
             $output->writeln("Downloading " . $download->getSource());
-            $status = $this->download($input->getArgument('host'), $download->getSource(), $download->getTarget());
-            $status ? $em->remove($download) : $output->writeln("Couldn't download " . $download->getSource());
-            $em->flush($download);
+            $successful = $this->download($input->getArgument('host'), $download->getSource(), $download->getTarget());
+
+            if ($successful) {
+                $em->remove($download);
+                $em->flush($download);
+            } else {
+                $output->writeln("Couldn't download " . $download->getSource());
+            }
         }
     }
 
