@@ -12,11 +12,6 @@ use OkulBilisim\OjsImportBundle\Importer\Importer;
 class IssueImporter extends Importer
 {
     /**
-     * @var array
-     */
-    private $settings;
-
-    /**
      * Imports issues of given journal
      * @param  int $oldJournalId Issue's old Journal ID
      * @param  int $newJournalId Issue's new Journal ID
@@ -94,12 +89,13 @@ class IssueImporter extends Importer
 
         $pkpIssue = $issueStatement->fetch();
         $pkpSettings = $settingsStatement->fetchAll();
+        $settings = [];
 
         foreach ($pkpSettings as $setting) {
             $locale = !empty($setting['locale']) ? $setting['locale'] : 'en_US';
             $name = $setting['setting_name'];
             $value = $setting['setting_value'];
-            $this->settings[$locale][$name] = $value;
+            $settings[$locale][$name] = $value;
         }
 
         $issue = new Issue();
@@ -128,7 +124,7 @@ class IssueImporter extends Importer
         // Current date & time is used when date is false
         $issue->setDatePublished($date ? $date : new DateTime());
 
-        foreach ($this->settings as $fieldLocale => $fields) {
+        foreach ($settings as $fieldLocale => $fields) {
             $issue->setCurrentLocale(substr($fieldLocale, 0, 2));
             $issue->setTitle(!empty($fields['title']) ? $fields['title']: '-');
             $issue->setDescription(!empty($fields['description']) ? $fields['description']: '-');
