@@ -4,9 +4,11 @@ namespace OkulBilisim\OjsImportBundle\Importer\PKP;
 
 use DateTime;
 use Exception;
+use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\Section;
+use OkulBilisim\OjsImportBundle\Entity\PendingDownload;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
 
 class IssueImporter extends Importer
@@ -124,10 +126,44 @@ class IssueImporter extends Importer
         // Current date & time is used when date is false
         $issue->setDatePublished($date ? $date : new DateTime());
 
+        $cover = null;
+
         foreach ($settings as $fieldLocale => $fields) {
+            if (!$cover && !empty($fields['fileName'])) {
+                $cover = $fields['fileName'];
+            }
+
             $issue->setCurrentLocale(substr($fieldLocale, 0, 2));
             $issue->setTitle(!empty($fields['title']) ? $fields['title']: '-');
             $issue->setDescription(!empty($fields['description']) ? $fields['description']: '-');
+        }
+
+        if ($cover) {
+            $baseDir = '/../web/uploads/journal/imported/';
+            $croppedBaseDir = '/../web/uploads/journal/croped/imported/';
+            $coverPath = $pkpIssue['journal_id'] . '/' . $cover;
+
+            $pendingDownload = new PendingDownload();
+            $pendingDownload
+                ->setSource('public/journals/' . $coverPath)
+                ->setTarget($baseDir . $coverPath)
+                ->setTag('issue-cover');
+
+            $croppedPendingDownload = new PendingDownload();
+            $croppedPendingDownload
+                ->setSource('public/journals/' . $coverPath)
+                ->setTarget($croppedBaseDir . $coverPath)
+                ->setTag('issue-cover');
+
+            $history = new FileHistory();
+            $history->setFileName($coverPath);
+            $history->setOriginalName($coverPath);
+            $history->setType('journal');
+
+            $this->em->persist($croppedPendingDownload);
+            $this->em->persist($pendingDownload);
+            $this->em->persist($history);
+            $issue->setCover('imported/' . $coverPath);
         }
 
         $importer = new IssueFileImporter($this->dbalConnection, $this->em, $this->logger, $this->consoleOutput);
