@@ -13,6 +13,7 @@ use Ojs\JournalBundle\Entity\JournalContact;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
 use Ojs\JournalBundle\Entity\Subject;
+use Ojs\JournalBundle\Entity\SubmissionChecklist;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -188,6 +189,7 @@ class JournalImporter extends Importer
         $this->journal->addLanguage($language ? $language : $this->createLanguage($languageCode));
 
         $this->importContacts($primaryLocale);
+        $this->importSubmissionChecklist($primaryLocale);
 
         $this->consoleOutput->writeln("Read journal's settings.");
         $this->em->beginTransaction(); // Outer transaction
@@ -388,5 +390,27 @@ class JournalImporter extends Importer
         
         $this->journal->addJournalContact($mainContact);
         $this->journal->addJournalContact($supportContact);
+    }
+
+    public function importSubmissionChecklist($primaryLocale)
+    {
+        $checklist = new SubmissionChecklist();
+        $checklist->setLabel('Checklist');
+        $checklist->setLocale(substr($primaryLocale, 0, 2));
+
+        $detail = "<ul>";
+
+        if (!empty($this->settings[$primaryLocale]['submissionChecklist'])) {
+            $items = unserialize($this->settings[$primaryLocale]['submissionChecklist']);
+
+            foreach ($items as $item) {
+                $detail .= "<li>" . $item['content'] . "</li>";
+            }
+        }
+
+        $detail .= "</ul>";
+
+        $checklist->setDetail($detail);
+        $this->journal->addSubmissionChecklist($checklist);
     }
 }
