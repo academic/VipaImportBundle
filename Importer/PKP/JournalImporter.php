@@ -134,13 +134,17 @@ class JournalImporter extends Importer
         $this->journal->setCurrentLocale($languageCode);
 
         // Fill fields for the primary language
-        !empty($fields['title']) ?
-            $this->journal->setTitle($fields['title']) :
+        !empty($this->settings[$primaryLocale]['title']) ?
+            $this->journal->setTitle($this->settings[$primaryLocale]['title']) :
             $this->journal->setTitle('Unknown Journal');
 
-        !empty($fields['description']) ?
-            $this->journal->setDescription($fields['description']) :
+        !empty($this->settings[$primaryLocale]['description']) ?
+            $this->journal->setDescription($this->settings[$primaryLocale]['description']) :
             $this->journal->setDescription('-');
+
+        !empty($this->settings[$primaryLocale]['journalPageFooter']) ?
+            $this->journal->setFooterText($this->settings[$primaryLocale]['journalPageFooter']) :
+            $this->journal->setFooterText(null);
 
         !empty($this->settings[$primaryLocale]['printIssn']) ?
             $this->journal->setIssn($this->settings[$primaryLocale]['printIssn']) :
