@@ -7,7 +7,9 @@ use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Exception;
+use Ojs\JournalBundle\Entity\ContactTypes;
 use Ojs\JournalBundle\Entity\Journal;
+use Ojs\JournalBundle\Entity\JournalContact;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
 use Ojs\JournalBundle\Entity\Subject;
@@ -185,6 +187,8 @@ class JournalImporter extends Importer
         $this->journal->setMandatoryLang($language ? $language : $this->createLanguage($languageCode));
         $this->journal->addLanguage($language ? $language : $this->createLanguage($languageCode));
 
+        $this->importContacts($primaryLocale);
+
         $this->consoleOutput->writeln("Read journal's settings.");
         $this->em->beginTransaction(); // Outer transaction
 
@@ -350,5 +354,39 @@ class JournalImporter extends Importer
         }
 
         return $subjects;
+    }
+
+    public function importContacts($primaryLocale)
+    {
+        $mainContact = new JournalContact();
+        $mainContact->setFullName($this->settings[$primaryLocale]['contactName']);
+        $mainContact->setEmail($this->settings[$primaryLocale]['contactEmail']);
+        $mainContact->setPhone($this->settings[$primaryLocale]['contactPhone']);
+        $mainContact->setAddress($this->settings[$primaryLocale]['contactMailingAddress']);
+        
+        $supportContact = new JournalContact();
+        $supportContact->setFullName($this->settings[$primaryLocale]['supportName']);
+        $supportContact->setEmail($this->settings[$primaryLocale]['supportEmail']);
+        $supportContact->setPhone($this->settings[$primaryLocale]['supportPhone']);
+        $supportContact->setAddress($this->settings[$primaryLocale]['mailingAddress']);
+
+        $type = $this->em->getRepository('OjsJournalBundle:ContactTypes')->findBy([], null, 1);
+
+        if ($type) {
+            $mainContact->setContactType($type[0]);
+            $supportContact->setContactType($type[0]);
+        } else {
+            $newType = new ContactTypes();
+            $newType->setName('Default');
+            $newType->setDescription('Default Type');
+
+            $this->em->persist($newType);
+
+            $mainContact->setContactType($newType);
+            $supportContact->setContactType($newType);
+        }
+        
+        $this->journal->addJournalContact($mainContact);
+        $this->journal->addJournalContact($supportContact);
     }
 }
