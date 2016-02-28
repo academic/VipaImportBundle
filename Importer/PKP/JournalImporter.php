@@ -374,9 +374,9 @@ class JournalImporter extends Importer
             $mainContact->setFullName($contactName);
             $mainContact->setEmail($contactEmail);
 
-            if (!empty($this->settings[$primaryLocale]['contactName']))
+            if (!empty($this->settings[$primaryLocale]['contactPhone']))
                 $mainContact->setPhone($this->settings[$primaryLocale]['contactPhone']);
-            if (!empty($this->settings[$primaryLocale]['contactName']))
+            if (!empty($this->settings[$primaryLocale]['contactMailingAddress']))
                 $mainContact->setAddress($this->settings[$primaryLocale]['contactMailingAddress']);
         }
 
@@ -390,9 +390,9 @@ class JournalImporter extends Importer
             $supportContact->setFullName($supportName);
             $supportContact->setEmail($supportEmail);
 
-            if (!empty($this->settings[$primaryLocale]['supportName']))
+            if (!empty($this->settings[$primaryLocale]['supportPhone']))
                 $supportContact->setPhone($this->settings[$primaryLocale]['supportPhone']);
-            if (!empty($this->settings[$primaryLocale]['supportName']))
+            if (!empty($this->settings[$primaryLocale]['mailingAddress']))
                 $supportContact->setAddress($this->settings[$primaryLocale]['mailingAddress']);
         }
 
