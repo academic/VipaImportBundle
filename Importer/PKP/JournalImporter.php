@@ -428,8 +428,10 @@ class JournalImporter extends Importer
         if (!empty($this->settings[$primaryLocale]['submissionChecklist'])) {
             $items = unserialize($this->settings[$primaryLocale]['submissionChecklist']);
 
-            foreach ($items as $item) {
-                $detail .= "<li>" . $item['content'] . "</li>";
+            if ($items) {
+                foreach ($items as $item) {
+                    $detail .= "<li>".$item['content']."</li>";
+                }
             }
         }
 
