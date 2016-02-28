@@ -311,6 +311,10 @@ class JournalImporter extends Importer
 
     private function importSubjects($primaryLocale)
     {
+        if (empty($this->settings[$primaryLocale]['categories'])) {
+            return array();
+        }
+
         $subjects = [];
         $categoryIds = unserialize($this->settings[$primaryLocale]['categories']);
 
@@ -361,16 +365,36 @@ class JournalImporter extends Importer
     public function importContacts($primaryLocale)
     {
         $mainContact = new JournalContact();
-        $mainContact->setFullName($this->settings[$primaryLocale]['contactName']);
-        $mainContact->setEmail($this->settings[$primaryLocale]['contactEmail']);
-        $mainContact->setPhone($this->settings[$primaryLocale]['contactPhone']);
-        $mainContact->setAddress($this->settings[$primaryLocale]['contactMailingAddress']);
-        
+        $contactName = !empty($this->settings[$primaryLocale]['contactName']) ?
+            $this->settings[$primaryLocale]['contactName'] : null;
+        $contactEmail = !empty($this->settings[$primaryLocale]['contactEmail']) ?
+            $this->settings[$primaryLocale]['contactEmail'] : null;
+
+        if ($contactName && $contactEmail) {
+            $mainContact->setFullName($contactName);
+            $mainContact->setEmail($contactEmail);
+
+            if (!empty($this->settings[$primaryLocale]['contactName']))
+                $mainContact->setPhone($this->settings[$primaryLocale]['contactPhone']);
+            if (!empty($this->settings[$primaryLocale]['contactName']))
+                $mainContact->setAddress($this->settings[$primaryLocale]['contactMailingAddress']);
+        }
+
         $supportContact = new JournalContact();
-        $supportContact->setFullName($this->settings[$primaryLocale]['supportName']);
-        $supportContact->setEmail($this->settings[$primaryLocale]['supportEmail']);
-        $supportContact->setPhone($this->settings[$primaryLocale]['supportPhone']);
-        $supportContact->setAddress($this->settings[$primaryLocale]['mailingAddress']);
+        $supportName = !empty($this->settings[$primaryLocale]['supportName']) ?
+            $this->settings[$primaryLocale]['supportName'] : null;
+        $supportEmail = !empty($this->settings[$primaryLocale]['supportEmail']) ?
+            $this->settings[$primaryLocale]['supportEmail'] : null;
+
+        if ($supportName && $supportEmail) {
+            $supportContact->setFullName($supportName);
+            $supportContact->setEmail($supportEmail);
+
+            if (!empty($this->settings[$primaryLocale]['supportName']))
+                $supportContact->setPhone($this->settings[$primaryLocale]['supportPhone']);
+            if (!empty($this->settings[$primaryLocale]['supportName']))
+                $supportContact->setAddress($this->settings[$primaryLocale]['mailingAddress']);
+        }
 
         $type = $this->em->getRepository('OjsJournalBundle:ContactTypes')->findBy([], null, 1);
 
@@ -379,6 +403,7 @@ class JournalImporter extends Importer
             $supportContact->setContactType($type[0]);
         } else {
             $newType = new ContactTypes();
+            $newType->setCurrentLocale(substr($primaryLocale, 0, 2));
             $newType->setName('Default');
             $newType->setDescription('Default Type');
 
