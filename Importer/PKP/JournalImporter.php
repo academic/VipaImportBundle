@@ -10,6 +10,7 @@ use Exception;
 use Ojs\JournalBundle\Entity\ContactTypes;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\JournalContact;
+use Ojs\JournalBundle\Entity\JournalPage;
 use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
 use Ojs\JournalBundle\Entity\Subject;
@@ -190,6 +191,7 @@ class JournalImporter extends Importer
 
         $this->importContacts($primaryLocale);
         $this->importSubmissionChecklist($primaryLocale);
+        $this->importAboutPage();
 
         $this->consoleOutput->writeln("Read journal's settings.");
         $this->em->beginTransaction(); // Outer transaction
@@ -439,5 +441,36 @@ class JournalImporter extends Importer
 
         $checklist->setDetail($detail);
         $this->journal->addSubmissionChecklist($checklist);
+    }
+
+    public function importAboutPage()
+    {
+        $page = new JournalPage();
+        $page->setJournal($this->journal);
+
+        foreach ($this->settings as $language => $field) {
+            $content = '';
+
+            !empty($field['focusScopeDesc']) && $content .= $field['focusScopeDesc'];
+            !empty($field['reviewPolicy']) && $content .= $field['reviewPolicy'];
+            !empty($field['reviewGuidelines']) && $content .= $field['reviewGuidelines'];
+            !empty($field['authorGuidelines']) && $content .= $field['authorGuidelines'];
+            !empty($field['authorInformation']) && $content .= $field['authorInformation'];
+            !empty($field['readerInformation']) && $content .= $field['readerInformation'];
+            !empty($field['librarianInformation']) && $content .= $field['librarianInformation'];
+            !empty($field['authorSelfArchivePolicy']) && $content .= $field['authorSelfArchivePolicy'];
+            !empty($field['publisherNote']) && $content .= $field['publisherNote'];
+            !empty($field['pubFreqPolicy']) && $content .= $field['pubFreqPolicy'];
+            !empty($field['openAccessPolicy']) && $content .= $field['openAccessPolicy'];
+            !empty($field['privacyStatement']) && $content .= $field['privacyStatement'];
+            !empty($field['copyrightNotice']) && $content .= $field['copyrightNotice'];
+            !empty($field['copyeditInstructions']) && $content .= $field['copyeditInstructions'];
+
+            $page->setCurrentLocale(substr($language, 0, 2));
+            $page->setTitle('About');
+            $page->setBody($content);
+        }
+
+        $this->em->persist($page);
     }
 }
