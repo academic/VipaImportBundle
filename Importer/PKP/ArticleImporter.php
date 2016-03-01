@@ -155,7 +155,7 @@ class ArticleImporter extends Importer
 
         switch ($pkpArticle['status']) {
             case 0: // STATUS_ARCHIVED
-                $article->setStatus(ArticleStatuses::STATUS_INREVIEW);
+                $article->setStatus(ArticleStatuses::STATUS_REJECTED);
                 break;
             case 1: // STATUS_QUEUED
                 $article->setStatus($this->determineStatus($id));
