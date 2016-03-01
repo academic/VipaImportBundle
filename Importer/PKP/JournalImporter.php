@@ -52,6 +52,16 @@ class JournalImporter extends Importer
     private $articleImporter;
 
     /**
+     * @var BoardImporter
+     */
+    private $boardImporter;
+
+    /**
+     * @var BoardMemberImporter
+     */
+    private $boardMemberImporter;
+
+    /**
      * JournalImporter constructor.
      * @param Connection $dbalConnection
      * @param EntityManager $em
@@ -71,9 +81,9 @@ class JournalImporter extends Importer
         $this->userImporter = $ui;
         $this->sectionImporter = new SectionImporter($this->dbalConnection, $this->em, $this->logger, $consoleOutput);
         $this->issueImporter = new IssueImporter($this->dbalConnection, $this->em, $this->logger, $consoleOutput);
-        $this->articleImporter = new ArticleImporter(
-            $this->dbalConnection, $this->em, $logger, $consoleOutput, $this->userImporter
-        );
+        $this->articleImporter = new ArticleImporter($this->dbalConnection, $this->em, $logger, $consoleOutput, $this->userImporter);
+        $this->boardImporter = new BoardImporter($this->dbalConnection, $this->em, $logger, $consoleOutput);
+        $this->boardMemberImporter = new BoardMemberImporter($this->dbalConnection, $this->em, $logger, $consoleOutput, $this->userImporter);
     }
 
     /**
@@ -212,6 +222,12 @@ class JournalImporter extends Importer
         $createdSections = $this->sectionImporter->importJournalSections($id, $this->journal->getId());
         $createdIssues = $this->issueImporter->importJournalIssues($id, $this->journal->getId(), $createdSections);
         $this->articleImporter->importArticles($id, $this->journal->getId(), $createdIssues, $createdSections);
+
+        $createdBoards = $this->boardImporter->importBoards($id, $this->journal->getId());
+
+        foreach ($createdBoards as $oldBoardId => $newBoardId) {
+            $this->boardMemberImporter->importBoardMembers($oldBoardId, $newBoardId);
+        }
 
         $this->em->commit();
         return ['new' => $this->journal->getId(), 'old' => $id];
