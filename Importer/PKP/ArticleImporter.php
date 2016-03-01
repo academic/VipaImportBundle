@@ -6,6 +6,7 @@ use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Exception;
+use Ojs\CoreBundle\Params\ArticleStatuses;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\ArticleAuthor;
 use Ojs\JournalBundle\Entity\Author;
@@ -153,17 +154,29 @@ class ArticleImporter extends Importer
         }
 
         switch ($pkpArticle['status']) {
-            case 0:
-                $article->setStatus(0);  // In Review
+            case 0: // STATUS_ARCHIVED
+                $article->setStatus(ArticleStatuses::STATUS_INREVIEW);
                 break;
-            case 1:
-                $article->setStatus(-2); // Unpublished
+            case 1: // STATUS_QUEUED
+                $article->setStatus(ArticleStatuses::STATUS_INREVIEW);
                 break;
-            case 3:
-                $article->setStatus(1);  // Published
+            case 3: // STATUS_PUBLISHED
+                $article->setStatus(ArticleStatuses::STATUS_PUBLISHED);
                 break;
-            case 4:
-                $article->setStatus(-3); // Rejected
+            case 4: // STATUS_DECLINED
+                $article->setStatus(ArticleStatuses::STATUS_REJECTED);
+                break;
+            case 5: // STATUS_QUEUED_UNASSIGNED
+                $article->setStatus(ArticleStatuses::STATUS_INREVIEW);
+                break;
+            case 6: // STATUS_QUEUED_REVIEW
+                $article->setStatus(ArticleStatuses::STATUS_INREVIEW);
+                break;
+            case 7: // STATUS_QUEUED_EDITING
+                $article->setStatus(ArticleStatuses::STATUS_UNPUBLISHED);
+                break;
+            case 8: // STATUS_INCOMPLETE
+                $article->setStatus(ArticleStatuses::STATUS_NOT_SUBMITTED);
                 break;
         }
 
