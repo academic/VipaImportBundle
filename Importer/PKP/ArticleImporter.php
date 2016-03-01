@@ -158,7 +158,7 @@ class ArticleImporter extends Importer
                 $article->setStatus(ArticleStatuses::STATUS_INREVIEW);
                 break;
             case 1: // STATUS_QUEUED
-                $article->setStatus(ArticleStatuses::STATUS_INREVIEW);
+                $article->setStatus($this->determineStatus($id));
                 break;
             case 3: // STATUS_PUBLISHED
                 $article->setStatus(ArticleStatuses::STATUS_PUBLISHED);
@@ -297,6 +297,26 @@ class ArticleImporter extends Importer
             $articleAuthor->setAuthor($author);
             $articleAuthor->setArticle($article);
             $articleAuthor->setAuthorOrder(!empty($pkpAuthor['seq']) ? $pkpAuthor['seq'] : 0);
+        }
+    }
+
+    public function determineStatus($oldArticleId)
+    {
+        $statusSql = "SELECT decision FROM edit_decisions WHERE article_id = :id ORDER BY round DESC";
+        $statusStatement = $this->dbalConnection->prepare($statusSql);
+        $statusStatement->bindValue('id', $oldArticleId);
+        $statusStatement->execute();
+
+        $result = $statusStatement->fetch();
+
+        if (!$result || empty($result['decision'])) {
+            return ArticleStatuses::STATUS_INREVIEW;
+        } elseif ($result['decision'] == 1) {
+            return ArticleStatuses::STATUS_UNPUBLISHED;
+        } elseif ($result['decision'] == 4) {
+            return ArticleStatuses::STATUS_REJECTED;
+        } else {
+            return ArticleStatuses::STATUS_INREVIEW;
         }
     }
 }
