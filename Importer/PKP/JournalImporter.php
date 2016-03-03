@@ -62,6 +62,11 @@ class JournalImporter extends Importer
     private $boardMemberImporter;
 
     /**
+     * @var JournalPageImporter
+     */
+    private $journalPageImporter;
+
+    /**
      * JournalImporter constructor.
      * @param Connection $dbalConnection
      * @param EntityManager $em
@@ -84,6 +89,7 @@ class JournalImporter extends Importer
         $this->articleImporter = new ArticleImporter($this->dbalConnection, $this->em, $logger, $consoleOutput, $this->userImporter);
         $this->boardImporter = new BoardImporter($this->dbalConnection, $this->em, $logger, $consoleOutput);
         $this->boardMemberImporter = new BoardMemberImporter($this->dbalConnection, $this->em, $logger, $consoleOutput, $this->userImporter);
+        $this->journalPageImporter = new JournalPageImporter($this->dbalConnection, $this->em, $logger, $consoleOutput);
     }
 
     /**
@@ -222,6 +228,7 @@ class JournalImporter extends Importer
         $createdSections = $this->sectionImporter->importJournalSections($id, $this->journal->getId());
         $createdIssues = $this->issueImporter->importJournalIssues($id, $this->journal->getId(), $createdSections);
         $this->articleImporter->importArticles($id, $this->journal->getId(), $createdIssues, $createdSections);
+        $this->journalPageImporter->importPages($id, $this->journal->getId());
 
         $createdBoards = $this->boardImporter->importBoards($id, $this->journal->getId());
 
