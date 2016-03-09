@@ -168,11 +168,11 @@ class JournalImporter extends Importer
 
         !empty($this->settings[$primaryLocale]['printIssn']) ?
             $this->journal->setIssn($this->settings[$primaryLocale]['printIssn']) :
-            $this->journal->setIssn('1234-5679');
+            $this->journal->setIssn('');
 
         !empty($this->settings[$primaryLocale]['onlineIssn']) ?
             $this->journal->setEissn($this->settings[$primaryLocale]['onlineIssn']) :
-            $this->journal->setEissn('1234-5679');
+            $this->journal->setEissn('');
 
         $date = sprintf('%d-01-01 00:00:00',
             !empty($this->settings[$primaryLocale]['initialYear']) ?
