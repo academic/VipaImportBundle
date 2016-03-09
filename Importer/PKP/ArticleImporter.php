@@ -151,6 +151,7 @@ class ArticleImporter extends Importer
             $article->setTags(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
             $article->setKeywords(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
             $article->setAbstract(!empty($fields['abstract']) ? $fields['abstract'] : '-');
+            $article->setDoi(!empty($fields['pub-id::doi']) ? $fields['pub-id::doi'] : null);
         }
 
         switch ($pkpArticle['status']) {
