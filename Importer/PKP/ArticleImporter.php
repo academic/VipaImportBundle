@@ -134,7 +134,7 @@ class ArticleImporter extends Importer
         $settings = array();
 
         foreach ($pkpSettings as $setting) {
-            $locale = !empty($setting['locale']) ? $setting['locale'] : 'en_US';
+            $locale = !empty($setting['locale']) ? $setting['locale'] : 'none';
             $name = $setting['setting_name'];
             $value = $setting['setting_value'];
             $settings[$locale][$name] = $value;
@@ -144,6 +144,7 @@ class ArticleImporter extends Importer
         $article->setJournal($journal);
         $article->setCurrentLocale(!empty($pkpArticle['language']) ? $pkpArticle['language'] : 'en');
         $article->setPrimaryLanguage(!empty($pkpArticle['language']) ? $pkpArticle['language'] : 'en');
+        $article->setDoi(!empty($settings['none']['pub-id::doi']) ? $settings['none']['pub-id::doi'] : null);
 
         foreach ($settings as $fieldLocale => $fields) {
             $article->setCurrentLocale(substr($fieldLocale, 0, 2));
@@ -151,7 +152,6 @@ class ArticleImporter extends Importer
             $article->setTags(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
             $article->setKeywords(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
             $article->setAbstract(!empty($fields['abstract']) ? $fields['abstract'] : '-');
-            $article->setDoi(!empty($fields['pub-id::doi']) ? $fields['pub-id::doi'] : null);
         }
 
         switch ($pkpArticle['status']) {
