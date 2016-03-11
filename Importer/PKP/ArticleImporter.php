@@ -266,7 +266,6 @@ class ArticleImporter extends Importer
         foreach ($authors as $pkpAuthor) {
             $author = new Author();
             $author->setCurrentLocale('en');
-            $author->setTitle('-');
             $author->setFirstName(!empty($pkpAuthor['first_name']) ? $pkpAuthor['first_name'] : '-');
             $author->setLastName(!empty($pkpAuthor['last_name']) ? $pkpAuthor['last_name'] : '-');
             $author->setEmail(
