@@ -117,20 +117,8 @@ class ArticleImporter extends Importer
         $settingsStatement->bindValue('id', $id);
         $settingsStatement->execute();
 
-        $viewStatsSql = "SELECT total FROM article_total_view_stats WHERE article_id = :id";
-        $viewStatsStatement = $this->dbalConnection->prepare($viewStatsSql);
-        $viewStatsStatement->bindValue('id', $id);
-        $viewStatsStatement->execute();
-
-        $downloadStatsSql = "SELECT total FROM article_total_download_stats WHERE article_id = :id";
-        $downloadStatsStatement = $this->dbalConnection->prepare($downloadStatsSql);
-        $downloadStatsStatement->bindValue('id', $id);
-        $downloadStatsStatement->execute();
-
         $pkpArticle = $articleStatement->fetch();
         $pkpSettings = $settingsStatement->fetchAll();
-        $pkpViewStats = $viewStatsStatement->fetch();
-        $pkpDownloadStats = $downloadStatsStatement->fetch();
         $settings = array();
 
         foreach ($pkpSettings as $setting) {
@@ -218,13 +206,6 @@ class ArticleImporter extends Importer
                 (int) StringHelper::roman2int($pages[1]) :
                 (int) $pages[1]);
         }
-
-        !empty($pkpViewStats['total']) ?
-            $article->setViewCount($pkpViewStats['total']) :
-            $article->setViewCount(0);
-        !empty($pkpDownloadStats['total']) ?
-            $article->setDownloadCount($pkpDownloadStats['total']) :
-            $article->setDownloadCount(0);
 
         $this->em->persist($article);
 
