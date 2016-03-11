@@ -102,7 +102,7 @@ class IssueImporter extends Importer
 
         $issue = new Issue();
         $issue->setJournal($journal);
-        $issue->setVolume($pkpIssue['volume']);
+        $issue->setVolume(is_numeric($pkpIssue['volume']) ? $pkpIssue['volume'] : '');
         $issue->setNumber($pkpIssue['number']);
         $issue->setYear($pkpIssue['year']);
         $issue->setPublished($pkpIssue['published']);
