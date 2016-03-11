@@ -7,6 +7,7 @@ use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Exception;
+use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
 use Ojs\JournalBundle\Entity\ContactTypes;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\JournalContact;
@@ -15,6 +16,7 @@ use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
 use Ojs\JournalBundle\Entity\Subject;
 use Ojs\JournalBundle\Entity\SubmissionChecklist;
+use OkulBilisim\OjsImportBundle\Entity\PendingDownload;
 use OkulBilisim\OjsImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -186,6 +188,37 @@ class JournalImporter extends Importer
         !empty($this->settings[$primaryLocale]['total_downloads']) ?
             $this->journal->setDownloadCount($this->settings[$primaryLocale]['total_downloads']) :
             $this->journal->setDownloadCount(0);
+        !empty($this->settings[$primaryLocale]['homeHeaderTitleImage']) ?
+            $header = unserialize($this->settings[$primaryLocale]['homeHeaderTitleImage']) :
+            $header = null;
+
+        if ($header) {
+            $baseDir = '/../web/uploads/journal/imported/';
+            $croppedBaseDir = '/../web/uploads/journal/croped/imported/';
+            $headerPath = $id . '/' . $header['uploadName'];
+
+            $pendingDownload = new PendingDownload();
+            $pendingDownload
+                ->setSource('public/journals/' . $headerPath)
+                ->setTarget($baseDir . $headerPath)
+                ->setTag('journal-header');
+
+            $croppedPendingDownload = new PendingDownload();
+            $croppedPendingDownload
+                ->setSource('public/journals/' . $headerPath)
+                ->setTarget($croppedBaseDir . $headerPath)
+                ->setTag('journal-header');
+
+            $history = new FileHistory();
+            $history->setFileName($headerPath);
+            $history->setOriginalName($headerPath);
+            $history->setType('journal');
+
+            $this->em->persist($croppedPendingDownload);
+            $this->em->persist($pendingDownload);
+            $this->em->persist($history);
+            $this->journal->setHeader('imported/' . $headerPath);
+        }
 
         $subjects = $this->importSubjects($primaryLocale);
 
