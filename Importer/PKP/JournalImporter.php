@@ -168,11 +168,11 @@ class JournalImporter extends Importer
             $this->journal->setFooterText($this->settings[$primaryLocale]['journalPageFooter']) :
             $this->journal->setFooterText(null);
 
-        !empty($this->settings[$primaryLocale]['printIssn']) ?
+        !empty($this->settings[$primaryLocale]['printIssn']) && count($this->settings[$primaryLocale]['printIssn']) == 9 ?
             $this->journal->setIssn($this->settings[$primaryLocale]['printIssn']) :
             $this->journal->setIssn('');
 
-        !empty($this->settings[$primaryLocale]['onlineIssn']) ?
+        !empty($this->settings[$primaryLocale]['onlineIssn']) && count($this->settings[$primaryLocale]['onlineIssn']) == 9 ?
             $this->journal->setEissn($this->settings[$primaryLocale]['onlineIssn']) :
             $this->journal->setEissn('');
 
