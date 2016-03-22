@@ -1,6 +1,6 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Helper;
+namespace Ojs\ImportBundle\Helper;
 
 class ImportHelper
 {

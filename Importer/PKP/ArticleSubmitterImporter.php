@@ -1,9 +1,9 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Importer\PKP;
+namespace Ojs\ImportBundle\Importer\PKP;
 
 use Ojs\JournalBundle\Entity\Article;
-use OkulBilisim\OjsImportBundle\Importer\Importer;
+use Ojs\ImportBundle\Importer\Importer;
 
 class ArticleSubmitterImporter extends Importer
 {
@@ -12,7 +12,7 @@ class ArticleSubmitterImporter extends Importer
      */
     public function importArticleSubmitter($userImporter)
     {
-        $pendingImports = $this->em->getRepository('OkulBilisimOjsImportBundle:PendingSubmitterImport')->findAll();
+        $pendingImports = $this->em->getRepository('ImportBundle:PendingSubmitterImport')->findAll();
         $this->consoleOutput->writeln("Importing article submitters...");
 
         foreach ($pendingImports as $import) {

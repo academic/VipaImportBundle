@@ -1,6 +1,6 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Importer\PKP;
+namespace Ojs\ImportBundle\Importer\PKP;
 
 use DateTime;
 use Doctrine\DBAL\Connection;
@@ -14,10 +14,10 @@ use Ojs\JournalBundle\Entity\Citation;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\Section;
-use OkulBilisim\OjsImportBundle\Entity\PendingStatisticImport;
-use OkulBilisim\OjsImportBundle\Entity\PendingSubmitterImport;
-use OkulBilisim\OjsImportBundle\Helper\StringHelper;
-use OkulBilisim\OjsImportBundle\Importer\Importer;
+use Ojs\ImportBundle\Entity\PendingStatisticImport;
+use Ojs\ImportBundle\Entity\PendingSubmitterImport;
+use Ojs\ImportBundle\Helper\StringHelper;
+use Ojs\ImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

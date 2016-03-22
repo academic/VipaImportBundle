@@ -1,13 +1,13 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Importer\PKP;
+namespace Ojs\ImportBundle\Importer\PKP;
 
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\ArticleFile;
-use OkulBilisim\OjsImportBundle\Entity\PendingDownload;
-use OkulBilisim\OjsImportBundle\Helper\FileHelper;
-use OkulBilisim\OjsImportBundle\Importer\Importer;
+use Ojs\ImportBundle\Entity\PendingDownload;
+use Ojs\ImportBundle\Helper\FileHelper;
+use Ojs\ImportBundle\Importer\Importer;
 
 class ArticleFileImporter extends Importer
 {

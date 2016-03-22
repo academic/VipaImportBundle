@@ -1,11 +1,11 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Importer\PKP;
+namespace Ojs\ImportBundle\Importer\PKP;
 
 use DateTime;
 use Ojs\AnalyticsBundle\Entity\ArticleFileStatistic;
 use Ojs\AnalyticsBundle\Entity\ArticleStatistic;
-use OkulBilisim\OjsImportBundle\Importer\Importer;
+use Ojs\ImportBundle\Importer\Importer;
 
 class ArticleStatisticImporter extends Importer
 {
@@ -14,7 +14,7 @@ class ArticleStatisticImporter extends Importer
      */
     public function importArticleStatistics()
     {
-        $pendingImports = $this->em->getRepository('OkulBilisimOjsImportBundle:PendingStatisticImport')->findAll();
+        $pendingImports = $this->em->getRepository('ImportBundle:PendingStatisticImport')->findAll();
         $this->consoleOutput->writeln("Importing article statistics...");
 
         foreach ($pendingImports as $import) {

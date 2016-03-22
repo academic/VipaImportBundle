@@ -1,6 +1,6 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Importer\PKP;
+namespace Ojs\ImportBundle\Importer\PKP;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
@@ -8,8 +8,8 @@ use Faker\Factory;
 use FOS\UserBundle\Model\UserManager;
 use FOS\UserBundle\Util\TokenGenerator;
 use Ojs\UserBundle\Entity\User;
-use OkulBilisim\OjsImportBundle\Helper\ImportHelper;
-use OkulBilisim\OjsImportBundle\Importer\Importer;
+use Ojs\ImportBundle\Helper\ImportHelper;
+use Ojs\ImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Importer\PKP;
+namespace Ojs\ImportBundle\Importer\PKP;
 
 use DateTime;
 use Exception;
@@ -8,8 +8,8 @@ use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\Section;
-use OkulBilisim\OjsImportBundle\Entity\PendingDownload;
-use OkulBilisim\OjsImportBundle\Importer\Importer;
+use Ojs\ImportBundle\Entity\PendingDownload;
+use Ojs\ImportBundle\Importer\Importer;
 
 class IssueImporter extends Importer
 {

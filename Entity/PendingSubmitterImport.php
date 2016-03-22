@@ -1,6 +1,6 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Entity;
+namespace Ojs\ImportBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Ojs\JournalBundle\Entity\Article;
@@ -9,7 +9,7 @@ use Ojs\JournalBundle\Entity\Article;
  * PendingSubmitterImport
  *
  * @ORM\Table()
- * @ORM\Entity(repositoryClass="OkulBilisim\OjsImportBundle\Entity\PendingSubmitterImportRepository")
+ * @ORM\Entity(repositoryClass="Ojs\ImportBundle\Entity\PendingSubmitterImportRepository")
  * @ORM\Table("import_pending_submitter_import")
  */
 class PendingSubmitterImport

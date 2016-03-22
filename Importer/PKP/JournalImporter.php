@@ -1,6 +1,6 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Importer\PKP;
+namespace Ojs\ImportBundle\Importer\PKP;
 
 use Behat\Transliterator\Transliterator;
 use DateTime;
@@ -16,8 +16,8 @@ use Ojs\JournalBundle\Entity\Lang;
 use Ojs\JournalBundle\Entity\Publisher;
 use Ojs\JournalBundle\Entity\Subject;
 use Ojs\JournalBundle\Entity\SubmissionChecklist;
-use OkulBilisim\OjsImportBundle\Entity\PendingDownload;
-use OkulBilisim\OjsImportBundle\Importer\Importer;
+use Ojs\ImportBundle\Entity\PendingDownload;
+use Ojs\ImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

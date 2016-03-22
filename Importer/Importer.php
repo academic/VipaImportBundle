@@ -1,6 +1,6 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Importer;
+namespace Ojs\ImportBundle\Importer;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;

@@ -1,10 +1,10 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Command;
+namespace Ojs\ImportBundle\Command;
 
 use Ojs\CoreBundle\Helper\StringHelper;
-use OkulBilisim\OjsImportBundle\Helper\ImportCommand;
-use OkulBilisim\OjsImportBundle\Importer\PKP\JournalContactImporter;
+use Ojs\ImportBundle\Helper\ImportCommand;
+use Ojs\ImportBundle\Importer\PKP\JournalContactImporter;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Stopwatch\Stopwatch;

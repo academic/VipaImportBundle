@@ -1,6 +1,6 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Command;
+namespace Ojs\ImportBundle\Command;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -27,7 +27,7 @@ class DownloadCommand extends ContainerAwareCommand
         /** @var EntityManager $em */
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
         $pendingDownloads = $em
-            ->getRepository('OkulBilisimOjsImportBundle:PendingDownload')
+            ->getRepository('ImportBundle:PendingDownload')
             ->findBy(['tag' => $input->getArgument('tag')]);
         $output->writeln("Downloading...");
 

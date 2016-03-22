@@ -1,9 +1,9 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Importer\PKP;
+namespace Ojs\ImportBundle\Importer\PKP;
 
 use Ojs\JournalBundle\Entity\Board;
-use OkulBilisim\OjsImportBundle\Importer\Importer;
+use Ojs\ImportBundle\Importer\Importer;
 
 class BoardImporter extends Importer
 {

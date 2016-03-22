@@ -1,4 +1,4 @@
-# OjsImportBundle
+# ImportBundle
 This is a bundle which helps with importing databases of other journal softwares to a new instance of OJS.
 
 ## Available Commands

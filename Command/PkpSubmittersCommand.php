@@ -1,12 +1,12 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Command;
+namespace Ojs\ImportBundle\Command;
 
 
 use Ojs\CoreBundle\Helper\StringHelper;
-use OkulBilisim\OjsImportBundle\Helper\ImportCommand;
-use OkulBilisim\OjsImportBundle\Importer\PKP\ArticleSubmitterImporter;
-use OkulBilisim\OjsImportBundle\Importer\PKP\UserImporter;
+use Ojs\ImportBundle\Helper\ImportCommand;
+use Ojs\ImportBundle\Importer\PKP\ArticleSubmitterImporter;
+use Ojs\ImportBundle\Importer\PKP\UserImporter;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Stopwatch\Stopwatch;

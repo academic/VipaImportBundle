@@ -11,11 +11,11 @@
         "symfony"
     ],
     "support": {
-        "email": "info@okulbilisim.com"
+        "email": "info@bulutyazilim.com"
     },
     "autoload": {
         "psr-4": {
-            "OkulBilisim\\OjsImportBundle\\": ""
+            "Ojs\\ImportBundle\\": ""
         }
     },
     "require": {

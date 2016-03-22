@@ -1,6 +1,6 @@
 <?php
 
-namespace OkulBilisim\OjsImportBundle\Entity;
+namespace Ojs\ImportBundle\Entity;
 
 use Doctrine\ORM\EntityRepository;
 
