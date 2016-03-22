@@ -1,27 +1,27 @@
 {
-    "name": "ojs/import-bundle",
-    "license": "MIT",
-    "type": "project",
-    "description": "A helper for migrating to OJS",
-    "version": "0.0.1",
-    "keywords": [
-        "ojs",
-        "import",
-        "migration",
-        "symfony"
-    ],
-    "support": {
-        "email": "info@bulutyazilim.com"
-    },
-    "autoload": {
-        "psr-4": {
-            "Ojs\\ImportBundle\\": ""
-        }
-    },
-    "require": {
-        "php": ">=5.4",
-        "ojs/ojs": "*",
-        "doctrine/dbal": "2.5.1",
-        "guzzlehttp/guzzle": "^6.1"
+  "name": "ojs/import-bundle",
+  "license": "MIT",
+  "type": "project",
+  "description": "A helper for migrating to OJS",
+  "version": "1.0.2",
+  "keywords": [
+    "ojs",
+    "import",
+    "migration",
+    "symfony"
+  ],
+  "support": {
+    "email": "info@okulbilisim.com"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ojs\\ImportBundle\\": ""
     }
+  },
+  "require": {
+    "php": ">=5.5.0",
+    "symfony/symfony": "~2.8|~3.0",
+    "doctrine/dbal": "~2.5",
+    "guzzlehttp/guzzle": "~6.2"
+  }
 }
