@@ -99,7 +99,7 @@ class ArticleImporter extends Importer
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      */
-    private function importArticle($id, $newJournalId, $issueIds, $sectionIds)
+    public function importArticle($id, $newJournalId, $issueIds, $sectionIds)
     {
         /** @var Journal $journal */
         $journal = $this->em->getReference('OjsJournalBundle:Journal', $newJournalId);
@@ -169,16 +169,28 @@ class ArticleImporter extends Importer
                 break;
         }
 
-        if (!empty($pkpArticle['issue_id']) && isset($issueIds[$pkpArticle['issue_id']])) {
-            /** @var Issue $issue */
-            $issue = $this->em->getReference('OjsJournalBundle:Issue', $issueIds[$pkpArticle['issue_id']]);
-            $article->setIssue($issue);
+        if (!empty($issueIds)) {
+            if (!is_array($issueIds)) {
+                /** @var Issue $issue */
+                $issue = $this->em->getReference('OjsJournalBundle:Issue', $issueIds);
+                $article->setIssue($issue);
+            } else if (!empty($pkpArticle['issue_id']) && isset($issueIds[$pkpArticle['issue_id']])) {
+                /** @var Issue $issue */
+                $issue = $this->em->getReference('OjsJournalBundle:Issue', $issueIds[$pkpArticle['issue_id']]);
+                $article->setIssue($issue);
+            }
         }
-        
-        if (!empty($pkpArticle['section_id']) && isset($sectionIds[$pkpArticle['section_id']])) {
-            /** @var Section $section */
-            $section = $this->em->getReference('OjsJournalBundle:Section', $sectionIds[$pkpArticle['section_id']]);
-            $article->setSection($section);
+
+        if (!empty($sectionIds)) {
+            if (!is_array($sectionIds)) {
+                /** @var Section $section */
+                $section = $this->em->getReference('OjsJournalBundle:Section', $sectionIds);
+                $article->setSection($section);
+            } else if (!empty($pkpArticle['section_id']) && isset($sectionIds[$pkpArticle['section_id']])) {
+                /** @var Section $section */
+                $section = $this->em->getReference('OjsJournalBundle:Section', $sectionIds[$pkpArticle['section_id']]);
+                $article->setSection($section);
+            }
         }
 
         $article->setSubmissionDate(
