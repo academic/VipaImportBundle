@@ -94,8 +94,8 @@ class ArticleImporter extends Importer
      * Imports the given article.
      * @param int $id Article's ID
      * @param int $newJournalId New journal's ID
-     * @param array $issueIds   IDs of issues
-     * @param array $sectionIds IDs of sections
+     * @param array|int $issueIds   IDs of issues
+     * @param array|int $sectionIds IDs of sections
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      */
