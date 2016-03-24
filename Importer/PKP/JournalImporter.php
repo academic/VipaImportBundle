@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManager;
 use Exception;
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
 use Ojs\CoreBundle\Params\PublisherStatuses;
+use Ojs\ImportBundle\Entity\ImportMap;
 use Ojs\JournalBundle\Entity\ContactTypes;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\JournalContact;
@@ -270,7 +271,11 @@ class JournalImporter extends Importer
             $this->boardMemberImporter->importBoardMembers($oldBoardId, $newBoardId);
         }
 
+        $map = new ImportMap($id, $this->journal->getId(), Journal::class);
+        $this->em->persist($map);
+        $this->em->flush();
         $this->em->commit();
+
         return ['new' => $this->journal->getId(), 'old' => $id];
     }
 
