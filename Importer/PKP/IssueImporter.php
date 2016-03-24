@@ -5,6 +5,7 @@ namespace Ojs\ImportBundle\Importer\PKP;
 use DateTime;
 use Exception;
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
+use Ojs\ImportBundle\Entity\ImportMap;
 use Ojs\JournalBundle\Entity\Issue;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\Section;
@@ -33,6 +34,7 @@ class IssueImporter extends Importer
         try {
             $this->em->beginTransaction();
             $createdIssues = array();
+            $createdIssueIds = array();
             $persistCounter = 1;
 
             foreach ($issues as $issue) {
@@ -46,6 +48,16 @@ class IssueImporter extends Importer
                     $this->em->commit();
                     $this->em->clear();
                     $this->em->beginTransaction();
+
+                    /** @var Issue $entity */
+                    foreach ($createdIssues as $oldIssueId => $entity) {
+                        $createdIssueIds[$oldIssueId] = $entity->getId();
+                        $map = new ImportMap($oldIssueId, $entity->getId(), Issue::class);
+                        $this->em->persist($map);
+                    }
+
+                    $this->em->flush();
+                    $createdIssues = [];
                 }
             }
 
@@ -55,11 +67,9 @@ class IssueImporter extends Importer
             throw $exception;
         }
 
-        $createdIssueIds = array();
-
         /** @var Issue $entity */
-        foreach ($createdIssues as $oldJournalId => $entity) {
-            $createdIssueIds[$oldJournalId] = $entity->getId();
+        foreach ($createdIssues as $oldIssueId => $entity) {
+            $createdIssueIds[$oldIssueId] = $entity->getId();
         }
 
         return $createdIssueIds;

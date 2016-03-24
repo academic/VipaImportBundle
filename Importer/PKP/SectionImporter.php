@@ -3,6 +3,7 @@
 namespace Ojs\ImportBundle\Importer\PKP;
 
 use Exception;
+use Ojs\ImportBundle\Entity\ImportMap;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\Section;
 use Ojs\ImportBundle\Importer\Importer;
@@ -35,6 +36,7 @@ class SectionImporter extends Importer
         try {
             $this->em->beginTransaction();
             $createdSections = array();
+            $createdSectionIds = array();
             $persistCounter = 1;
 
             foreach ($sections as $section) {
@@ -48,6 +50,16 @@ class SectionImporter extends Importer
                     $this->em->commit();
                     $this->em->clear();
                     $this->em->beginTransaction();
+
+                    /** @var Section $entity */
+                    foreach ($createdSections as $oldSectionId => $entity) {
+                        $createdSectionIds[$oldSectionId] = $entity->getId();
+                        $map = new ImportMap($oldSectionId, $entity->getId(), Section::class);
+                        $this->em->persist($map);
+                    }
+
+                    $this->em->flush();
+                    $createdSections = [];
                 }
             }
 
@@ -55,13 +67,6 @@ class SectionImporter extends Importer
         }  catch (Exception $exception) {
             $this->em->rollBack();
             throw $exception;
-        }
-
-        $createdSectionIds = array();
-
-        /** @var Section $entity */
-        foreach ($createdSections as $oldJournalId => $entity) {
-            $createdSectionIds[$oldJournalId] = $entity->getId();
         }
 
         return $createdSectionIds;

@@ -7,6 +7,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Ojs\CoreBundle\Params\ArticleStatuses;
+use Ojs\ImportBundle\Entity\ImportMap;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\ArticleAuthor;
 use Ojs\JournalBundle\Entity\Author;
@@ -66,12 +67,16 @@ class ArticleImporter extends Importer
         $articleStatement->execute();
         $articles = $articleStatement->fetchAll();
 
+        $createdArticles = array();
+        $createdArticleIds = array();
+
         try {
             $this->em->beginTransaction();
             $persistCounter = 1;
 
             foreach ($articles as $article) {
-                $this->importArticle($article['article_id'], $newJournalId, $issueIds, $sectionIds);
+                $createdArticle = $this->importArticle($article['article_id'], $newJournalId, $issueIds, $sectionIds);
+                $createdArticles[$article['article_id']] = $createdArticle;
                 $persistCounter++;
 
                 if ($persistCounter % 10 == 0  || $persistCounter == count($articles)) {
@@ -80,6 +85,16 @@ class ArticleImporter extends Importer
                     $this->em->commit();
                     $this->em->clear();
                     $this->em->beginTransaction();
+
+                    /** @var Issue $entity */
+                    foreach ($createdArticles as $oldArticleId => $entity) {
+                        $createdArticleIds[$oldArticleId] = $entity->getId();
+                        $map = new ImportMap($oldArticleId, $entity->getId(), Article::class);
+                        $this->em->persist($map);
+                    }
+
+                    $this->em->flush();
+                    $createdArticles = [];
                 }
             }
 
@@ -94,8 +109,9 @@ class ArticleImporter extends Importer
      * Imports the given article.
      * @param int $id Article's ID
      * @param int $newJournalId New journal's ID
-     * @param array|int $issueIds   IDs of issues
+     * @param array|int $issueIds IDs of issues
      * @param array|int $sectionIds IDs of sections
+     * @return Article
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      */
@@ -231,6 +247,8 @@ class ArticleImporter extends Importer
         $pendingSubmitterImport = new PendingSubmitterImport($article, $pkpArticle['user_id']);
         $this->em->persist($pendingStatImport);
         $this->em->persist($pendingSubmitterImport);
+
+        return $article;
     }
 
     /**
