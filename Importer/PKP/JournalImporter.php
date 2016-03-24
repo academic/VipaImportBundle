@@ -8,6 +8,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
+use Ojs\CoreBundle\Params\PublisherStatuses;
 use Ojs\JournalBundle\Entity\ContactTypes;
 use Ojs\JournalBundle\Entity\Journal;
 use Ojs\JournalBundle\Entity\JournalContact;
@@ -210,8 +211,8 @@ class JournalImporter extends Importer
                 ->setTag('journal-header');
 
             $history = new FileHistory();
-            $history->setFileName('imported/' .$headerPath);
-            $history->setOriginalName('imported/' .$headerPath);
+            $history->setFileName('imported/' . $headerPath);
+            $history->setOriginalName('imported/' . $headerPath);
             $history->setType('journal');
 
             $this->em->persist($croppedPendingDownload);
@@ -289,6 +290,7 @@ class JournalImporter extends Importer
         if (!$publisher) {
             $url = !empty($this->settings[$locale]['publisherUrl']) ? $this->settings[$locale]['publisherUrl'] : null;
             $publisher = $this->createPublisher($this->settings[$locale]['publisherInstitution'], $url);
+            $publisher->setStatus(PublisherStatuses::STATUS_COMPLETE);
 
             foreach ($this->settings as $fieldLocale => $fields) {
                 $publisher->setCurrentLocale(substr($fieldLocale, 0, 2));
