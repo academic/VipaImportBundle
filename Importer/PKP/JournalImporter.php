@@ -210,8 +210,8 @@ class JournalImporter extends Importer
                 ->setTag('journal-header');
 
             $history = new FileHistory();
-            $history->setFileName($headerPath);
-            $history->setOriginalName($headerPath);
+            $history->setFileName('imported/' .$headerPath);
+            $history->setOriginalName('imported/' .$headerPath);
             $history->setType('journal');
 
             $this->em->persist($croppedPendingDownload);
