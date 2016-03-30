@@ -59,7 +59,7 @@ class ArticleImporter extends Importer
      * @throws \Doctrine\DBAL\ConnectionException
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function importArticles($oldJournalId, $newJournalId, $issueIds, $sectionIds)
+    public function importJournalArticles($oldJournalId, $newJournalId, $issueIds, $sectionIds)
     {
         $articleSql = "SELECT article_id FROM articles WHERE journal_id = :journal_id";
         $articleStatement = $this->dbalConnection->prepare($articleSql);
@@ -67,19 +67,31 @@ class ArticleImporter extends Importer
         $articleStatement->execute();
         $articles = $articleStatement->fetchAll();
 
-        $createdArticles = array();
-        $createdArticleIds = array();
+        $this->importArticles($articles, $newJournalId, $sectionIds, $issueIds);
+    }
+
+    /**
+     * @param $articles
+     * @param $newJournalId
+     * @param $sectionIds
+     * @param $issueIds
+     * @throws Exception
+     */
+    public function importArticles($articles, $newJournalId, $sectionIds, $issueIds)
+    {
+        $createdArticles = [];
+        $createdArticleIds = [];
 
         try {
             $this->em->beginTransaction();
-            $persistCounter = 1;
+            $persistCounter = 0;
 
             foreach ($articles as $article) {
                 $createdArticle = $this->importArticle($article['article_id'], $newJournalId, $issueIds, $sectionIds);
                 $createdArticles[$article['article_id']] = $createdArticle;
                 $persistCounter++;
 
-                if ($persistCounter % 10 == 0  || $persistCounter == count($articles)) {
+                if ($persistCounter % 10 == 0 || $persistCounter == count($articles)) {
                     $this->consoleOutput->writeln("Writing articles...", true);
                     $this->em->flush();
                     $this->em->commit();

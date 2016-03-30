@@ -31,11 +31,23 @@ class IssueImporter extends Importer
         $issuesStatement->execute();
         $issues = $issuesStatement->fetchAll();
 
+        return $this->importIssues($issues, $newJournalId, $sectionIds);
+    }
+
+    /**
+     * @param $issues
+     * @param $newJournalId
+     * @param $sectionIds
+     * @return array
+     * @throws Exception
+     */
+    public function importIssues($issues, $newJournalId, $sectionIds)
+    {
         try {
             $this->em->beginTransaction();
-            $createdIssues = array();
-            $createdIssueIds = array();
-            $persistCounter = 1;
+            $createdIssues = [];
+            $createdIssueIds = [];
+            $persistCounter = 0;
 
             foreach ($issues as $issue) {
                 $createdIssue = $this->importIssue($issue['issue_id'], $newJournalId, $sectionIds);

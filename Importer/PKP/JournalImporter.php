@@ -262,7 +262,7 @@ class JournalImporter extends Importer
         // Those below also create their own inner transactions
         $createdSections = $this->sectionImporter->importJournalSections($id, $this->journal->getId());
         $createdIssues = $this->issueImporter->importJournalIssues($id, $this->journal->getId(), $createdSections);
-        $this->articleImporter->importArticles($id, $this->journal->getId(), $createdIssues, $createdSections);
+        $this->articleImporter->importJournalArticles($id, $this->journal->getId(), $createdIssues, $createdSections);
         $this->journalPageImporter->importPages($id, $this->journal->getId());
 
         $createdBoards = $this->boardImporter->importBoards($id, $this->journal->getId());

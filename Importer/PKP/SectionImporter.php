@@ -37,7 +37,7 @@ class SectionImporter extends Importer
             $this->em->beginTransaction();
             $createdSections = array();
             $createdSectionIds = array();
-            $persistCounter = 1;
+            $persistCounter = 0;
 
             foreach ($sections as $section) {
                 $createdSection = $this->importSection($section['section_id'], $newJournalId);
