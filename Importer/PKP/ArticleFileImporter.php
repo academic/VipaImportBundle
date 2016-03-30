@@ -82,10 +82,15 @@ class ArticleFileImporter extends Importer
             $articleFile->setDescription('-');
             $articleFile->setType(0);
 
-            $history = new FileHistory();
-            $history->setFileName($filename);
-            $history->setOriginalName($pkpArticleFile['original_file_name']);
-            $history->setType('articlefiles');
+            $history = $this->em->getRepository(FileHistory::class)->findOneBy(['fileName' => $filename]);
+
+            if (!$history) {
+                $history = new FileHistory();
+                $history->setFileName($filename);
+                $history->setOriginalName($pkpArticleFile['original_file_name']);
+                $history->setType('articlefiles');
+                $this->em->persist($history);
+            }
 
             $source = sprintf('%s/article/download/%s/%s', $slug, $galley['article_id'], $galley['galley_id']);
             $target = sprintf('/../web/uploads/articlefiles/imported/%s/%s.%s',
@@ -99,7 +104,6 @@ class ArticleFileImporter extends Importer
 
             $this->em->persist($pendingDownload);
             $this->em->persist($articleFile);
-            $this->em->persist($history);
         }
     }
 }

@@ -211,10 +211,14 @@ class JournalImporter extends Importer
                 ->setTarget($croppedBaseDir . $headerPath)
                 ->setTag('journal-header');
 
-            $history = new FileHistory();
-            $history->setFileName('imported/' . $headerPath);
-            $history->setOriginalName('imported/' . $headerPath);
-            $history->setType('journal');
+            $history = $this->em->getRepository(FileHistory::class)->findOneBy(['fileName' => 'imported/' . $headerPath]);
+
+            if (!$history) {
+                $history = new FileHistory();
+                $history->setFileName('imported/' . $headerPath);
+                $history->setOriginalName('imported/' . $headerPath);
+                $history->setType('journal');
+            }
 
             $this->em->persist($croppedPendingDownload);
             $this->em->persist($pendingDownload);

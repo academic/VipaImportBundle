@@ -76,10 +76,15 @@ class IssueFileImporter extends Importer
             $issueFile->setTitle($label);
             $issueFile->setDescription('-');
 
-            $history = new FileHistory();
-            $history->setFileName($filename);
-            $history->setOriginalName($pkpIssueFile['original_file_name']);
-            $history->setType('issuefiles');
+            $history = $this->em->getRepository(FileHistory::class)->findOneBy(['fileName' => $filename]);
+
+            if (!$history) {
+                $history = new FileHistory();
+                $history->setFileName($filename);
+                $history->setOriginalName($pkpIssueFile['original_file_name']);
+                $history->setType('issuefiles');
+                $this->em->persist($history);
+            }
 
             $source = sprintf('%s/issue/download/%s/%s', $slug, $galley['issue_id'], $galley['galley_id']);
             $target = sprintf('/../web/uploads/issuefiles/imported/%s/%s.%s',
@@ -93,7 +98,6 @@ class IssueFileImporter extends Importer
 
             $this->em->persist($pendingDownload);
             $this->em->persist($issueFile);
-            $this->em->persist($history);
         }
     }
 }

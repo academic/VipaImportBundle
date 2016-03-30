@@ -177,14 +177,18 @@ class IssueImporter extends Importer
                 ->setTarget($croppedBaseDir . $coverPath)
                 ->setTag('issue-cover');
 
-            $history = new FileHistory();
-            $history->setFileName($coverPath);
-            $history->setOriginalName($coverPath);
-            $history->setType('journal');
+            $history = $this->em->getRepository(FileHistory::class)->findOneBy(['fileName' => $coverPath]);
+
+            if (!$history) {
+                $history = new FileHistory();
+                $history->setFileName('imported/' . $coverPath);
+                $history->setOriginalName('imported/' . $coverPath);
+                $history->setType('journal');
+                $this->em->persist($history);
+            }
 
             $this->em->persist($croppedPendingDownload);
             $this->em->persist($pendingDownload);
-            $this->em->persist($history);
             $issue->setCover('imported/' . $coverPath);
         }
 
