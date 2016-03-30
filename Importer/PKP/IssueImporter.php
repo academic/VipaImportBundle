@@ -177,7 +177,7 @@ class IssueImporter extends Importer
                 ->setTarget($croppedBaseDir . $coverPath)
                 ->setTag('issue-cover');
 
-            $history = $this->em->getRepository(FileHistory::class)->findOneBy(['fileName' => $coverPath]);
+            $history = $this->em->getRepository(FileHistory::class)->findOneBy(['fileName' => 'imported/' . $coverPath]);
 
             if (!$history) {
                 $history = new FileHistory();
