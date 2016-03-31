@@ -2,6 +2,7 @@
 
 namespace Ojs\ImportBundle\Importer\PKP;
 
+use Doctrine\ORM\EntityNotFoundException;
 use Ojs\ImportBundle\Entity\PendingSubmitterImport;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\ImportBundle\Importer\Importer;
@@ -33,10 +34,15 @@ class ArticleSubmitterImporter extends Importer
             $user = $userImporter->importUser($import->getOldId());
 
             if ($user) {
-                /** @var Article $article */
-                $article = $import->getArticle();
-                $article->setSubmitterUser($user);
-                $this->em->persist($article);
+                try {
+                    /** @var Article $article */
+                    $article = $import->getArticle();
+                    $article->setSubmitterUser($user);
+                    $this->em->persist($article);
+                } catch (EntityNotFoundException $e) {
+                    $this->consoleOutput->writeln("Article not found, skipping #" . $import->getId());
+                    continue;
+                }
             }
 
             $this->em->remove($import);
