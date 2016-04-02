@@ -163,11 +163,12 @@ class ArticleImporter extends Importer
         $article->setDoi(!empty($settings['none']['pub-id::doi']) ? $settings['none']['pub-id::doi'] : null);
 
         foreach ($settings as $fieldLocale => $fields) {
+            $subject = !empty($fields['subject']) ? mb_substr($fields['subject'], 0, 254, 'UTF-8') : '-';
             $article->setCurrentLocale(substr($fieldLocale, 0, 2));
             $article->setTitle(!empty($fields['title']) ? $fields['title'] : '-');
-            $article->setTags(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
-            $article->setKeywords(!empty($fields['subject']) ? substr($fields['subject'], 0, 254) : '-');
             $article->setAbstract(!empty($fields['abstract']) ? $fields['abstract'] : '-');
+            $article->setKeywords($subject);
+            $article->setTags($subject);
         }
 
         switch ($pkpArticle['status']) {
