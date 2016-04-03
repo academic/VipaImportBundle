@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Map
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Ojs\ImportBundle\Entity\ImportMapRepository")
  * @ORM\Table("import_map")
  */
 class ImportMap
