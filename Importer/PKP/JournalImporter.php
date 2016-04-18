@@ -134,7 +134,6 @@ class JournalImporter extends Importer
 
         $this->journal = new Journal();
         $this->journal->setStatus(1);
-        $this->journal->setPublished(true);
         $this->journal->setSlug($pkpJournal['path']);
 
         // Fill translatable fields in all available languages except the primary one
