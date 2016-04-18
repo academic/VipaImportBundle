@@ -143,7 +143,7 @@ class IssueImporter extends Importer
         $date = false;
         if (!empty($pkpIssue['date_published'])) {
             // This might assign 'false' to the variable
-            $date = DateTime::createFromFormat('Y-m-d h:m:s', $pkpIssue['date_published']);
+            $date = DateTime::createFromFormat('Y-m-d H:i:s', $pkpIssue['date_published']);
         }
         // Current date & time is used when date is false
         $issue->setDatePublished($date ? $date : new DateTime());
