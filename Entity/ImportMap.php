@@ -136,5 +136,13 @@ class ImportMap
     {
         return $this->type;
     }
+
+    /**
+     *
+     */
+    function __toString()
+    {
+        return $this->getOldId() . " => " . $this->getNewId() . " :: " . $this->getType();
+    }
 }
 
