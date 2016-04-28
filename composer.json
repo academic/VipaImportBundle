@@ -3,7 +3,7 @@
   "license": "MIT",
   "type": "project",
   "description": "A helper for migrating to OJS",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "keywords": [
     "ojs",
     "import",
