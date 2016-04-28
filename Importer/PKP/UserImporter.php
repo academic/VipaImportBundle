@@ -78,9 +78,11 @@ class UserImporter extends Importer
 
         if ($pkpUser) {
             if (!empty($pkpUser['username'])) {
-                $user = $this->em
-                    ->getRepository('OjsUserBundle:User')
-                    ->findOneBy(['username' => $pkpUser['username']]);
+                $user = $this->em->getRepository('OjsUserBundle:User')->findOneBy(['username' => $pkpUser['username']]);
+
+                if (!$user) {
+                    $user = $this->em->getRepository('OjsUserBundle:User')->findOneBy(['email' => $pkpUser['email']]);
+                }
             }
 
             if (is_null($user)) {
