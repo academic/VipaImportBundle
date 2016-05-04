@@ -133,9 +133,9 @@ class ArticleImporter extends Importer
         $journal = $this->em->getReference('OjsJournalBundle:Journal', $newJournalId);
         $this->consoleOutput->writeln("Reading article #" . $id . "... ", true);
 
-        $articleSql = "SELECT articles.*, published_articles.issue_id FROM articles LEFT JOIN " .
-            "published_articles ON published_articles.article_id = articles.article_id WHERE " .
-            "articles.article_id = :id";
+        $articleSql = "SELECT articles.*, published_articles.issue_id, published_articles.seq FROM articles LEFT JOIN" .
+            " published_articles ON published_articles.article_id = articles.article_id WHERE" .
+            " articles.article_id = :id";
         $articleStatement = $this->dbalConnection->prepare($articleSql);
         $articleStatement->bindValue('id', $id);
         $articleStatement->execute();
@@ -246,6 +246,10 @@ class ArticleImporter extends Importer
             $article->setLastPage((int) $pages[1] == 0 && !empty($pages[1]) ?
                 (int) StringHelper::roman2int($pages[1]) :
                 (int) $pages[1]);
+        }
+
+        if (!empty($pkpArticle['seq'])) {
+            $article->setOrderNum($pkpArticle['seq']);
         }
 
         $this->em->persist($article);
