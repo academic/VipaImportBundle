@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,6 +15,11 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class DownloadCommand extends ContainerAwareCommand
 {
+    /**
+     * @var OutputInterface
+     */
+    private $output;
+
     protected function configure()
     {
         $this
@@ -28,6 +34,8 @@ class DownloadCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->output = $output;
+
         /** @var EntityManager $em */
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
         $pendingDownloads = $em
@@ -36,17 +44,16 @@ class DownloadCommand extends ContainerAwareCommand
                 'tag' => $input->getArgument('tag'),
                 'error' => $input->getOption('retry'),
             ]);
-        $output->writeln("Downloading...");
+        $this->output->writeln("Downloading...");
 
         foreach ($pendingDownloads as $download) {
-            $output->writeln("Downloading " . $download->getSource());
             $successful = $this->download($input->getArgument('host'), $download->getSource(), $download->getTarget());
 
             if ($successful) {
                 $em->remove($download);
             } else {
                 $download->setError(true);
-                $output->writeln("Couldn't download " . $download->getSource());
+                $this->output->writeln("Couldn't download " . $download->getSource());
             }
 
             $em->flush($download);
@@ -56,8 +63,15 @@ class DownloadCommand extends ContainerAwareCommand
     private function download($host, $source, $target)
     {
         try {
+            $progress = new ProgressBar($this->output, 100);
+            $progress->start();
+
             $client = new Client(['base_uri' => $host]);
-            $response = $client->request('GET', $source);
+            $response = $client->request('GET', $source, [
+                'progress' => function ($total, $downloaded) use ($progress) {
+                    $progress->setProgress(100 * $downloaded / ++$total);
+                }
+            ]);
         } catch (BadResponseException $e) {
             return false;
         }
