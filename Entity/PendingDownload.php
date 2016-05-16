@@ -39,6 +39,12 @@ class PendingDownload
     private $tag;
 
     /**
+     * @ORM\Column(type="boolean", options={"default": false})
+     * @var string
+     */
+    private $error = false;
+
+    /**
      * @return int
      */
     public function getId()
@@ -99,6 +105,25 @@ class PendingDownload
     public function setTag($tag)
     {
         $this->tag = $tag;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getError()
+    {
+        return $this->error;
+    }
+
+    /**
+     * @param string $error
+     * @return PendingDownload
+     */
+    public function setError($error)
+    {
+        $this->error = $error;
 
         return $this;
     }

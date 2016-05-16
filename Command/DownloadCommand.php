@@ -3,9 +3,12 @@
 namespace Ojs\ImportBundle\Command;
 
 use Doctrine\ORM\EntityManager;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -18,7 +21,8 @@ class DownloadCommand extends ContainerAwareCommand
             ->setDescription('Downloads files of imported entities')
             ->addArgument('host', InputArgument::REQUIRED, 'Hostname of the server where the files are stored')
             ->addArgument('tag', InputArgument::OPTIONAL, 'Tag of the files which will be downloaded ' .
-                '(eg. issue-cover). Tagless ones will be downloaded if there is not any tag supplied');
+                '(eg. issue-cover). Tagless ones will be downloaded if there is not any tag supplied')
+            ->addOption('retry', null, InputOption::VALUE_NONE, 'Retry failed downloads');
     }
 
 
@@ -28,7 +32,10 @@ class DownloadCommand extends ContainerAwareCommand
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
         $pendingDownloads = $em
             ->getRepository('ImportBundle:PendingDownload')
-            ->findBy(['tag' => $input->getArgument('tag')]);
+            ->findBy([
+                'tag' => $input->getArgument('tag'),
+                'error' => $input->getOption('retry'),
+            ]);
         $output->writeln("Downloading...");
 
         foreach ($pendingDownloads as $download) {
@@ -37,35 +44,41 @@ class DownloadCommand extends ContainerAwareCommand
 
             if ($successful) {
                 $em->remove($download);
-                $em->flush($download);
             } else {
+                $download->setError(true);
                 $output->writeln("Couldn't download " . $download->getSource());
             }
+
+            $em->flush($download);
         }
     }
 
     private function download($host, $source, $target)
     {
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $host . '/' . $source);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_BINARYTRANSFER, true);
+        try {
+            $client = new Client(['base_uri' => $host]);
+            $response = $client->request('GET', $source);
+        } catch (BadResponseException $e) {
+            return false;
+        }
 
-        $data = curl_exec($curl);
-        curl_close($curl);
+        if ($response->getStatusCode() === 200) {
+            $rootDir = $this->getContainer()->get('kernel')->getRootDir();
+            $absoluteTarget = $rootDir . $target;
+            $body = $response->getBody();
 
-        $rootDir = $this->getContainer()->get('kernel')->getRootDir();
-        $fs = new Filesystem();
+            $targetDir = explode('/', $absoluteTarget);
+            array_pop($targetDir); // Remove filename
+            $targetDir = implode('/', $targetDir);
 
-        $targetDir = explode('/', $target);
-        array_pop($targetDir);
-        $targetDir = implode('/', $targetDir);
-        $fs->mkdir($rootDir . '/'. $targetDir);
 
-        $file = fopen($rootDir . $target, "w");
-        $status = fputs($file, $data);
-        fclose($file);
+            $filesystem = new Filesystem();
+            $filesystem->mkdir($targetDir);
+            $file = fopen($absoluteTarget, "w");
 
-        return $status;
+            return fputs($file, $body->getContents());
+        }
+
+        return false;
     }
 }
