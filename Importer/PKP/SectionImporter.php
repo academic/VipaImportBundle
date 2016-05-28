@@ -65,7 +65,7 @@ class SectionImporter extends Importer
 
             $this->em->commit();
         }  catch (Exception $exception) {
-            $this->em->rollBack();
+            $this->em->rollback();
             throw $exception;
         }
 
