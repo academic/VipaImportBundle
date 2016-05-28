@@ -107,7 +107,8 @@ class SectionImporter extends Importer
         $section = new Section();
         $section->setJournal($journal);
         $section->setAllowIndex(!empty($pkpSection['meta_indexed']) ? $pkpSection['meta_indexed'] : 0);
-        $section->setHideTitle(!empty($pkpSection['hide_title']) ? $pkpSection['hide_title']: 0);
+        $section->setHideTitle(!empty($pkpSection['hide_title']) ? $pkpSection['hide_title'] : 0);
+        $section->setSectionOrder(!empty($pkpSection['seq']) ? $pkpSection['seq'] : 0);
 
         foreach ($this->settings as $fieldLocale => $fields) {
             $section->setCurrentLocale(substr($fieldLocale, 0, 2));
