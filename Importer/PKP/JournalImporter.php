@@ -234,7 +234,7 @@ class JournalImporter extends Importer
         // Set publisher
         !empty($this->settings[$primaryLocale]['publisherInstitution']) ?
             $this->importAndSetPublisher($this->settings[$primaryLocale]['publisherInstitution'], $primaryLocale) :
-            $this->journal->setPublisher($this->getUnknownPublisher());
+            $this->journal->setPublisher($this->getUnknownPublisher($primaryLocale));
 
         // Use existing languages or create if needed
         $language = $this->em
@@ -291,13 +291,14 @@ class JournalImporter extends Importer
      */
     private function importAndSetPublisher($name, $locale)
     {
-        $publisher = $this->em
-            ->getRepository('OjsJournalBundle:Publisher')
+        $translation = $this->em
+            ->getRepository('OjsJournalBundle:PublisherTranslation')
             ->findOneBy(['name' => $name]);
+        $publisher = $translation !== null ? $translation->getTranslatable() : null;
 
         if (!$publisher) {
             $url = !empty($this->settings[$locale]['publisherUrl']) ? $this->settings[$locale]['publisherUrl'] : null;
-            $publisher = $this->createPublisher($this->settings[$locale]['publisherInstitution'], $url);
+            $publisher = $this->createPublisher($this->settings[$locale]['publisherInstitution'], $url, $locale);
             $publisher->setStatus(PublisherStatuses::STATUS_COMPLETE);
 
             foreach ($this->settings as $fieldLocale => $fields) {
@@ -313,18 +314,19 @@ class JournalImporter extends Importer
 
     /**
      * Fetches the publisher with the name "Unknown Publisher".
+     * @param string $locale Locale of translatable fields
      * @return Publisher Publisher with the name "Unknown Publisher"
      */
-    private function getUnknownPublisher()
+    private function getUnknownPublisher($locale)
     {
-        $publisher = $this->em
-            ->getRepository('OjsJournalBundle:Publisher')
+        $translation = $this->em
+            ->getRepository('OjsJournalBundle:PublisherTranslation')
             ->findOneBy(['name' => 'Unknown Publisher']);
+        $publisher = $translation !== null ? $translation->getTranslatable() : null;
 
         if (!$publisher) {
-            $publisher = $this->createPublisher('Unknown Publisher', 'http://example.com');
-            $publisher->setCurrentLocale('en');
-            $publisher->setAbout('-');
+            $publisher = $this->createPublisher('Unknown Publisher', 'http://example.com', $locale);
+            $publisher->setCurrentLocale($locale)->setAbout('-');
             $this->em->persist($publisher);
         }
 
@@ -333,21 +335,22 @@ class JournalImporter extends Importer
 
     /**
      * Creates a publisher with given properties.
-     * @param  String $name
-     * @param  String $url
+     * @param  string $name
+     * @param  string $url
+     * @param  string $locale
      * @return Publisher Created publisher
      */
-    private function createPublisher($name, $url)
+    private function createPublisher($name, $url, $locale)
     {
         $publisher = new Publisher();
-        $publisher->setName($name);
-        $publisher->setEmail('publisher@example.com');
-        $publisher->setAddress('-');
-        $publisher->setPhone('-');
-        $publisher->setUrl($url);
-
+        $publisher
+            ->setCurrentLocale($locale)
+            ->setName($name)
+            ->setEmail('publisher@example.com')
+            ->setAddress('-')
+            ->setPhone('-')
+            ->setUrl($url);
         $this->em->persist($publisher);
-
         return $publisher;
     }
 
