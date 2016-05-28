@@ -249,7 +249,7 @@ class ArticleImporter extends Importer
         }
 
         if (!empty($pkpArticle['seq'])) {
-            $article->setOrderNum($pkpArticle['seq']);
+            $article->setOrderNum(intval($pkpArticle['seq']));
         }
 
         $this->em->persist($article);
