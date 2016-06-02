@@ -6,7 +6,6 @@ use Doctrine\ORM\EntityManager;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -51,9 +50,10 @@ class DownloadCommand extends ContainerAwareCommand
 
             if ($successful) {
                 $em->remove($download);
+                $this->output->writeln("<info>Downloaded " . $download->getSource() . "</info>");
             } else {
                 $download->setError(true);
-                $this->output->writeln("Couldn't download " . $download->getSource());
+                $this->output->writeln("<error>Couldn't download " . $download->getSource() . "</error>");
             }
 
             $em->flush($download);
@@ -63,15 +63,8 @@ class DownloadCommand extends ContainerAwareCommand
     private function download($host, $source, $target)
     {
         try {
-            $progress = new ProgressBar($this->output, 100);
-            $progress->start();
-
             $client = new Client(['base_uri' => $host]);
-            $response = $client->request('GET', $source, [
-                'progress' => function ($total, $downloaded) use ($progress) {
-                    $progress->setProgress(100 * $downloaded / ++$total);
-                }
-            ]);
+            $response = $client->request('GET', $source);
         } catch (BadResponseException $e) {
             return false;
         }
