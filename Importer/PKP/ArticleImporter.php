@@ -133,8 +133,8 @@ class ArticleImporter extends Importer
         $journal = $this->em->getReference('OjsJournalBundle:Journal', $newJournalId);
         $this->consoleOutput->writeln("Reading article #" . $id . "... ", true);
 
-        $articleSql = "SELECT articles.*, published_articles.issue_id, published_articles.seq FROM articles LEFT JOIN" .
-            " published_articles ON published_articles.article_id = articles.article_id WHERE" .
+        $articleSql = "SELECT articles.*, published_articles.issue_id, published_articles.seq, published_articles.date_published FROM articles " .
+            " LEFT JOIN published_articles ON published_articles.article_id = articles.article_id WHERE" .
             " articles.article_id = :id";
         $articleStatement = $this->dbalConnection->prepare($articleSql);
         $articleStatement->bindValue('id', $id);
@@ -229,9 +229,9 @@ class ArticleImporter extends Importer
         );
 
         $article->setPubdate(
-            !empty($pkpArticle['date_submitted']) ?
-                DateTime::createFromFormat('Y-m-d H:i:s', $pkpArticle['date_submitted']) :
-                new DateTime()
+            !empty($pkpArticle['date_published']) ?
+                DateTime::createFromFormat('Y-m-d H:i:s', $pkpArticle['date_published']) :
+                null
         );
 
         if (isset($pkpArticle['pages'])) {
