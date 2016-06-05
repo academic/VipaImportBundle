@@ -55,7 +55,7 @@ class JournalPageImporter extends Importer
             $title = !empty($fields['title']) ? $fields['title'] : 'Page';
             $content = !empty($fields['content']) ? $fields['content'] : 'This page is intentionally left blank.';
 
-            $page->setCurrentLocale(mb_substr($locale, 0, 2));
+            $page->setCurrentLocale(mb_substr($locale, 0, 2, 'UTF-8'));
             $page->setTitle($title);
             $page->setBody($content);
             $page->setVisible(true);

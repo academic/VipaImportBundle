@@ -120,7 +120,7 @@ class JournalImporter extends Importer
         $pkpJournal = $journalStatement->fetch();
         $pkpSettings = $settingsStatement->fetchAll();
         $primaryLocale = $pkpJournal['primary_locale'];
-        $languageCode = mb_substr($primaryLocale, 0, 2);
+        $languageCode = mb_substr($primaryLocale, 0, 2, 'UTF-8');
 
         !$pkpJournal && die('Journal not found.' . PHP_EOL);
         $this->consoleOutput->writeln("Reading journal settings...");
@@ -143,7 +143,7 @@ class JournalImporter extends Importer
                 continue;
             }
 
-            $this->journal->setCurrentLocale(mb_substr($fieldLocale, 0, 2));
+            $this->journal->setCurrentLocale(mb_substr($fieldLocale, 0, 2, 'UTF-8'));
 
             !empty($fields['title']) ?
                 $this->journal->setTitle($fields['title']) :
@@ -302,7 +302,7 @@ class JournalImporter extends Importer
             $publisher->setStatus(PublisherStatuses::STATUS_COMPLETE);
 
             foreach ($this->settings as $fieldLocale => $fields) {
-                $publisher->setCurrentLocale(mb_substr($fieldLocale, 0, 2));
+                $publisher->setCurrentLocale(mb_substr($fieldLocale, 0, 2, 'UTF-8'));
                 !empty($fields['publisherNote']) ?
                     $publisher->setAbout($fields['publisherNote']) :
                     $publisher->setAbout('-');
@@ -326,7 +326,7 @@ class JournalImporter extends Importer
 
         if (!$publisher) {
             $publisher = $this->createPublisher('Unknown Publisher', 'http://example.com', $locale);
-            $publisher->setCurrentLocale(mb_substr($locale, 0, 2))->setAbout('-');
+            $publisher->setCurrentLocale(mb_substr($locale, 0, 2, 'UTF-8'))->setAbout('-');
             $this->em->persist($publisher);
         }
 
@@ -344,7 +344,7 @@ class JournalImporter extends Importer
     {
         $publisher = new Publisher();
         $publisher
-            ->setCurrentLocale(mb_substr($locale, 0, 2))
+            ->setCurrentLocale(mb_substr($locale, 0, 2, 'UTF-8'))
             ->setName($name)
             ->setEmail('publisher@example.com')
             ->setAddress('-')
@@ -420,7 +420,7 @@ class JournalImporter extends Importer
                 $subject->setTags($tags);
 
                 foreach ($categorySettings as $locale => $value) {
-                    $subject->setCurrentLocale(mb_substr($locale, 0, 2));
+                    $subject->setCurrentLocale(mb_substr($locale, 0, 2, 'UTF-8'));
                     $subject->setSubject($value);
                     $this->em->persist($subject);
                     $this->em->flush();
@@ -474,7 +474,7 @@ class JournalImporter extends Importer
             $supportContact->setContactType($type[0]);
         } else {
             $newType = new ContactTypes();
-            $newType->setCurrentLocale(mb_substr($primaryLocale, 0, 2));
+            $newType->setCurrentLocale(mb_substr($primaryLocale, 0, 2, 'UTF-8'));
             $newType->setName('Default');
             $newType->setDescription('Default Type');
 
@@ -492,7 +492,7 @@ class JournalImporter extends Importer
     {
         $checklist = new SubmissionChecklist();
         $checklist->setLabel('Checklist');
-        $checklist->setLocale(mb_substr($primaryLocale, 0, 2));
+        $checklist->setLocale(mb_substr($primaryLocale, 0, 2, 'UTF-8'));
 
         $detail = "<ul>";
 
@@ -535,7 +535,7 @@ class JournalImporter extends Importer
             !empty($field['copyrightNotice']) && $content .= $field['copyrightNotice'];
             !empty($field['copyeditInstructions']) && $content .= $field['copyeditInstructions'];
 
-            $page->setCurrentLocale(mb_substr($language, 0, 2));
+            $page->setCurrentLocale(mb_substr($language, 0, 2, 'UTF-8'));
             $page->setTitle('About');
             $page->setBody($content);
         }

@@ -58,7 +58,7 @@ class IssueFileImporter extends Importer
         $pkpGalleys = $galleysStatement->fetchAll();
 
         foreach ($pkpGalleys as $galley) {
-            $locale = !empty($galley['locale']) ? mb_substr($galley['locale'], 0, 2) : 'en';
+            $locale = !empty($galley['locale']) ? mb_substr($galley['locale'], 0, 2, 'UTF-8') : 'en';
             $label = !empty($galley['label']) ? $galley['label'] : '-';
             $filename = sprintf('imported/%s/%s.%s',
                 $galley['issue_id'],

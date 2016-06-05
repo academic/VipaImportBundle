@@ -155,7 +155,7 @@ class IssueImporter extends Importer
                 $cover = $fields['fileName'];
             }
 
-            $issue->setCurrentLocale(mb_substr($fieldLocale, 0, 2));
+            $issue->setCurrentLocale(mb_substr($fieldLocale, 0, 2, 'UTF-8'));
             $issue->setTitle(!empty($fields['title']) ? $fields['title']: '-');
             $issue->setDescription(!empty($fields['description']) ? $fields['description']: '-');
         }

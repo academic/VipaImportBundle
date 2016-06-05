@@ -159,12 +159,12 @@ class ArticleImporter extends Importer
         $article = new Article();
         $article->setJournal($journal);
         $article->setCurrentLocale(!empty($pkpArticle['language']) ? $pkpArticle['language'] : 'en');
-        $article->setPrimaryLanguage(!empty($pkpArticle['language']) ? mb_substr($pkpArticle['language'], 0, 2) : 'en');
+        $article->setPrimaryLanguage(!empty($pkpArticle['language']) ? mb_substr($pkpArticle['language'], 0, 2, 'UTF-8') : 'en');
         $article->setDoi(!empty($settings['none']['pub-id::doi']) ? $settings['none']['pub-id::doi'] : null);
 
         foreach ($settings as $fieldLocale => $fields) {
             $subject = !empty($fields['subject']) ? mb_substr($fields['subject'], 0, 254, 'UTF-8') : '-';
-            $article->setCurrentLocale(mb_substr($fieldLocale, 0, 2));
+            $article->setCurrentLocale(mb_substr($fieldLocale, 0, 2, 'UTF-8'));
             $article->setTitle(!empty($fields['title']) ? $fields['title'] : '-');
             $article->setAbstract(!empty($fields['abstract']) ? $fields['abstract'] : '-');
             $article->setKeywords($subject);
