@@ -111,7 +111,7 @@ class SectionImporter extends Importer
         $section->setSectionOrder(!empty($pkpSection['seq']) ? intval($pkpSection['seq']) : 0);
 
         foreach ($this->settings as $fieldLocale => $fields) {
-            $section->setCurrentLocale(substr($fieldLocale, 0, 2));
+            $section->setCurrentLocale(mb_substr($fieldLocale, 0, 2));
             $section->setTitle(!empty($fields['title']) ? $fields['title']: '-');
         }
 

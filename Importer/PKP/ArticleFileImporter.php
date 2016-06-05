@@ -65,7 +65,7 @@ class ArticleFileImporter extends Importer
         $pkpGalleys = $galleysStatement->fetchAll();
 
         foreach ($pkpGalleys as $galley) {
-            $locale = !empty($galley['locale']) ? substr($galley['locale'], 0, 2) : 'en';
+            $locale = !empty($galley['locale']) ? mb_substr($galley['locale'], 0, 2) : 'en';
             $label = !empty($galley['label']) ? $galley['label'] : '-';
             $version = !empty($pkpArticleFile['revision']) ? $pkpArticleFile['revision'] : 0;
             $filename = sprintf('imported/%s/%s.%s',

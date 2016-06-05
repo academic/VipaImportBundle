@@ -100,7 +100,7 @@ class UserImporter extends Importer
                     $user->setEnabled(1);
 
                 // Set a random password
-                $password = substr($this->tokenGenerator->generateToken(), 0, 8);
+                $password = mb_substr($this->tokenGenerator->generateToken(), 0, 8);
                 $user->setPlainPassword($password);
 
                 // Fields which can't be blank

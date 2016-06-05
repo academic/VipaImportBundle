@@ -52,7 +52,7 @@ class BoardImporter extends Importer
         $board->setJournal($journal);
 
         foreach ($results as $result) {
-            $board->setCurrentLocale(substr($result['locale'], 0, 2));
+            $board->setCurrentLocale(mb_substr($result['locale'], 0, 2));
             $board->setName($result['setting_value']);
         }
 
