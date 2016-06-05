@@ -58,6 +58,7 @@ class JournalPageImporter extends Importer
             $page->setCurrentLocale(mb_substr($locale, 0, 2));
             $page->setTitle($title);
             $page->setBody($content);
+            $page->setVisible(true);
         }
 
         return $page;
