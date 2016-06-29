@@ -126,7 +126,7 @@ class IssueImporter extends Importer
         $issue->setJournal($journal);
         $issue->setVolume(is_numeric($pkpIssue['volume']) ? $pkpIssue['volume'] : '');
         $issue->setNumber($pkpIssue['number']);
-        $issue->setYear($pkpIssue['year']);
+        $issue->setYear(DateTime::createFromFormat('Y-m-d H:i:s', $pkpIssue['year'] . '-01-01 00:00:00'));
         $issue->setPublished($pkpIssue['published']);
         $issue->setSpecial(false);
 
