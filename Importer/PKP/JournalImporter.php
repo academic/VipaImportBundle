@@ -245,7 +245,6 @@ class JournalImporter extends Importer
 
         $this->importContacts($primaryLocale);
         $this->importSubmissionChecklist($primaryLocale);
-        $this->importAboutPage();
 
         $this->consoleOutput->writeln("Read journal's settings.");
         $this->em->beginTransaction(); // Outer transaction
@@ -273,6 +272,8 @@ class JournalImporter extends Importer
         foreach ($createdBoards as $oldBoardId => $newBoardId) {
             $this->boardMemberImporter->importBoardMembers($oldBoardId, $newBoardId);
         }
+
+        $this->importAboutPage();
 
         $map = new ImportMap($id, $this->journal->getId(), Journal::class);
         $this->em->persist($map);

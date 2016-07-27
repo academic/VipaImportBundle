@@ -191,7 +191,7 @@ class ArticleImporter extends Importer
                 $article->setStatus(ArticleStatuses::STATUS_INREVIEW);
                 break;
             case 7: // STATUS_QUEUED_EDITING
-                $article->setStatus(ArticleStatuses::STATUS_UNPUBLISHED);
+                $article->setStatus(ArticleStatuses::STATUS_PUBLISH_READY);
                 break;
             case 8: // STATUS_INCOMPLETE
                 $article->setStatus(ArticleStatuses::STATUS_NOT_SUBMITTED);
@@ -340,7 +340,7 @@ class ArticleImporter extends Importer
         if (!$result || empty($result['decision'])) {
             return ArticleStatuses::STATUS_INREVIEW;
         } elseif ($result['decision'] == 1) {
-            return ArticleStatuses::STATUS_UNPUBLISHED;
+            return ArticleStatuses::STATUS_PUBLISH_READY;
         } elseif ($result['decision'] == 4) {
             return ArticleStatuses::STATUS_REJECTED;
         } else {
