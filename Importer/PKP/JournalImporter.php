@@ -126,7 +126,7 @@ class JournalImporter extends Importer
         $this->consoleOutput->writeln("Reading journal settings...");
 
         foreach ($pkpSettings as $setting) {
-            $locale = !empty($setting['locale']) ? $setting['locale'] : $primaryLocale;
+            $locale = !empty($setting['locale']) ? mb_substr($setting['locale'], 0, 2, 'UTF-8') : $languageCode;
             $name = $setting['setting_name'];
             $value = $setting['setting_value'];
             $this->settings[$locale][$name] = $value;
@@ -138,7 +138,7 @@ class JournalImporter extends Importer
 
         // Fill translatable fields in all available languages except the primary one
         foreach ($this->settings as $fieldLocale => $fields) {
-            if ($fieldLocale === $primaryLocale) {
+            if ($fieldLocale === $languageCode) {
                 // We will fill fields of the primary language later.
                 continue;
             }
@@ -157,40 +157,40 @@ class JournalImporter extends Importer
         $this->journal->setCurrentLocale($languageCode);
 
         // Fill fields for the primary language
-        !empty($this->settings[$primaryLocale]['title']) ?
-            $this->journal->setTitle($this->settings[$primaryLocale]['title']) :
+        !empty($this->settings[$languageCode]['title']) ?
+            $this->journal->setTitle($this->settings[$languageCode]['title']) :
             $this->journal->setTitle('Unknown Journal');
 
-        !empty($this->settings[$primaryLocale]['description']) ?
-            $this->journal->setDescription($this->settings[$primaryLocale]['description']) :
+        !empty($this->settings[$languageCode]['description']) ?
+            $this->journal->setDescription($this->settings[$languageCode]['description']) :
             $this->journal->setDescription('-');
 
-        !empty($this->settings[$primaryLocale]['journalPageFooter']) ?
-            $this->journal->setFooterText($this->settings[$primaryLocale]['journalPageFooter']) :
+        !empty($this->settings[$languageCode]['journalPageFooter']) ?
+            $this->journal->setFooterText($this->settings[$languageCode]['journalPageFooter']) :
             $this->journal->setFooterText(null);
 
-        !empty($this->settings[$primaryLocale]['printIssn']) && count($this->settings[$primaryLocale]['printIssn']) == 9 ?
-            $this->journal->setIssn($this->settings[$primaryLocale]['printIssn']) :
+        !empty($this->settings[$languageCode]['printIssn']) && count($this->settings[$languageCode]['printIssn']) == 9 ?
+            $this->journal->setIssn($this->settings[$languageCode]['printIssn']) :
             $this->journal->setIssn('');
 
-        !empty($this->settings[$primaryLocale]['onlineIssn']) && count($this->settings[$primaryLocale]['onlineIssn']) == 9 ?
-            $this->journal->setEissn($this->settings[$primaryLocale]['onlineIssn']) :
+        !empty($this->settings[$languageCode]['onlineIssn']) && count($this->settings[$languageCode]['onlineIssn']) == 9 ?
+            $this->journal->setEissn($this->settings[$languageCode]['onlineIssn']) :
             $this->journal->setEissn('');
 
         $date = sprintf('%d-01-01 00:00:00',
-            !empty($this->settings[$primaryLocale]['initialYear']) ?
-                $this->settings[$primaryLocale]['initialYear'] : '2015');
+            !empty($this->settings[$languageCode]['initialYear']) ?
+                $this->settings[$languageCode]['initialYear'] : '2015');
         $this->journal->setFounded(DateTime::createFromFormat('Y-m-d H:i:s', $date));
 
         // Set view and download counts
-        !empty($this->settings[$primaryLocale]['total_views']) ?
-            $this->journal->setViewCount($this->settings[$primaryLocale]['total_views']) :
+        !empty($this->settings[$languageCode]['total_views']) ?
+            $this->journal->setViewCount($this->settings[$languageCode]['total_views']) :
             $this->journal->setViewCount(0);
-        !empty($this->settings[$primaryLocale]['total_downloads']) ?
-            $this->journal->setDownloadCount($this->settings[$primaryLocale]['total_downloads']) :
+        !empty($this->settings[$languageCode]['total_downloads']) ?
+            $this->journal->setDownloadCount($this->settings[$languageCode]['total_downloads']) :
             $this->journal->setDownloadCount(0);
-        !empty($this->settings[$primaryLocale]['homeHeaderTitleImage']) ?
-            $header = unserialize($this->settings[$primaryLocale]['homeHeaderTitleImage']) :
+        !empty($this->settings[$languageCode]['homeHeaderTitleImage']) ?
+            $header = unserialize($this->settings[$languageCode]['homeHeaderTitleImage']) :
             $header = null;
 
         if ($header) {
@@ -225,16 +225,16 @@ class JournalImporter extends Importer
             $this->journal->setHeader('imported/' . $headerPath);
         }
 
-        $subjects = $this->importSubjects($primaryLocale);
+        $subjects = $this->importSubjects($languageCode);
 
         foreach ($subjects as $subject) {
             $this->journal->addSubject($subject);
         }
 
         // Set publisher
-        !empty($this->settings[$primaryLocale]['publisherInstitution']) ?
-            $this->importAndSetPublisher($this->settings[$primaryLocale]['publisherInstitution'], $primaryLocale) :
-            $this->journal->setPublisher($this->getUnknownPublisher($primaryLocale));
+        !empty($this->settings[$languageCode]['publisherInstitution']) ?
+            $this->importAndSetPublisher($this->settings[$languageCode]['publisherInstitution'], $languageCode) :
+            $this->journal->setPublisher($this->getUnknownPublisher($languageCode));
 
         // Use existing languages or create if needed
         $language = $this->em
@@ -243,8 +243,8 @@ class JournalImporter extends Importer
         $this->journal->setMandatoryLang($language ? $language : $this->createLanguage($languageCode));
         $this->journal->addLanguage($language ? $language : $this->createLanguage($languageCode));
 
-        $this->importContacts($primaryLocale);
-        $this->importSubmissionChecklist($primaryLocale);
+        $this->importContacts($languageCode);
+        $this->importSubmissionChecklist($languageCode);
 
         $this->consoleOutput->writeln("Read journal's settings.");
         $this->em->beginTransaction(); // Outer transaction
@@ -381,14 +381,14 @@ class JournalImporter extends Importer
         return $lang;
     }
 
-    private function importSubjects($primaryLocale)
+    private function importSubjects($languageCode)
     {
-        if (empty($this->settings[$primaryLocale]['categories'])) {
+        if (empty($this->settings[$languageCode]['categories'])) {
             return array();
         }
 
         $subjects = [];
-        $categoryIds = unserialize($this->settings[$primaryLocale]['categories']);
+        $categoryIds = unserialize($this->settings[$languageCode]['categories']);
 
         if (!is_array($categoryIds)) {
             return [];
@@ -407,7 +407,7 @@ class JournalImporter extends Importer
             $categorySettings = [];
 
             foreach ($pkpCategorySettings as $pkpSetting) {
-                $locale = !empty($pkpSetting['locale']) ? $pkpSetting['locale'] : $primaryLocale;
+                $locale = !empty($pkpSetting['locale']) ? $pkpSetting['locale'] : $languageCode;
                 $value = $pkpSetting['setting_value'];
                 $categorySettings[$locale] = $value;
             }
@@ -438,38 +438,38 @@ class JournalImporter extends Importer
         return $subjects;
     }
 
-    public function importContacts($primaryLocale)
+    public function importContacts($languageCode)
     {
         $mainContact = new JournalContact();
-        $contactName = !empty($this->settings[$primaryLocale]['contactName']) ?
-            $this->settings[$primaryLocale]['contactName'] : null;
-        $contactEmail = !empty($this->settings[$primaryLocale]['contactEmail']) ?
-            $this->settings[$primaryLocale]['contactEmail'] : null;
+        $contactName = !empty($this->settings[$languageCode]['contactName']) ?
+            $this->settings[$languageCode]['contactName'] : null;
+        $contactEmail = !empty($this->settings[$languageCode]['contactEmail']) ?
+            $this->settings[$languageCode]['contactEmail'] : null;
 
         if ($contactName && $contactEmail) {
             $mainContact->setFullName($contactName);
             $mainContact->setEmail($contactEmail);
 
-            if (!empty($this->settings[$primaryLocale]['contactPhone']))
-                $mainContact->setPhone($this->settings[$primaryLocale]['contactPhone']);
-            if (!empty($this->settings[$primaryLocale]['contactMailingAddress']))
-                $mainContact->setAddress($this->settings[$primaryLocale]['contactMailingAddress']);
+            if (!empty($this->settings[$languageCode]['contactPhone']))
+                $mainContact->setPhone($this->settings[$languageCode]['contactPhone']);
+            if (!empty($this->settings[$languageCode]['contactMailingAddress']))
+                $mainContact->setAddress($this->settings[$languageCode]['contactMailingAddress']);
         }
 
         $supportContact = new JournalContact();
-        $supportName = !empty($this->settings[$primaryLocale]['supportName']) ?
-            $this->settings[$primaryLocale]['supportName'] : null;
-        $supportEmail = !empty($this->settings[$primaryLocale]['supportEmail']) ?
-            $this->settings[$primaryLocale]['supportEmail'] : null;
+        $supportName = !empty($this->settings[$languageCode]['supportName']) ?
+            $this->settings[$languageCode]['supportName'] : null;
+        $supportEmail = !empty($this->settings[$languageCode]['supportEmail']) ?
+            $this->settings[$languageCode]['supportEmail'] : null;
 
         if ($supportName && $supportEmail) {
             $supportContact->setFullName($supportName);
             $supportContact->setEmail($supportEmail);
 
-            if (!empty($this->settings[$primaryLocale]['supportPhone']))
-                $supportContact->setPhone($this->settings[$primaryLocale]['supportPhone']);
-            if (!empty($this->settings[$primaryLocale]['mailingAddress']))
-                $supportContact->setAddress($this->settings[$primaryLocale]['mailingAddress']);
+            if (!empty($this->settings[$languageCode]['supportPhone']))
+                $supportContact->setPhone($this->settings[$languageCode]['supportPhone']);
+            if (!empty($this->settings[$languageCode]['mailingAddress']))
+                $supportContact->setAddress($this->settings[$languageCode]['mailingAddress']);
         }
 
         $type = $this->em->getRepository('OjsJournalBundle:ContactTypes')->findBy([], null, 1);
@@ -479,7 +479,7 @@ class JournalImporter extends Importer
             $supportContact->setContactType($type[0]);
         } else {
             $newType = new ContactTypes();
-            $newType->setCurrentLocale(mb_substr($primaryLocale, 0, 2, 'UTF-8'));
+            $newType->setCurrentLocale(mb_substr($languageCode, 0, 2, 'UTF-8'));
             $newType->setName('Default');
             $newType->setDescription('Default Type');
 
@@ -493,16 +493,16 @@ class JournalImporter extends Importer
         $this->journal->addJournalContact($supportContact);
     }
 
-    public function importSubmissionChecklist($primaryLocale)
+    public function importSubmissionChecklist($languageCode)
     {
         $checklist = new SubmissionChecklist();
         $checklist->setLabel('Checklist');
-        $checklist->setLocale(mb_substr($primaryLocale, 0, 2, 'UTF-8'));
+        $checklist->setLocale(mb_substr($languageCode, 0, 2, 'UTF-8'));
 
         $detail = "<ul>";
 
-        if (!empty($this->settings[$primaryLocale]['submissionChecklist'])) {
-            $items = unserialize($this->settings[$primaryLocale]['submissionChecklist']);
+        if (!empty($this->settings[$languageCode]['submissionChecklist'])) {
+            $items = unserialize($this->settings[$languageCode]['submissionChecklist']);
 
             if ($items) {
                 foreach ($items as $item) {
