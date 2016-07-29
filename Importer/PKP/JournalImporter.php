@@ -390,6 +390,10 @@ class JournalImporter extends Importer
         $subjects = [];
         $categoryIds = unserialize($this->settings[$primaryLocale]['categories']);
 
+        if (!is_array($categoryIds)) {
+            return [];
+        }
+
         foreach ($categoryIds as $categoryId) {
             $categorySql = "SELECT locale, setting_value FROM " .
                 "controlled_vocab_entry_settings WHERE " .
