@@ -8,6 +8,7 @@ class FileHelper {
         'image/jpeg'         => 'jpg',
         'application/msword' => 'doc',
         'application/zip'    => 'zip',
+        'application/xml'    => 'xml',
         'application/octet-stream' => 'bin',
         'application/text-plain:formatted' => 'txt',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx'
