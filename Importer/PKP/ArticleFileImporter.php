@@ -3,6 +3,7 @@
 namespace Ojs\ImportBundle\Importer\PKP;
 
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
+use Ojs\CoreBundle\Params\ArticleFileParams;
 use Ojs\JournalBundle\Entity\Article;
 use Ojs\JournalBundle\Entity\ArticleFile;
 use Ojs\ImportBundle\Entity\PendingDownload;
@@ -80,7 +81,7 @@ class ArticleFileImporter extends Importer
             $articleFile->setTitle($label);
             $articleFile->setLangCode($locale);
             $articleFile->setDescription('-');
-            $articleFile->setType(0);
+            $articleFile->setType(ArticleFileParams::FULL_TEXT);
 
             $history = $this->em->getRepository(FileHistory::class)->findOneBy(['fileName' => $filename]);
 
