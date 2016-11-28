@@ -14,7 +14,7 @@ class ArticleFileImporter extends Importer
 {
     /**
      * Imports files of the given article
-     * @param Article $article The Article whose files are going to be important
+     * @param Article $article The Article whose files are going to be imported
      * @param int     $oldId   Old ID of the article
      * @param String  $slug    Journal's slug
      * @throws \Doctrine\DBAL\DBALException
