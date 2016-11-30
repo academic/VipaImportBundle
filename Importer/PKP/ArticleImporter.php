@@ -259,6 +259,8 @@ class ArticleImporter extends Importer
 
         $articleFileImporter = new ArticleFileImporter($this->dbalConnection, $this->em, $this->logger, $this->consoleOutput);
         $articleFileImporter->importArticleFiles($article, $id, $journal->getSlug());
+        $supFileImporter = new SupFileImporter($this->dbalConnection, $this->em, $this->logger, $this->consoleOutput);
+        $supFileImporter->importSupFiles($article, $id, $journal->getSlug());
 
         $pendingStatImport = new PendingStatisticImport($article, $id);
         $pendingSubmitterImport = new PendingSubmitterImport($article, $pkpArticle['user_id']);
