@@ -42,9 +42,13 @@ class SupFileImporter extends Importer
      */
     public function importSupFile(Article $article, $row, $oldArticleId, $oldJournalSlug)
     {
-        $accessor = PropertyAccess::createPropertyAccessor();
-
         $settings = $this->getSettings($row["supp_id"]);
+
+        if (empty($settings)) {
+            return;
+        }
+
+        $accessor = PropertyAccess::createPropertyAccessor();
         $code = $article->getJournal()->getMandatoryLang()->getCode();
         $settings = empty($settings[$code]) ? current($settings) : $settings[$code];
 
