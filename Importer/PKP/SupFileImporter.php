@@ -53,7 +53,7 @@ class SupFileImporter extends Importer
         $settings = empty($settings[$code]) ? current($settings) : $settings[$code];
 
         $fileFormat = "imported/supplementary/%s/%s.%s";
-        $extension = FileHelper::$mimeToExtMap[$row["file_type"]];
+        $extension = !empty($row["file_type"]) ? $accessor->getValue(FileHelper::$mimeToExtMap, "[".$row["file_type"]."]") : "";
         $filename = sprintf($fileFormat, $oldArticleId, $row["file_id"], $extension);
         $keywords = mb_substr($accessor->getValue($settings, "[subject]"), 0, 255);
 
