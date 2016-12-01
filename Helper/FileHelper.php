@@ -4,6 +4,7 @@ namespace Ojs\ImportBundle\Helper;
 
 class FileHelper {
     public static $mimeToExtMap = [
+        '' => 'unknown',
         'application/pdf'    => 'pdf',
         'image/jpeg'         => 'jpg',
         'image/png'          => 'png',
