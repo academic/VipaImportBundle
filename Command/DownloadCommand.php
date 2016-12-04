@@ -4,7 +4,7 @@ namespace Ojs\ImportBundle\Command;
 
 use Doctrine\ORM\EntityManager;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -65,7 +65,7 @@ class DownloadCommand extends ContainerAwareCommand
         try {
             $client = new Client(['base_uri' => $host]);
             $response = $client->request('GET', $source);
-        } catch (BadResponseException $e) {
+        } catch (RequestException $e) {
             return false;
         }
 
