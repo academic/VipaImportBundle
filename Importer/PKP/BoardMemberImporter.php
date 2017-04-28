@@ -1,11 +1,11 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
-use Ojs\JournalBundle\Entity\BoardMember;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\JournalBundle\Entity\BoardMember;
+use Vipa\ImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -59,7 +59,7 @@ class BoardMemberImporter extends Importer
     public function importBoardMember($oldUserId, $seq, $newBoardId)
     {
         $user = $this->ui->importUser($oldUserId);
-        $board = $this->em->getReference('OjsJournalBundle:Board', $newBoardId);
+        $board = $this->em->getReference('VipaJournalBundle:Board', $newBoardId);
 
         $member = new BoardMember();
         $member->setUser($user)->setBoard($board)->setSeq($seq);

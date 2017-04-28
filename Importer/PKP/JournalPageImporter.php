@@ -1,9 +1,9 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
-use Ojs\JournalBundle\Entity\JournalPage;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\JournalBundle\Entity\JournalPage;
+use Vipa\ImportBundle\Importer\Importer;
 
 class JournalPageImporter extends Importer
 {
@@ -42,7 +42,7 @@ class JournalPageImporter extends Importer
             $settings[$locale][$name] = $value;
         }
 
-        $journal = $this->em->getReference('OjsJournalBundle:Journal', $newJournalId);
+        $journal = $this->em->getReference('VipaJournalBundle:Journal', $newJournalId);
 
         if (!$journal) {
             return null;

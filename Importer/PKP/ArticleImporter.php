@@ -1,24 +1,24 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Exception;
-use Ojs\CoreBundle\Params\ArticleStatuses;
-use Ojs\ImportBundle\Entity\ImportMap;
-use Ojs\JournalBundle\Entity\Article;
-use Ojs\JournalBundle\Entity\ArticleAuthor;
-use Ojs\JournalBundle\Entity\Author;
-use Ojs\JournalBundle\Entity\Citation;
-use Ojs\JournalBundle\Entity\Issue;
-use Ojs\JournalBundle\Entity\Journal;
-use Ojs\JournalBundle\Entity\Section;
-use Ojs\ImportBundle\Entity\PendingStatisticImport;
-use Ojs\ImportBundle\Entity\PendingSubmitterImport;
-use Ojs\ImportBundle\Helper\StringHelper;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\CoreBundle\Params\ArticleStatuses;
+use Vipa\ImportBundle\Entity\ImportMap;
+use Vipa\JournalBundle\Entity\Article;
+use Vipa\JournalBundle\Entity\ArticleAuthor;
+use Vipa\JournalBundle\Entity\Author;
+use Vipa\JournalBundle\Entity\Citation;
+use Vipa\JournalBundle\Entity\Issue;
+use Vipa\JournalBundle\Entity\Journal;
+use Vipa\JournalBundle\Entity\Section;
+use Vipa\ImportBundle\Entity\PendingStatisticImport;
+use Vipa\ImportBundle\Entity\PendingSubmitterImport;
+use Vipa\ImportBundle\Helper\StringHelper;
+use Vipa\ImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -130,7 +130,7 @@ class ArticleImporter extends Importer
     public function importArticle($id, $newJournalId, $issueIds, $sectionIds)
     {
         /** @var Journal $journal */
-        $journal = $this->em->getReference('OjsJournalBundle:Journal', $newJournalId);
+        $journal = $this->em->getReference('VipaJournalBundle:Journal', $newJournalId);
         $this->consoleOutput->writeln("Reading article #" . $id . "... ", true);
 
         $articleSql = "SELECT articles.*, published_articles.issue_id, published_articles.seq, published_articles.date_published FROM articles " .
@@ -201,11 +201,11 @@ class ArticleImporter extends Importer
         if (!empty($issueIds)) {
             if (!is_array($issueIds)) {
                 /** @var Issue $issue */
-                $issue = $this->em->getReference('OjsJournalBundle:Issue', $issueIds);
+                $issue = $this->em->getReference('VipaJournalBundle:Issue', $issueIds);
                 $article->setIssue($issue);
             } else if (!empty($pkpArticle['issue_id']) && isset($issueIds[$pkpArticle['issue_id']])) {
                 /** @var Issue $issue */
-                $issue = $this->em->getReference('OjsJournalBundle:Issue', $issueIds[$pkpArticle['issue_id']]);
+                $issue = $this->em->getReference('VipaJournalBundle:Issue', $issueIds[$pkpArticle['issue_id']]);
                 $article->setIssue($issue);
             }
         }
@@ -213,11 +213,11 @@ class ArticleImporter extends Importer
         if (!empty($sectionIds)) {
             if (!is_array($sectionIds)) {
                 /** @var Section $section */
-                $section = $this->em->getReference('OjsJournalBundle:Section', $sectionIds);
+                $section = $this->em->getReference('VipaJournalBundle:Section', $sectionIds);
                 $article->setSection($section);
             } else if (!empty($pkpArticle['section_id']) && isset($sectionIds[$pkpArticle['section_id']])) {
                 /** @var Section $section */
-                $section = $this->em->getReference('OjsJournalBundle:Section', $sectionIds[$pkpArticle['section_id']]);
+                $section = $this->em->getReference('VipaJournalBundle:Section', $sectionIds[$pkpArticle['section_id']]);
                 $article->setSection($section);
             }
         }

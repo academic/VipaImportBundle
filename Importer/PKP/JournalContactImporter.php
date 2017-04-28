@@ -1,10 +1,10 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
-use Ojs\JournalBundle\Entity\Journal;
-use Ojs\JournalBundle\Entity\JournalContact;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\JournalBundle\Entity\Journal;
+use Vipa\JournalBundle\Entity\JournalContact;
+use Vipa\ImportBundle\Importer\Importer;
 
 class JournalContactImporter extends Importer
 {
@@ -38,7 +38,7 @@ class JournalContactImporter extends Importer
         $contact->setPhone($settings['contactPhone']);
         $contact->setAddress($settings['contactMailingAddress']);
 
-        $types = $this->em->getRepository('OjsJournalBundle:ContactTypes')->findAll();
+        $types = $this->em->getRepository('VipaJournalBundle:ContactTypes')->findAll();
         !empty($types) && $contact->setContactType($types[0]);
 
         $journal->addJournalContact($contact);

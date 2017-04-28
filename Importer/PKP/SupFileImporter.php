@@ -1,14 +1,14 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
-use Ojs\CoreBundle\Params\ArticleFileParams;
-use Ojs\ImportBundle\Entity\PendingDownload;
-use Ojs\ImportBundle\Helper\FileHelper;
-use Ojs\ImportBundle\Importer\Importer;
-use Ojs\JournalBundle\Entity\Article;
-use Ojs\JournalBundle\Entity\ArticleFile;
+use Vipa\CoreBundle\Params\ArticleFileParams;
+use Vipa\ImportBundle\Entity\PendingDownload;
+use Vipa\ImportBundle\Helper\FileHelper;
+use Vipa\ImportBundle\Importer\Importer;
+use Vipa\JournalBundle\Entity\Article;
+use Vipa\JournalBundle\Entity\ArticleFile;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class SupFileImporter extends Importer

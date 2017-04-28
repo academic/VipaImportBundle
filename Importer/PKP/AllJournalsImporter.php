@@ -1,11 +1,11 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Exception;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\ImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -47,7 +47,7 @@ class AllJournalsImporter extends Importer
 
         foreach ($journals as $journal) {
             $existingJournal = $this->em
-                ->getRepository('OjsJournalBundle:Journal')
+                ->getRepository('VipaJournalBundle:Journal')
                 ->findOneBy(['slug' => $journal['path']]);
 
             if (!$existingJournal) {

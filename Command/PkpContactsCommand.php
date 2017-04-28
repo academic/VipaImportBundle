@@ -1,10 +1,10 @@
 <?php
 
-namespace Ojs\ImportBundle\Command;
+namespace Vipa\ImportBundle\Command;
 
-use Ojs\CoreBundle\Helper\StringHelper;
-use Ojs\ImportBundle\Helper\ImportCommand;
-use Ojs\ImportBundle\Importer\PKP\JournalContactImporter;
+use Vipa\CoreBundle\Helper\StringHelper;
+use Vipa\ImportBundle\Helper\ImportCommand;
+use Vipa\ImportBundle\Importer\PKP\JournalContactImporter;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
@@ -34,7 +34,7 @@ class PkpContactsCommand extends ImportCommand
 
         foreach ($journals as $journal) {
             $existingJournal = $this->em
-                ->getRepository('OjsJournalBundle:Journal')
+                ->getRepository('VipaJournalBundle:Journal')
                 ->findOneBy(['slug' => $journal['path']]);
 
             if($existingJournal !== null && $existingJournal->getJournalContacts()->isEmpty()) {

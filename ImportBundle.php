@@ -1,6 +1,6 @@
 <?php
 
-namespace Ojs\ImportBundle;
+namespace Vipa\ImportBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

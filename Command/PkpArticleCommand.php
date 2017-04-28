@@ -1,11 +1,11 @@
 <?php
 
-namespace Ojs\ImportBundle\Command;
+namespace Vipa\ImportBundle\Command;
 
-use Ojs\ImportBundle\Helper\ImportCommand;
-use Ojs\ImportBundle\Importer\PKP\ArticleImporter;
-use Ojs\ImportBundle\Importer\PKP\UserImporter;
-use Ojs\JournalBundle\Entity\Journal;
+use Vipa\ImportBundle\Helper\ImportCommand;
+use Vipa\ImportBundle\Importer\PKP\ArticleImporter;
+use Vipa\ImportBundle\Importer\PKP\UserImporter;
+use Vipa\JournalBundle\Entity\Journal;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -40,7 +40,7 @@ class PkpArticleCommand extends ImportCommand
         $section = $input->getArgument('section') != 'null' ? $input->getArgument('section') : null;
 
         $journal = is_numeric($journalId) ?
-            $this->em->find('OjsJournalBundle:Journal', $journalId) :
+            $this->em->find('VipaJournalBundle:Journal', $journalId) :
             $this->em->getRepository(Journal::class)->findOneBy(['slug' => $journalId]);
 
         if (!$journal) {

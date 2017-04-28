@@ -1,16 +1,16 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
 use DateTime;
 use Exception;
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
-use Ojs\ImportBundle\Entity\ImportMap;
-use Ojs\JournalBundle\Entity\Issue;
-use Ojs\JournalBundle\Entity\Journal;
-use Ojs\JournalBundle\Entity\Section;
-use Ojs\ImportBundle\Entity\PendingDownload;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\ImportBundle\Entity\ImportMap;
+use Vipa\JournalBundle\Entity\Issue;
+use Vipa\JournalBundle\Entity\Journal;
+use Vipa\JournalBundle\Entity\Section;
+use Vipa\ImportBundle\Entity\PendingDownload;
+use Vipa\ImportBundle\Importer\Importer;
 
 class IssueImporter extends Importer
 {
@@ -98,7 +98,7 @@ class IssueImporter extends Importer
     public function importIssue($id, $newJournalId, $sectionIds)
     {
         /** @var Journal $journal */
-        $journal = $this->em->getReference('OjsJournalBundle:Journal', $newJournalId);
+        $journal = $this->em->getReference('VipaJournalBundle:Journal', $newJournalId);
         $this->consoleOutput->writeln("Reading issue #" . $id . "... ", true);
 
         $issueSql = "SELECT * FROM issues WHERE issue_id = :id LIMIT 1";
@@ -133,7 +133,7 @@ class IssueImporter extends Importer
         foreach (array_values($sectionIds) as $sectionId) {
             if ($sectionId !== null) {
                 /** @var Section $section */
-                $section = $this->em->getReference('OjsJournalBundle:Section', $sectionId);
+                $section = $this->em->getReference('VipaJournalBundle:Section', $sectionId);
                 $issue->addSection($section);
             }
         }

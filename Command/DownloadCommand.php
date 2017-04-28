@@ -1,6 +1,6 @@
 <?php
 
-namespace Ojs\ImportBundle\Command;
+namespace Vipa\ImportBundle\Command;
 
 use Doctrine\ORM\EntityManager;
 use GuzzleHttp\Client;

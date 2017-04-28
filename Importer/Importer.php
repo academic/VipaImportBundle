@@ -1,6 +1,6 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer;
+namespace Vipa\ImportBundle\Importer;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;

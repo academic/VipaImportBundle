@@ -1,9 +1,9 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
-use Ojs\JournalBundle\Entity\Board;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\JournalBundle\Entity\Board;
+use Vipa\ImportBundle\Importer\Importer;
 
 class BoardImporter extends Importer
 {
@@ -46,7 +46,7 @@ class BoardImporter extends Importer
             return null;
         }
 
-        $journal = $this->em->getReference('OjsJournalBundle:Journal', $newJournalId);
+        $journal = $this->em->getReference('VipaJournalBundle:Journal', $newJournalId);
 
         $board = new Board();
         $board->setJournal($journal);

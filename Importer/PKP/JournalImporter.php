@@ -1,6 +1,6 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
 use Behat\Transliterator\Transliterator;
 use DateTime;
@@ -8,18 +8,18 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
-use Ojs\CoreBundle\Params\PublisherStatuses;
-use Ojs\ImportBundle\Entity\ImportMap;
-use Ojs\JournalBundle\Entity\ContactTypes;
-use Ojs\JournalBundle\Entity\Journal;
-use Ojs\JournalBundle\Entity\JournalContact;
-use Ojs\JournalBundle\Entity\JournalPage;
-use Ojs\JournalBundle\Entity\Lang;
-use Ojs\JournalBundle\Entity\Publisher;
-use Ojs\JournalBundle\Entity\Subject;
-use Ojs\JournalBundle\Entity\SubmissionChecklist;
-use Ojs\ImportBundle\Entity\PendingDownload;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\CoreBundle\Params\PublisherStatuses;
+use Vipa\ImportBundle\Entity\ImportMap;
+use Vipa\JournalBundle\Entity\ContactTypes;
+use Vipa\JournalBundle\Entity\Journal;
+use Vipa\JournalBundle\Entity\JournalContact;
+use Vipa\JournalBundle\Entity\JournalPage;
+use Vipa\JournalBundle\Entity\Lang;
+use Vipa\JournalBundle\Entity\Publisher;
+use Vipa\JournalBundle\Entity\Subject;
+use Vipa\JournalBundle\Entity\SubmissionChecklist;
+use Vipa\ImportBundle\Entity\PendingDownload;
+use Vipa\ImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -238,7 +238,7 @@ class JournalImporter extends Importer
 
         // Use existing languages or create if needed
         $language = $this->em
-            ->getRepository('OjsJournalBundle:Lang')
+            ->getRepository('VipaJournalBundle:Lang')
             ->findOneBy(['code' => $languageCode]);
         $this->journal->setMandatoryLang($language ? $language : $this->createLanguage($languageCode));
         $this->journal->addLanguage($language ? $language : $this->createLanguage($languageCode));
@@ -293,7 +293,7 @@ class JournalImporter extends Importer
     private function importAndSetPublisher($name, $locale)
     {
         $translation = $this->em
-            ->getRepository('OjsJournalBundle:PublisherTranslation')
+            ->getRepository('VipaJournalBundle:PublisherTranslation')
             ->findOneBy(['name' => $name]);
         $publisher = $translation !== null ? $translation->getTranslatable() : null;
 
@@ -321,7 +321,7 @@ class JournalImporter extends Importer
     private function getUnknownPublisher($locale)
     {
         $translation = $this->em
-            ->getRepository('OjsJournalBundle:PublisherTranslation')
+            ->getRepository('VipaJournalBundle:PublisherTranslation')
             ->findOneBy(['name' => 'Unknown Publisher']);
         $publisher = $translation !== null ? $translation->getTranslatable() : null;
 
@@ -416,7 +416,7 @@ class JournalImporter extends Importer
             $tags = str_replace(' ', ', ', strtolower(array_values($categorySettings)[0]));
 
             $subject = $this->em
-                ->getRepository('OjsJournalBundle:Subject')
+                ->getRepository('VipaJournalBundle:Subject')
                 ->findOneBy(['slug' => $slug]);
 
             if (!$subject) {
@@ -472,7 +472,7 @@ class JournalImporter extends Importer
                 $supportContact->setAddress($this->settings[$languageCode]['mailingAddress']);
         }
 
-        $type = $this->em->getRepository('OjsJournalBundle:ContactTypes')->findBy([], null, 1);
+        $type = $this->em->getRepository('VipaJournalBundle:ContactTypes')->findBy([], null, 1);
 
         if ($type) {
             $mainContact->setContactType($type[0]);

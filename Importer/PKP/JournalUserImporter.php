@@ -1,13 +1,13 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
-use Ojs\JournalBundle\Entity\Journal;
-use Ojs\JournalBundle\Entity\JournalUser;
-use Ojs\UserBundle\Entity\Role;
-use Ojs\UserBundle\Entity\User;
-use Ojs\ImportBundle\Helper\ImportHelper;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\JournalBundle\Entity\Journal;
+use Vipa\JournalBundle\Entity\JournalUser;
+use Vipa\UserBundle\Entity\Role;
+use Vipa\UserBundle\Entity\User;
+use Vipa\ImportBundle\Helper\ImportHelper;
+use Vipa\ImportBundle\Importer\Importer;
 
 class JournalUserImporter extends Importer
 {
@@ -21,7 +21,7 @@ class JournalUserImporter extends Importer
     public function importJournalUsers($newJournalId, $oldJournalId, $userImporter)
     {
         $this->em->clear();
-        $journal = $this->em->getRepository('OjsJournalBundle:Journal')->find($newJournalId);
+        $journal = $this->em->getRepository('VipaJournalBundle:Journal')->find($newJournalId);
 
         $roleMap = [
             '1'      => "ROLE_ADMIN",
@@ -40,7 +40,7 @@ class JournalUserImporter extends Importer
 
         // Replace role names with role entities
         foreach ($roleMap as $id => $name) {
-            $role = $this->em->getRepository('OjsUserBundle:Role')->findOneBy(['role' => $name]);
+            $role = $this->em->getRepository('VipaUserBundle:Role')->findOneBy(['role' => $name]);
 
             if (!$role) {
                 $role = new Role();
@@ -69,7 +69,7 @@ class JournalUserImporter extends Importer
             // Put the user from DB to cache
             if (empty($cache[$email]['user'])) {
                 $cache[$email]['user'] = $this->em
-                    ->getRepository('OjsUserBundle:User')
+                    ->getRepository('VipaUserBundle:User')
                     ->findOneBy(['email' => $email]);
             }
 
@@ -103,7 +103,7 @@ class JournalUserImporter extends Importer
         }
 
         $journalUser = $this->em
-            ->getRepository('OjsJournalBundle:JournalUser')
+            ->getRepository('VipaJournalBundle:JournalUser')
             ->findOneBy(['journal' => $journal, 'user' => $cache[$email]['user']]);
 
         if ($journalUser === null) {

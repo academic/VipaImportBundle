@@ -1,12 +1,12 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
 use Exception;
-use Ojs\ImportBundle\Entity\ImportMap;
-use Ojs\JournalBundle\Entity\Journal;
-use Ojs\JournalBundle\Entity\Section;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\ImportBundle\Entity\ImportMap;
+use Vipa\JournalBundle\Entity\Journal;
+use Vipa\JournalBundle\Entity\Section;
+use Vipa\ImportBundle\Importer\Importer;
 
 class SectionImporter extends Importer
 {
@@ -81,7 +81,7 @@ class SectionImporter extends Importer
     public function importSection($id, $newJournalId)
     {
         /** @var Journal $journal */
-        $journal = $this->em->getReference('OjsJournalBundle:Journal', $newJournalId);
+        $journal = $this->em->getReference('VipaJournalBundle:Journal', $newJournalId);
         $this->consoleOutput->writeln("Reading section #" . $id . "... ", true);
 
         $sectionSql = "SELECT * FROM sections WHERE section_id = :id LIMIT 1";

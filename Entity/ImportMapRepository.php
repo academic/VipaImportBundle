@@ -1,11 +1,11 @@
 <?php
 
-namespace Ojs\ImportBundle\Entity;
+namespace Vipa\ImportBundle\Entity;
 
 use Doctrine\ORM\EntityRepository;
-use Ojs\JournalBundle\Entity\Article;
-use Ojs\JournalBundle\Entity\Issue;
-use Ojs\JournalBundle\Entity\Section;
+use Vipa\JournalBundle\Entity\Article;
+use Vipa\JournalBundle\Entity\Issue;
+use Vipa\JournalBundle\Entity\Section;
 
 class ImportMapRepository extends EntityRepository
 {

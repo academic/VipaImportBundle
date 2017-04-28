@@ -1,17 +1,17 @@
 <?php
 
-namespace Ojs\ImportBundle\Command;
+namespace Vipa\ImportBundle\Command;
 
 use Doctrine\DBAL\Connection;
-use Ojs\ImportBundle\Entity\ImportMap;
-use Ojs\ImportBundle\Helper\ImportCommand;
-use Ojs\ImportBundle\Importer\PKP\ArticleImporter;
-use Ojs\ImportBundle\Importer\PKP\IssueImporter;
-use Ojs\ImportBundle\Importer\PKP\UserImporter;
-use Ojs\JournalBundle\Entity\Article;
-use Ojs\JournalBundle\Entity\Issue;
-use Ojs\JournalBundle\Entity\Journal;
-use Ojs\JournalBundle\Entity\Section;
+use Vipa\ImportBundle\Entity\ImportMap;
+use Vipa\ImportBundle\Helper\ImportCommand;
+use Vipa\ImportBundle\Importer\PKP\ArticleImporter;
+use Vipa\ImportBundle\Importer\PKP\IssueImporter;
+use Vipa\ImportBundle\Importer\PKP\UserImporter;
+use Vipa\JournalBundle\Entity\Article;
+use Vipa\JournalBundle\Entity\Issue;
+use Vipa\JournalBundle\Entity\Journal;
+use Vipa\JournalBundle\Entity\Section;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

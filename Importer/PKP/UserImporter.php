@@ -1,15 +1,15 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Faker\Factory;
 use FOS\UserBundle\Model\UserManager;
 use FOS\UserBundle\Util\TokenGenerator;
-use Ojs\UserBundle\Entity\User;
-use Ojs\ImportBundle\Helper\ImportHelper;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\UserBundle\Entity\User;
+use Vipa\ImportBundle\Helper\ImportHelper;
+use Vipa\ImportBundle\Importer\Importer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -78,10 +78,10 @@ class UserImporter extends Importer
 
         if ($pkpUser) {
             if (!empty($pkpUser['username'])) {
-                $user = $this->em->getRepository('OjsUserBundle:User')->findOneBy(['username' => $pkpUser['username']]);
+                $user = $this->em->getRepository('VipaUserBundle:User')->findOneBy(['username' => $pkpUser['username']]);
 
                 if (!$user) {
-                    $user = $this->em->getRepository('OjsUserBundle:User')->findOneBy(['email' => $pkpUser['email']]);
+                    $user = $this->em->getRepository('VipaUserBundle:User')->findOneBy(['email' => $pkpUser['email']]);
                 }
             }
 

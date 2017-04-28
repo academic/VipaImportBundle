@@ -1,6 +1,6 @@
 <?php
 
-namespace Ojs\ImportBundle\Entity;
+namespace Vipa\ImportBundle\Entity;
 
 use Doctrine\ORM\EntityRepository;
 

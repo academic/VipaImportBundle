@@ -1,12 +1,12 @@
 <?php
 
-namespace Ojs\ImportBundle\Entity;
+namespace Vipa\ImportBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Class PendingDownload
- * @package Ojs\ImportBundle\Entity
+ * @package Vipa\ImportBundle\Entity
  * @ORM\Entity
  * @ORM\Table("import_pending_download")
  */

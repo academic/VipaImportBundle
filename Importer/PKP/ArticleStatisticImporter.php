@@ -1,11 +1,11 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
 use DateTime;
-use Ojs\AnalyticsBundle\Entity\ArticleFileStatistic;
-use Ojs\AnalyticsBundle\Entity\ArticleStatistic;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\AnalyticsBundle\Entity\ArticleFileStatistic;
+use Vipa\AnalyticsBundle\Entity\ArticleStatistic;
+use Vipa\ImportBundle\Importer\Importer;
 
 class ArticleStatisticImporter extends Importer
 {
@@ -32,7 +32,7 @@ class ArticleStatisticImporter extends Importer
      */
     public function importArticleStatistic($oldId, $newId)
     {
-        $article = $this->em->getRepository('OjsJournalBundle:Article')->find($newId);
+        $article = $this->em->getRepository('VipaJournalBundle:Article')->find($newId);
 
         if (!$article) {
             $this->consoleOutput->writeln("Couldn't find #" . $newId . " on the new database.");

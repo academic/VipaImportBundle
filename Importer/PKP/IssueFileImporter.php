@@ -1,13 +1,13 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
 use Jb\Bundle\FileUploaderBundle\Entity\FileHistory;
-use Ojs\JournalBundle\Entity\Issue;
-use Ojs\JournalBundle\Entity\IssueFile;
-use Ojs\ImportBundle\Entity\PendingDownload;
-use Ojs\ImportBundle\Helper\FileHelper;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\JournalBundle\Entity\Issue;
+use Vipa\JournalBundle\Entity\IssueFile;
+use Vipa\ImportBundle\Entity\PendingDownload;
+use Vipa\ImportBundle\Helper\FileHelper;
+use Vipa\ImportBundle\Importer\Importer;
 
 class IssueFileImporter extends Importer
 {

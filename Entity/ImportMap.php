@@ -1,13 +1,13 @@
 <?php
 
-namespace Ojs\ImportBundle\Entity;
+namespace Vipa\ImportBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Map
  *
- * @ORM\Entity(repositoryClass="Ojs\ImportBundle\Entity\ImportMapRepository")
+ * @ORM\Entity(repositoryClass="Vipa\ImportBundle\Entity\ImportMapRepository")
  * @ORM\Table("import_map")
  */
 class ImportMap

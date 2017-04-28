@@ -1,11 +1,11 @@
 <?php
 
-namespace Ojs\ImportBundle\Importer\PKP;
+namespace Vipa\ImportBundle\Importer\PKP;
 
 use Doctrine\ORM\EntityNotFoundException;
-use Ojs\ImportBundle\Entity\PendingSubmitterImport;
-use Ojs\JournalBundle\Entity\Article;
-use Ojs\ImportBundle\Importer\Importer;
+use Vipa\ImportBundle\Entity\PendingSubmitterImport;
+use Vipa\JournalBundle\Entity\Article;
+use Vipa\ImportBundle\Importer\Importer;
 
 class ArticleSubmitterImporter extends Importer
 {

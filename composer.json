@@ -1,11 +1,11 @@
 {
-  "name": "ojs/import-bundle",
+  "name": "vipa/import-bundle",
   "license": "MIT",
   "type": "project",
-  "description": "A helper for migrating to OJS",
+  "description": "A helper for migrating to Vipa",
   "version": "1.0.10",
   "keywords": [
-    "ojs",
+    "vipa",
     "import",
     "migration",
     "symfony"
@@ -15,7 +15,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Ojs\\ImportBundle\\": ""
+      "Vipa\\ImportBundle\\": ""
     }
   },
   "require": {

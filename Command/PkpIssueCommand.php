@@ -1,14 +1,14 @@
 <?php
 
-namespace Ojs\ImportBundle\Command;
+namespace Vipa\ImportBundle\Command;
 
-use Ojs\ImportBundle\Entity\ImportMap;
-use Ojs\ImportBundle\Helper\ImportCommand;
-use Ojs\ImportBundle\Importer\PKP\ArticleImporter;
-use Ojs\ImportBundle\Importer\PKP\IssueImporter;
-use Ojs\ImportBundle\Importer\PKP\UserImporter;
-use Ojs\JournalBundle\Entity\Journal;
-use Ojs\JournalBundle\Entity\Section;
+use Vipa\ImportBundle\Entity\ImportMap;
+use Vipa\ImportBundle\Helper\ImportCommand;
+use Vipa\ImportBundle\Importer\PKP\ArticleImporter;
+use Vipa\ImportBundle\Importer\PKP\IssueImporter;
+use Vipa\ImportBundle\Importer\PKP\UserImporter;
+use Vipa\JournalBundle\Entity\Journal;
+use Vipa\JournalBundle\Entity\Section;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -43,7 +43,7 @@ class PkpIssueCommand extends ImportCommand
         $journalId = $input->getArgument('journal');
 
         if (is_numeric($journalId)) {
-            $journal = $this->em->find('OjsJournalBundle:Journal', $journalId);
+            $journal = $this->em->find('VipaJournalBundle:Journal', $journalId);
         } else {
             $journal = $this->em->getRepository(Journal::class)->findOneBy(['slug' => $journalId]);
         }

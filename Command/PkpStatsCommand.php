@@ -1,11 +1,11 @@
 <?php
 
-namespace Ojs\ImportBundle\Command;
+namespace Vipa\ImportBundle\Command;
 
 
-use Ojs\CoreBundle\Helper\StringHelper;
-use Ojs\ImportBundle\Helper\ImportCommand;
-use Ojs\ImportBundle\Importer\PKP\ArticleStatisticImporter;
+use Vipa\CoreBundle\Helper\StringHelper;
+use Vipa\ImportBundle\Helper\ImportCommand;
+use Vipa\ImportBundle\Importer\PKP\ArticleStatisticImporter;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Stopwatch\Stopwatch;

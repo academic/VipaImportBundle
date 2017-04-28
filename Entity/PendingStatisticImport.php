@@ -1,15 +1,15 @@
 <?php
 
-namespace Ojs\ImportBundle\Entity;
+namespace Vipa\ImportBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Ojs\JournalBundle\Entity\Article;
+use Vipa\JournalBundle\Entity\Article;
 
 /**
  * PendingStatisticImport
  *
  * @ORM\Table()
- * @ORM\Entity(repositoryClass="Ojs\ImportBundle\Entity\PendingStatisticImportRepository")
+ * @ORM\Entity(repositoryClass="Vipa\ImportBundle\Entity\PendingStatisticImportRepository")
  * @ORM\Table("import_pending_statistic_import")
  */
 class PendingStatisticImport
@@ -24,7 +24,7 @@ class PendingStatisticImport
 
     /**
      * @var Article
-     * @ORM\OneToOne(targetEntity="Ojs\JournalBundle\Entity\Article")
+     * @ORM\OneToOne(targetEntity="Vipa\JournalBundle\Entity\Article")
      * @ORM\JoinColumn(name="article_id", referencedColumnName="id")
      **/
     private $article;
