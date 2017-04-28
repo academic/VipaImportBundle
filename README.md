@@ -1,5 +1,5 @@
 # ImportBundle
-This is a bundle which helps with importing databases of other journal softwares to a new instance of OJS.
+This is a bundle which helps with importing databases of other journal softwares to a new instance of VIPA.
 
 ## Available Commands
 | Command                       | Description                                          |
@@ -27,7 +27,7 @@ php app/console ojs:import:pkp:journal <journal_id_from_pkpojs> <db_host> <db_us
 ```
 
 ### Downloading files
-After importing your journals, run this to make your files available on OJS.
+After importing your journals, run this to make your files available on VIPA.
 ```
 php app/console ojs:import:download <pkpojs_domain_name>
 ```
